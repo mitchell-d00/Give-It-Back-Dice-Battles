@@ -1,0 +1,1445 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<link rel="icon" type="image/svg+xml" href="logo.svg">
+<title>Give It Back: Dice Battles</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700;900&display=swap" rel="stylesheet">
+<style>
+/* Layout: a tabletop. Enemy ranks across the top, yours across the bottom, the dice tray between them; a side rail holds orders and the battle log. Tokens follow Give It Back: The RPG. */
+:root{
+  padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);color-scheme:light;
+  --page:#efe9dc; --panel:#faf6ec; --ink:#221d2b; --muted:#6b6478; --line:#cfc6b4; --well:#ddd5c4;
+  --accent:#a8741a; --on-accent:#1b1407;
+  --hp:#c0392b; --heal:#3d8b4f; --you:#2f6fc4; --foe:#b8322a;
+  --gold:#b8860b; --shadow:0 1px 0 rgba(34,29,43,.06),0 6px 18px -10px rgba(34,29,43,.35);
+  --display:"Cinzel",Georgia,"Times New Roman",serif;
+  --body:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  --mono:ui-monospace,"SFMono-Regular",Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --page:#15131a; --panel:#1f1c27; --ink:#e9e4d8; --muted:#9a93a8; --line:#37324a; --well:#0d0c11;
+    --accent:#d9a441; --on-accent:#1b1407; --hp:#e05a4f; --heal:#5cae6e; --you:#5b93e6; --foe:#e0625a;
+    --gold:#e2b84a; --shadow:0 1px 0 rgba(0,0,0,.3),0 8px 22px -12px rgba(0,0,0,.8); color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --page:#15131a; --panel:#1f1c27; --ink:#e9e4d8; --muted:#9a93a8; --line:#37324a; --well:#0d0c11;
+  --accent:#d9a441; --on-accent:#1b1407; --hp:#e05a4f; --heal:#5cae6e; --you:#5b93e6; --foe:#e0625a;
+  --gold:#e2b84a; --shadow:0 1px 0 rgba(0,0,0,.3),0 8px 22px -12px rgba(0,0,0,.8); color-scheme:dark;
+}
+html{font-size:15px}
+html[data-text="large"]{font-size:17.5px}
+body{background:var(--page);color:var(--ink);font-family:var(--body);font-size:1rem;line-height:1.45;margin:0}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+h1,h2,h3{font-family:var(--display);text-wrap:balance;margin:0;line-height:1.15;letter-spacing:.01em}
+h2{font-size:1.5rem} h3{font-size:1.05rem}
+p{margin:0}
+.muted{color:var(--muted)}
+.eyebrow{font-size:.72rem;text-transform:uppercase;letter-spacing:.14em;color:var(--muted);font-weight:700}
+button,select,input{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.btn{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:.5rem .85rem;font-weight:600;line-height:1.2}
+.btn:hover:not(:disabled){border-color:var(--accent)}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--on-accent)}
+.btn.small{padding:.3rem .55rem;font-size:.85rem}
+.btn.ghost{background:transparent}
+select,input[type="text"],input[type="search"]{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:.45rem .6rem;min-width:0}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:12px}
+
+.wrap{max-width:1200px;margin:0 auto;padding-inline:16px;padding-block:0 40px}
+header.top{display:flex;align-items:center;gap:10px 16px;padding-block:12px;flex-wrap:wrap;border-bottom:1px solid var(--line);margin-bottom:20px}
+.brand{display:flex;align-items:center;gap:10px;background:none;border:0;padding:0;text-align:left}
+.brand svg{width:36px;height:36px;flex:none}
+.brand b{font-family:var(--display);font-weight:900;font-size:1.1rem;display:block;line-height:1.1}
+.brand small{font-size:.7rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+.top nav{margin-left:auto;display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.coins{display:inline-flex;align-items:center;gap:6px;font-weight:700;font-variant-numeric:tabular-nums;padding:.35rem .7rem;border-radius:999px;background:var(--well);}
+.coin{width:14px;height:14px;border-radius:50%;background:var(--gold);box-shadow:inset 0 0 0 2px rgba(0,0,0,.18);display:inline-block}
+
+/* Menu */
+.hero{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,1fr);gap:24px;align-items:center;padding-block:8px 28px}
+.hero h1{font-size:clamp(2.3rem,6vw,4rem);font-weight:900;line-height:1}
+.hero .lede{font-size:1.1rem;max-width:34ch;margin-top:12px;color:var(--muted)}
+.hero-dice{display:flex;flex-wrap:wrap;gap:10px;justify-content:center}
+.hero-dice .tile{width:clamp(54px,9vw,82px);height:auto;transition:transform .3s}
+.hero-dice .tile:nth-child(odd){transform:rotate(-7deg)} .hero-dice .tile:nth-child(even){transform:rotate(6deg) translateY(8px)}
+.hero-dice:hover .tile{transform:rotate(0) translateY(0)}
+.modes{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px}
+.mode{padding:16px;display:flex;flex-direction:column;gap:10px}
+.mode p{color:var(--muted);font-size:.93rem}
+.mode .ctl{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:auto}
+.mode .ctl label{font-size:.82rem;color:var(--muted);display:flex;gap:6px;align-items:center}
+.wheel{margin-top:28px;padding:16px;display:grid;gap:12px}
+.wheel-row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.beat{display:inline-flex;align-items:center;gap:6px;font-size:.86rem;padding:.25rem .5rem;border-radius:8px;background:var(--well)}
+.beat .tile{width:22px;height:22px}
+
+/* Color swatch dot */
+.sw{width:14px;height:14px;border-radius:4px;display:inline-block;border:1px solid rgba(0,0,0,.25);flex:none}
+
+/* Builder */
+.build-head{display:flex;flex-wrap:wrap;gap:12px;align-items:flex-end;justify-content:space-between;margin-bottom:14px}
+.budget{min-width:200px}
+.budget .num{font-family:var(--display);font-size:1.4rem;font-weight:900;font-variant-numeric:tabular-nums}
+.meter{height:8px;border-radius:99px;background:var(--well);overflow:hidden;margin-top:4px}
+.meter i{display:block;height:100%;background:var(--accent);transition:width .25s}
+.meter.over i{background:var(--hp)}
+.build-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.25fr);gap:14px;align-items:start}
+.roster{padding:14px;display:grid;gap:12px;position:sticky;top:calc(env(safe-area-inset-top,0px) + 8px)}
+.roster .tools{display:flex;flex-wrap:wrap;gap:6px}
+.rank-label{font-size:.72rem;text-transform:uppercase;letter-spacing:.12em;color:var(--muted);font-weight:700;display:flex;justify-content:space-between}
+.slots{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.slot{border:1.5px dashed var(--line);border-radius:10px;min-height:118px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;padding:8px 6px;text-align:center;font-size:.8rem;color:var(--muted)}
+.slot.filled{border-style:solid;background:var(--page);color:var(--ink)}
+.slot .tile{width:44px;height:44px}
+.slot .nm{font-weight:600;line-height:1.15;font-size:.78rem}
+.slot .row-btns{display:flex;gap:4px;margin-top:2px}
+.slot .row-btns button{font-size:.7rem;padding:.15rem .35rem;border-radius:6px;border:1px solid var(--line);background:var(--panel)}
+.recruit{padding:14px;display:grid;gap:10px;min-width:0}
+.filters{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.cchip{display:inline-flex;align-items:center;gap:5px;border:1px solid var(--line);background:var(--panel);border-radius:999px;padding:.25rem .6rem;font-size:.82rem;font-weight:600}
+.cchip.on{border-color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent)}
+.dlist{display:grid;gap:6px;max-height:70vh;overflow:auto;padding-right:2px}
+.drow{display:grid;grid-template-columns:44px minmax(0,1fr) auto;gap:10px;align-items:center;padding:8px;border:1px solid var(--line);border-radius:10px;background:var(--page)}
+.drow .tile{width:44px;height:44px}
+.drow .nm{font-weight:700;font-size:.92rem;line-height:1.2}
+.drow .sub{font-size:.78rem;color:var(--muted)}
+.drow .ab{font-size:.8rem;margin-top:2px}
+.drow .side{display:flex;flex-direction:column;align-items:flex-end;gap:4px}
+.cost{font-variant-numeric:tabular-nums;font-weight:800;display:inline-flex;align-items:center;gap:4px;font-size:.88rem}
+.statline{font-family:var(--mono);font-size:.76rem;color:var(--muted)}
+.rar{font-size:.66rem;text-transform:uppercase;letter-spacing:.1em;font-weight:800}
+.rar.common{color:var(--muted)} .rar.rare{color:var(--you)} .rar.epic{color:#9b59d0} .rar.legendary{color:var(--gold)}
+.build-foot{display:flex;gap:8px;justify-content:space-between;flex-wrap:wrap;align-items:center;margin-top:14px}
+.warn{color:var(--hp);font-weight:600;font-size:.9rem}
+
+/* Battle */
+.battle{display:grid;grid-template-columns:minmax(0,1fr) 320px;gap:14px;align-items:start}
+.board{display:grid;gap:10px;min-width:0}
+.half{padding:10px;border-radius:14px;display:grid;gap:8px;background:var(--well)}
+.half-head{display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-weight:700;font-size:.9rem}
+.half-head .dot{width:10px;height:10px;border-radius:50%}
+.half.s0 .dot{background:var(--you)} .half.s1 .dot{background:var(--foe)}
+.half-head .out{margin-left:auto;display:flex;gap:3px;align-items:center;font-weight:500;font-size:.78rem;color:var(--muted)}
+.half-head .out .tile{width:18px;height:18px;opacity:.45;filter:grayscale(1)}
+.rank{display:flex;justify-content:center;gap:8px;max-width:600px;width:100%;margin:0 auto;min-height:40px}
+.rank>.unit{flex:0 1 calc((100% - 16px)/3)}
+.rank-tag{font-size:.66rem;text-transform:uppercase;letter-spacing:.14em;color:var(--muted);text-align:center;font-weight:700}
+.unit{position:relative;display:flex;flex-direction:column;align-items:center;gap:3px;padding:8px 6px 7px;border-radius:11px;background:var(--panel);border:1px solid var(--line);border-top:3px solid var(--you);text-align:center;min-width:0;transition:transform .15s,box-shadow .15s,opacity .2s}
+.unit.s1{border-top-color:var(--foe)}
+.unit .tile{width:54px;height:54px}
+.unit .u-name{font-size:.76rem;font-weight:700;line-height:1.15;min-height:2.3em;display:flex;align-items:center;overflow-wrap:anywhere}
+.hpbar{width:100%;height:6px;border-radius:9px;background:var(--well);overflow:hidden}
+.hpbar i{display:block;height:100%;background:var(--heal);transition:width .35s}
+.hpbar i.low{background:var(--hp)}
+.u-line{display:flex;gap:4px;align-items:center;justify-content:center;flex-wrap:wrap;font-size:.72rem;font-variant-numeric:tabular-nums}
+.chip{display:inline-flex;align-items:center;gap:2px;border-radius:5px;padding:0 .3rem;font-weight:800;font-size:.7rem;line-height:1.5}
+.ic{width:.9em;height:.9em;vertical-align:-1px}
+.chip.a{background:var(--ink);color:var(--panel)}
+.chip.d{border:1.5px solid var(--ink)}
+.chip.cd{background:var(--well);color:var(--muted)}
+.chip.ok{background:var(--accent);color:var(--on-accent)}
+.u-st{display:flex;gap:3px;flex-wrap:wrap;justify-content:center;min-height:0}
+.st{font-size:.62rem;font-weight:800;text-transform:uppercase;letter-spacing:.05em;padding:0 .3rem;border-radius:4px;background:var(--well);color:var(--ink)}
+.st.bad{background:var(--hp);color:#fff}
+.st.good{background:var(--heal);color:#fff}
+.unit.ready{box-shadow:0 0 0 2px var(--you)}
+.unit.s1.ready{box-shadow:0 0 0 2px var(--foe)}
+.unit.sel{transform:translateY(-3px);box-shadow:0 0 0 3px var(--accent),var(--shadow)}
+.unit.tgt{box-shadow:0 0 0 3px var(--hp);animation:pulse 1.1s infinite}
+.unit.done{opacity:.55}
+.unit.hit{animation:shake .35s}
+.hint{position:absolute;top:-10px;left:50%;transform:translateX(-50%);background:var(--ink);color:var(--panel);font-size:.66rem;font-weight:700;border-radius:6px;padding:.05rem .4rem;white-space:nowrap;font-variant-numeric:tabular-nums;z-index:2}
+.float{position:absolute;left:50%;top:30%;transform:translateX(-50%);font-weight:900;font-size:1.25rem;pointer-events:none;animation:floatUp 1.1s forwards;z-index:3;text-shadow:0 1px 0 var(--panel),0 0 6px var(--panel);white-space:nowrap}
+.float.dmg{color:var(--hp)} .float.heal{color:var(--heal)} .float.info{color:var(--ink);font-size:.85rem}
+@keyframes floatUp{from{opacity:1;transform:translate(-50%,0)}to{opacity:0;transform:translate(-50%,-34px)}}
+@keyframes pulse{50%{box-shadow:0 0 0 5px color-mix(in srgb,var(--hp) 35%,transparent)}}
+@keyframes shake{25%{transform:translateX(-4px)}50%{transform:translateX(4px)}75%{transform:translateX(-2px)}}
+
+.tray{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);gap:10px;align-items:center;padding:12px;min-height:96px;border-radius:14px;border:1px solid var(--line);background:var(--panel)}
+.tray .who{font-size:.75rem;color:var(--muted);font-weight:700;margin-bottom:4px;overflow-wrap:anywhere}
+.tray .dice{display:flex;gap:5px;flex-wrap:wrap;min-height:34px}
+.tray .tA{text-align:left} .tray .tD{text-align:right} .tray .tD .dice{justify-content:flex-end}
+.tray .tot{font-family:var(--display);font-weight:900;font-size:1.2rem;font-variant-numeric:tabular-nums}
+.tray .mid{text-align:center;min-width:88px}
+.tray .res{font-family:var(--display);font-weight:900;font-size:1.25rem}
+.tray .notes{font-size:.72rem;color:var(--muted);max-width:180px;margin:2px auto 0}
+.die{width:32px;height:32px;border-radius:7px;display:grid;grid-template:repeat(3,1fr)/repeat(3,1fr);padding:4px;background:var(--dbg,#888);border:2px solid rgba(0,0,0,.22);box-shadow:inset 0 -3px 0 rgba(0,0,0,.18)}
+.die.def{box-shadow:inset 0 0 0 2px var(--panel),inset 0 -3px 0 rgba(0,0,0,.18)}
+.die.wh{border-color:#bdb3a0}
+.die i{width:6px;height:6px;border-radius:50%;background:var(--dpip,#fff);place-self:center;opacity:0}
+.die i.on{opacity:1}
+.die.roll{animation:tumble .18s infinite}
+@keyframes tumble{50%{transform:rotate(14deg) translateY(-3px)}}
+.die.neutral{--dbg:var(--well);--dpip:var(--ink)}
+
+.rail{display:grid;gap:10px;position:sticky;top:calc(env(safe-area-inset-top,0px) + 8px)}
+.rail .panel{padding:12px}
+.turnbox{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.turnbox .big{font-family:var(--display);font-weight:900;font-size:1.1rem}
+.turnbox .tdot{width:12px;height:12px;border-radius:50%}
+.orders{display:grid;gap:8px}
+.act{display:grid;grid-template-columns:auto minmax(0,1fr);gap:2px 10px;text-align:left;padding:.6rem .7rem;border-radius:10px;border:1px solid var(--line);background:var(--page);align-items:center}
+.act:hover:not(:disabled){border-color:var(--accent)}
+.act:disabled{opacity:.45;cursor:not-allowed}
+.act.on{border-color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent)}
+.act kbd{grid-row:span 2;font-family:var(--mono);font-size:.75rem;border:1px solid var(--line);border-radius:5px;padding:.1rem .35rem;background:var(--panel)}
+.act b{font-size:.92rem} .act span{font-size:.78rem;color:var(--muted)}
+.info{display:grid;gap:6px;font-size:.84rem}
+.info-head{display:flex;gap:10px;align-items:center}
+.info-head .tile{width:48px;height:48px;flex:none}
+.info dl{display:grid;grid-template-columns:auto minmax(0,1fr);gap:3px 10px;margin:0}
+.info dt{font-weight:700} .info dd{margin:0;color:var(--muted)}
+.logbox h3{font-size:.9rem;margin-bottom:6px}
+#log{list-style:none;margin:0;padding:0;display:grid;gap:4px;max-height:280px;overflow:auto;font-size:.8rem}
+#log li{padding-left:10px;border-left:3px solid var(--line);line-height:1.35}
+#log li.s0{border-left-color:var(--you)} #log li.s1{border-left-color:var(--foe)}
+.watchbar{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:8px;overflow:hidden}
+.seg button{border:0;background:var(--panel);padding:.35rem .65rem;font-size:.84rem;font-weight:600;border-right:1px solid var(--line)}
+.seg button:last-child{border-right:0}
+.seg button.on{background:var(--accent);color:var(--on-accent)}
+
+/* Collection */
+.col-head{display:flex;flex-wrap:wrap;gap:16px;align-items:flex-end;justify-content:space-between;margin-bottom:14px}
+.colbars{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:8px;margin-bottom:14px}
+.colbar{padding:8px 10px;display:grid;gap:4px;font-size:.8rem}
+.colbar .top2{display:flex;align-items:center;gap:6px;font-weight:700}
+.colbar .top2 span:last-child{margin-left:auto;font-variant-numeric:tabular-nums;color:var(--muted);font-weight:600}
+.cgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(112px,1fr));gap:8px}
+.ccard{display:flex;flex-direction:column;align-items:center;gap:4px;padding:10px 6px;border:1px solid var(--line);border-radius:10px;background:var(--panel);text-align:center;position:relative}
+.ccard .tile{width:52px;height:52px}
+.ccard .nm{font-size:.76rem;font-weight:700;line-height:1.15;overflow-wrap:anywhere}
+.ccard.locked .tile{filter:grayscale(1);opacity:.3}
+.ccard.locked .nm{color:var(--muted);font-weight:500}
+.ccard .cnt{position:absolute;top:6px;right:6px;font-size:.7rem;font-weight:800;background:var(--ink);color:var(--panel);border-radius:6px;padding:0 .3rem}
+
+/* Shop */
+.shop{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px}
+.pack{padding:18px;display:grid;gap:10px;align-content:start}
+.pack .packart{display:flex;gap:6px}
+.pack .packart .tile{width:44px;height:44px}
+.pack ul{margin:0;padding-left:18px;color:var(--muted);font-size:.88rem}
+.colorpick{display:flex;flex-wrap:wrap;gap:6px}
+
+/* Overlays */
+.overlay{position:fixed;inset:0;background:color-mix(in srgb,var(--page) 55%,rgba(0,0,0,.55));display:grid;place-items:center;z-index:50;padding:16px}
+.modal{background:var(--panel);border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow);padding:20px;width:min(560px,100%);max-height:calc(100% - 24px);overflow:auto;display:grid;gap:14px}
+.modal.wide{width:min(760px,100%)}
+.modal-head{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.setgrid{display:grid;gap:12px}
+.setrow{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px;align-items:center}
+.setrow .lbl b{display:block;font-size:.92rem} .setrow .lbl span{font-size:.8rem;color:var(--muted)}
+.reveal{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px}
+.rcard{perspective:600px;min-height:170px}
+.rcard .inner{position:relative;width:100%;height:100%;min-height:170px;transition:transform .5s;transform-style:preserve-3d}
+.rcard.flip .inner{transform:rotateY(180deg)}
+.rcard .face{position:absolute;inset:0;backface-visibility:hidden;border-radius:12px;border:1px solid var(--line);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;padding:10px;text-align:center}
+.rcard .back{background:repeating-linear-gradient(45deg,var(--well) 0 8px,var(--panel) 8px 16px)}
+.rcard .front{transform:rotateY(180deg);background:var(--page)}
+.rcard .front .tile{width:60px;height:60px}
+.rcard .new{font-size:.66rem;font-weight:900;letter-spacing:.1em;color:var(--on-accent);background:var(--accent);border-radius:5px;padding:0 .35rem}
+.result-table{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums;font-size:.9rem}
+.result-table th,.result-table td{padding:6px 8px;border-bottom:1px solid var(--line);text-align:right}
+.result-table th:first-child,.result-table td:first-child{text-align:left}
+.starter{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:8px}
+.starter button{display:grid;gap:4px;justify-items:center;padding:12px 8px;border:1px solid var(--line);border-radius:12px;background:var(--page);text-align:center}
+.starter button:hover{border-color:var(--accent)}
+.starter .tile{width:48px;height:48px}
+.starter small{color:var(--muted);font-size:.76rem}
+
+/* How to play */
+.howto{display:grid;gap:18px;max-width:900px}
+.howto section{display:grid;gap:8px}
+.howto p,.howto li{max-width:70ch}
+.howto ul{margin:0;padding-left:20px;display:grid;gap:4px}
+.tbl{overflow-x:auto;border:1px solid var(--line);border-radius:10px}
+.tbl table{border-collapse:collapse;width:100%;font-size:.86rem;min-width:520px}
+.tbl th,.tbl td{text-align:left;padding:7px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+.tbl th{background:var(--well);font-size:.75rem;text-transform:uppercase;letter-spacing:.08em}
+.tbl tr:last-child td{border-bottom:0}
+.demo-dice{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+
+/* Coach */
+.coach{position:fixed;z-index:60;width:min(340px,calc(100vw - 32px));background:var(--ink);color:var(--panel);border-radius:14px;padding:14px 16px;box-shadow:0 12px 30px -10px rgba(0,0,0,.6);display:grid;gap:10px;font-size:.92rem}
+.coach .cstep{font-size:.7rem;letter-spacing:.12em;text-transform:uppercase;opacity:.7;font-weight:700}
+.coach .cbtns{display:flex;gap:6px;justify-content:flex-end;flex-wrap:wrap}
+.coach .cbtns button{border:1px solid color-mix(in srgb,var(--panel) 40%,transparent);background:transparent;color:var(--panel);border-radius:8px;padding:.35rem .7rem;font-weight:600;font-size:.85rem}
+.coach .cbtns button.go{background:var(--accent);border-color:var(--accent);color:var(--on-accent)}
+.coach-focus{outline:3px solid var(--accent)!important;outline-offset:4px;border-radius:12px}
+
+.toast{position:fixed;left:50%;bottom:calc(16px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:var(--panel);padding:.6rem 1rem;border-radius:10px;z-index:70;font-weight:600;box-shadow:var(--shadow);max-width:calc(100vw - 32px)}
+
+@media (max-width:900px){
+  .battle{grid-template-columns:minmax(0,1fr)}
+  .rail{position:static}
+  .build-grid{grid-template-columns:minmax(0,1fr)}
+  .roster{position:static}
+  .hero{grid-template-columns:minmax(0,1fr)}
+  .dlist{max-height:none}
+}
+@media (max-width:520px){
+  .unit .tile{width:38px;height:38px}
+  .unit .u-name{font-size:.7rem}
+  .tray{grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);padding:10px 8px}
+  .die{width:26px;height:26px;padding:3px}
+  .die i{width:5px;height:5px}
+  .tray .mid{min-width:64px}
+  .slot{min-height:108px}
+}
+html[data-motion="reduce"] *{animation:none!important;transition:none!important}
+@media (prefers-reduced-motion:reduce){html:not([data-motion="full"]) *{animation:none!important;transition:none!important}}
+</style>
+
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <button class="brand" data-go="menu" aria-label="Main menu">
+      <svg viewBox="0 0 128 128" aria-hidden="true"><rect width="128" height="128" rx="24" fill="#ffcc33"/><rect x="26" y="26" width="76" height="76" rx="16" fill="#e5483c" stroke="#1b2440" stroke-width="7"/><circle cx="48" cy="48" r="7" fill="#fff"/><circle cx="80" cy="80" r="7" fill="#fff"/><circle cx="64" cy="64" r="7" fill="#fff"/></svg>
+      <span><small>Give It Back</small><b>Dice Battles</b></span>
+    </button>
+    <nav aria-label="Main">
+      <button class="btn small ghost" data-go="menu">Play</button>
+      <button class="btn small ghost" data-go="collection">Collection</button>
+      <button class="btn small ghost" data-go="shop">Shop</button>
+      <button class="btn small ghost" data-go="howto">How to play</button>
+      <button class="btn small ghost" id="openSettings">Settings</button>
+      <span class="coins" title="Coins"><i class="coin"></i><span id="coinCount">0</span></span>
+    </nav>
+  </header>
+
+  <!-- MENU -->
+  <section id="scr-menu" class="screen">
+    <div class="hero">
+      <div>
+        <p class="eyebrow">Collect · Build · Roll</p>
+        <h1>Dice Battles</h1>
+        <p class="lede">400 dice in eight colours. Heroes, monsters and street-corner commons. Pick six, line them up in two ranks and roll for it.</p>
+      </div>
+      <div class="hero-dice" id="heroDice"></div>
+    </div>
+    <div class="modes">
+      <div class="mode panel">
+        <h3>Battle the computer</h3>
+        <p>Build an army from the dice you own. Winning pays coins for new packs.</p>
+        <div class="ctl"><label for="cpuDiff">Difficulty <select id="cpuDiff"><option value="easy">Easy</option><option value="normal" selected>Normal</option><option value="hard">Hard</option></select></label><button class="btn primary" data-play="cpu">Build army</button></div>
+      </div>
+      <div class="mode panel">
+        <h3>Two players</h3>
+        <p>Share one screen and take turns. Both players can use all 400 dice.</p>
+        <div class="ctl"><button class="btn primary" data-play="pvp">Build armies</button></div>
+      </div>
+      <div class="mode panel">
+        <h3>Watch AI vs AI</h3>
+        <p>Two computer generals fight it out. Pause, speed up, or read the log.</p>
+        <div class="ctl"><label for="aiDiffA">Blue <select id="aiDiffA"><option value="easy">Easy</option><option value="normal">Normal</option><option value="hard" selected>Hard</option></select></label><label for="aiDiffB">Red <select id="aiDiffB"><option value="easy">Easy</option><option value="normal" selected>Normal</option><option value="hard">Hard</option></select></label><button class="btn primary" data-play="aivai">Set up</button></div>
+      </div>
+      <div class="mode panel">
+        <h3>Walkthrough</h3>
+        <p>A short guided battle that teaches ranks, dice, colours and abilities. Pays 100 coins the first time.</p>
+        <div class="ctl"><button class="btn primary" data-play="tutorial">Start walkthrough</button></div>
+      </div>
+    </div>
+    <div class="wheel panel">
+      <h3>Colour edges</h3>
+      <p class="muted">A die attacking the colour it beats rolls one extra attack die.</p>
+      <div class="wheel-row" id="wheelRow"></div>
+    </div>
+  </section>
+
+  <!-- BUILDER -->
+  <section id="scr-build" class="screen" hidden>
+    <div class="build-head">
+      <div><p class="eyebrow" id="bSide">Player 1</p><h2 id="bTitle">Muster your army</h2></div>
+      <div class="budget"><div><span class="num" id="bCost">0</span> <span class="muted">/ <span id="bBudget">30</span> points · <span id="bCount">0</span>/6 dice</span></div><div class="meter" id="bMeter"><i></i></div></div>
+    </div>
+    <div class="build-grid">
+      <div class="roster panel">
+        <div class="tools">
+          <label for="presetSel" class="muted" style="font-size:.82rem;align-self:center">Load</label>
+          <select id="presetSel"></select>
+          <button class="btn small" id="bRandom">Random</button>
+          <button class="btn small" id="bClear">Clear</button>
+          <button class="btn small" id="bSave">Save army</button>
+        </div>
+        <div><div class="rank-label"><span>Front rank</span><span>fights hand to hand</span></div><div class="slots" id="slotsFront"></div></div>
+        <div><div class="rank-label"><span>Back rank</span><span>ranged, casters, reserves</span></div><div class="slots" id="slotsBack"></div></div>
+        <p class="muted" style="font-size:.8rem">Melee dice in the back rank wait as reserves. When your front rank falls, the back rank steps up.</p>
+      </div>
+      <div class="recruit panel">
+        <div class="filters" id="bColors"></div>
+        <div class="filters">
+          <select id="bType" aria-label="Type"><option value="all">All types</option><option value="hero">Heroes</option><option value="mon">Monsters</option><option value="common">Commons</option></select>
+          <select id="bSort" aria-label="Sort"><option value="cost">Sort by cost</option><option value="name">Sort by name</option><option value="hp">Sort by health</option></select>
+          <input type="search" id="bSearch" placeholder="Search dice" aria-label="Search dice" style="flex:1 1 140px">
+        </div>
+        <p class="muted" style="font-size:.8rem" id="bPoolNote"></p>
+        <div class="dlist" id="bList"></div>
+      </div>
+    </div>
+    <div class="build-foot">
+      <button class="btn" id="bBack">Back</button>
+      <span class="warn" id="bWarn"></span>
+      <button class="btn primary" id="bNext">Next</button>
+    </div>
+  </section>
+
+  <!-- BATTLE -->
+  <section id="scr-battle" class="screen" hidden>
+    <div class="battle">
+      <div class="board" id="board">
+        <div class="half s1" id="sideB"></div>
+        <div class="tray" id="tray" aria-live="polite">
+          <div class="tA"><div class="who" id="tWhoA">Dice tray</div><div class="dice" id="tDiceA"></div></div>
+          <div class="mid"><div class="tot" id="tTot">—</div><div class="res" id="tRes"></div><div class="notes" id="tNotes"></div></div>
+          <div class="tD"><div class="who" id="tWhoD"></div><div class="dice" id="tDiceD"></div></div>
+        </div>
+        <div class="half s0" id="sideA"></div>
+      </div>
+      <aside class="rail">
+        <div class="panel turnbox" id="turnBox"></div>
+        <div class="panel orders" id="orders"></div>
+        <div class="panel watchbar" id="watch" hidden>
+          <button class="btn small" id="wPause">Pause</button>
+          <div class="seg" id="wSpeed"><button data-sp="1" class="on">1×</button><button data-sp="2">2×</button><button data-sp="4">4×</button></div>
+        </div>
+        <div class="panel logbox" id="logbox"><h3>Battle log</h3><ol id="log"></ol></div>
+        <div style="display:flex;gap:6px;flex-wrap:wrap" id="leaveBox"><button class="btn small" id="leaveBtn">Leave battle</button></div>
+      </aside>
+    </div>
+  </section>
+
+  <!-- COLLECTION -->
+  <section id="scr-collection" class="screen" hidden>
+    <div class="col-head">
+      <div><p class="eyebrow">Your dice</p><h2>Collection</h2><p class="muted" id="colSummary"></p></div>
+      <div class="filters">
+        <select id="cType" aria-label="Type"><option value="all">All types</option><option value="hero">Heroes</option><option value="mon">Monsters</option><option value="common">Commons</option></select>
+        <select id="cOwned" aria-label="Show"><option value="all">Owned and missing</option><option value="owned">Owned only</option><option value="missing">Missing only</option></select>
+      </div>
+    </div>
+    <div class="colbars" id="colBars"></div>
+    <div class="cgrid" id="cGrid"></div>
+  </section>
+
+  <!-- SHOP -->
+  <section id="scr-shop" class="screen" hidden>
+    <div class="col-head"><div><p class="eyebrow">Spend coins</p><h2>Dice shop</h2><p class="muted">Win battles against the computer to earn coins: 40 on Easy, 70 on Normal, 110 on Hard, and 15 for a loss.</p></div></div>
+    <div class="shop">
+      <div class="pack panel">
+        <div class="packart" id="artMixed"></div>
+        <h3>Mixed pack · 100 coins</h3>
+        <ul><li>5 dice from any colour</li><li>3 commons, 1 hero or monster</li><li>1 wild slot: 1 in 10 is a dragon</li></ul>
+        <button class="btn primary" id="buyMixed">Open mixed pack</button>
+      </div>
+      <div class="pack panel">
+        <div class="packart" id="artColor"></div>
+        <h3>Colour pack · 150 coins</h3>
+        <ul><li>5 dice, all one colour</li><li>2 commons, 2 heroes or monsters</li><li>1 wild slot: 1 in 8 is a dragon</li></ul>
+        <div class="colorpick" id="packColors"></div>
+        <button class="btn primary" id="buyColor">Open colour pack</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- HOW TO -->
+  <section id="scr-howto" class="screen" hidden>
+    <div class="howto" id="howto"></div>
+  </section>
+</div>
+
+<div class="overlay" id="ov" hidden><div class="modal" id="ovBox" role="dialog" aria-modal="true"></div></div>
+<div class="coach" id="coach" hidden role="dialog" aria-live="polite"></div>
+<div class="toast" id="toast" hidden></div>
+
+<script>
+'use strict';
+// ================= Helpers =================
+const $=(s,r=document)=>r.querySelector(s), $$=(s,r=document)=>[...r.querySelectorAll(s)];
+const r6=()=>1+Math.floor(Math.random()*6);
+const rollN=n=>Array.from({length:Math.max(0,n)},r6);
+const sum=a=>a.reduce((x,y)=>x+y,0);
+const pick=a=>a[Math.floor(Math.random()*a.length)];
+const shuffle=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a};
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+const store={get(k,d){try{const v=localStorage.getItem('gib-dice.'+k);return v==null?d:JSON.parse(v)}catch(e){return d}},set(k,v){try{localStorage.setItem('gib-dice.'+k,JSON.stringify(v))}catch(e){}}};
+
+// ================= Data =================
+const COLORS=[
+ {id:'red',name:'Red',title:'Ember',hex:'#cf3b2a',ink:'#ffffff',beats:'green',pn:'Blaze',pt:'Every 6 on its attack dice adds 1 damage.'},
+ {id:'blue',name:'Blue',title:'Tide',hex:'#2c6cc0',ink:'#ffffff',beats:'red',pn:'Chill',pt:'A die it hurts rolls 1 fewer attack die on its next attack.'},
+ {id:'green',name:'Green',title:'Wild',hex:'#3a8a49',ink:'#ffffff',beats:'brown',pn:'Regrowth',pt:'Heals 1 health at the start of each of its turns.'},
+ {id:'brown',name:'Brown',title:'Stone',hex:'#8b5a2e',ink:'#ffffff',beats:'yellow',pn:'Bulwark',pt:'Takes 1 less damage from any hit of 3 or more.'},
+ {id:'yellow',name:'Yellow',title:'Storm',hex:'#e2b324',ink:'#2a2208',beats:'blue',pn:'Spark',pt:'Rerolls any 1s on its attack dice.'},
+ {id:'white',name:'White',title:'Light',hex:'#f3efe4',ink:'#3a3442',beats:'black',pn:'Blessing',pt:'When it is knocked out, its most wounded ally heals 3.'},
+ {id:'black',name:'Black',title:'Shadow',hex:'#2b2731',ink:'#f1ecf6',beats:'purple',pn:'Leech',pt:'Heals 1 whenever it deals damage.'},
+ {id:'purple',name:'Purple',title:'Arcane',hex:'#7b48b9',ink:'#ffffff',beats:'white',pn:'Pierce',pt:"Lowers the defender's defence roll by 1."}
+];
+const COL=Object.fromEntries(COLORS.map(c=>[c.id,c]));
+const beatenBy=id=>COLORS.find(c=>c.beats===id);
+
+const CLS=[
+ {name:'Warrior',hp:16,atk:2,def:1,ranged:0,ab:'cleave',cost:5},
+ {name:'Rogue',hp:11,atk:2,def:0,ranged:0,ab:'backstab',cost:4},
+ {name:'Mage',hp:8,atk:2,def:0,ranged:1,ab:'blast',cost:5},
+ {name:'Cleric',hp:11,atk:1,def:1,ranged:1,ab:'mend',cost:4},
+ {name:'Ranger',hp:10,atk:2,def:0,ranged:1,ab:'aimed',cost:4},
+ {name:'Paladin',hp:14,atk:2,def:1,ranged:0,ab:'guard',cost:5}
+];
+const RAC=[
+ {name:'Human',hp:0,perk:'lucky',cost:1},{name:'Dwarf',hp:1,perk:'stout',cost:1},{name:'Elf',hp:-1,perk:'keen',cost:1},
+ {name:'Orc',hp:1,perk:'fury',cost:1},{name:'Halfling',hp:-2,perk:'nimble',cost:0},{name:'Golemkin',hp:4,perk:'stone',cost:2}
+];
+const PERK={lucky:['Lucky','Once a battle, rerolls an attack that did no damage.'],stout:['Stout','Adds 1 to every defence roll.'],keen:['Keen','Every 6 on its attack dice adds 2 damage.'],fury:['Fury','Deals 2 extra damage while at half health or less.'],nimble:['Nimble','Dodges any attack on a roll of 6.'],stone:['Stoneborn','Cannot be poisoned.']};
+const ARCH=[
+ {kind:'Goblin',hp:7,atk:1,def:0,ranged:0,ab:'sneak',cost:2},
+ {kind:'Skeleton',hp:8,atk:2,def:1,ranged:0,pas:'reassemble',cost:3},
+ {kind:'Beast',hp:8,atk:2,def:0,ranged:0,pas:'pack',cost:3},
+ {kind:'Troll',hp:18,atk:2,def:1,ranged:0,pas:'regen',cost:6},
+ {kind:'Spider',hp:10,atk:2,def:0,ranged:0,ab:'bite',cost:4},
+ {kind:'Spirit',hp:10,atk:2,def:1,ranged:1,pas:'drain',cost:5},
+ {kind:'Ogre',hp:20,atk:2,def:0,ranged:0,ab:'smash',cost:6},
+ {kind:'Ooze',hp:14,atk:1,def:1,ranged:0,ab:'engulf',cost:4},
+ {kind:'Imp',hp:6,atk:1,def:0,ranged:1,ab:'hex',cost:3},
+ {kind:'Golem',hp:22,atk:2,def:2,ranged:0,pas:'taunt',cost:7},
+ {kind:'Gazer',hp:14,atk:2,def:1,ranged:1,ab:'gaze',cost:6},
+ {kind:'Dragon',hp:28,atk:3,def:2,ranged:1,ab:'breath',cost:12}
+];
+const ABIL={
+ cleave:{n:'Cleave',cd:3,t:'enemy',x:'One roll hits the target and a second enemy in the front rank.'},
+ backstab:{n:'Backstab',cd:3,t:'any',x:'Attack any enemy, in either rank. It rolls no defence.'},
+ blast:{n:'Blast',cd:4,t:'none',x:'Roll 2 dice. Every enemy takes half the total, rounded up.'},
+ mend:{n:'Mend',cd:2,t:'ally',x:'Heal an ally or itself by 1 die + 2.'},
+ aimed:{n:'Aimed Shot',cd:2,t:'any',x:'Attack any enemy with 1 extra die.'},
+ guard:{n:'Guard',cd:3,t:'ally',x:'An ally rolls 1 extra defence die until your next turn.'},
+ sneak:{n:'Sneak',cd:3,t:'any',x:'Attack any enemy, even in the back rank.'},
+ bite:{n:'Poison Bite',cd:3,t:'enemy',x:'Attack. If it hurts, the target loses 2 health at the start of its next 3 turns.'},
+ smash:{n:'Smash',cd:3,t:'enemy',x:'Attack with 2 extra dice.'},
+ engulf:{n:'Engulf',cd:3,t:'enemy',x:'Attack. If it hurts, the target loses its next action.'},
+ hex:{n:'Hex',cd:3,t:'any',x:'The target rolls 1 fewer attack die on its next 2 turns.'},
+ gaze:{n:'Stone Gaze',cd:4,t:'any',x:'Roll a die. On 3 or more, the target loses its next action.'},
+ breath:{n:'Dragon Breath',cd:4,t:'none',x:'Roll 3 dice. Every enemy takes the total minus its own defence roll.'}
+};
+const PAS={reassemble:['Reassemble','The first time it is knocked out, it gets back up with 4 health.'],pack:['Pack','+1 damage for each other Beast on its side.'],regen:['Regenerate','Heals 2 health at the start of each of its turns.'],drain:['Drain','Heals half the damage it deals.'],taunt:['Taunt','While it stands in the front rank, enemy basic attacks must target it.']};
+const JOBS=[
+ {k:'brawler',hp:9,atk:2,def:0,ranged:0,cost:2,mark:'fist'},
+ {k:'guard',hp:10,atk:1,def:1,ranged:0,cost:2,mark:'shield'},
+ {k:'archer',hp:7,atk:1,def:0,ranged:1,cost:2,mark:'bow'},
+ {k:'scout',hp:7,atk:2,def:0,ranged:0,cost:3,ab:'sneak',mark:'dagger'},
+ {k:'apprentice',hp:6,atk:2,def:0,ranged:1,cost:3,mark:'star'}
+];
+// Health scale: keeps battles to roughly 6-9 rounds
+[CLS,RAC,ARCH,JOBS].forEach(t=>t.forEach(x=>x.hp=Math.round(x.hp*1.35)));
+const JOBN={
+ red:['Street Fighter','Forge Guard','Torch Archer','Ash Runner','Ember Apprentice'],
+ blue:['Dock Brawler','Harbor Watch','Harpoon Thrower','Tide Runner','Frost Apprentice'],
+ green:['Wild Brawler','Grove Warden','Hunter','Trail Scout','Herb Apprentice'],
+ brown:['Pit Brawler','Shield Bearer','Slinger','Tunnel Scout','Earth Apprentice'],
+ yellow:['Arena Boxer','Gate Guard','Crossbow Hand','Courier','Spark Apprentice'],
+ white:['Pilgrim Fighter','Shrine Guard','Longbow Squire','Messenger','Acolyte'],
+ black:['Alley Thug','Night Watch','Knife Thrower','Cutpurse','Hex Apprentice'],
+ purple:['Rune Boxer','Ward Keeper','Wand Slinger','Blink Scout','Arcane Apprentice']
+};
+// [race, class, name]  race: 0 Human 1 Dwarf 2 Elf 3 Orc 4 Halfling 5 Golemkin · class: 0 Warrior 1 Rogue 2 Mage 3 Cleric 4 Ranger 5 Paladin
+const HEROES={
+ red:[[3,0,'Grukk Emberfist'],[0,5,'Sir Aldric of the Flame'],[1,0,'Brannoc Forgeheart'],[2,2,'Ilyra Sunflare'],[3,1,'Skarra Quickburn'],[0,0,'Kade the Scorched'],[4,4,'Pip Cinderbow'],[5,5,'The Furnace Warden'],[1,3,'Mother Ashka'],[3,2,'Zug the Pyromancer']],
+ blue:[[2,2,'Nerys Frostweaver'],[0,3,'Brother Tamsin'],[2,4,'Seliandre Wavecaller'],[4,1,'Minnow Quickfingers'],[0,0,'Captain Maren Gale'],[1,5,'Hrolf Icebeard'],[5,0,'The Glacier Sentinel'],[0,2,'Corvin Deepwater'],[4,3,'Tilly Rainsong'],[2,1,'Vashi the Undertow']],
+ green:[[2,4,'Thalion Greenleaf'],[4,4,'Bramble Fennick'],[0,3,'Moira of the Grove'],[3,0,'Mossjaw'],[2,3,'Aelith Bloomsong'],[1,4,'Rootbeard'],[4,1,'Nettle'],[5,0,'Oakheart'],[0,4,'Wren the Hunter'],[3,3,'Grandmother Thornhide']],
+ brown:[[1,0,'Thane Durgan Stonehelm'],[1,5,'Bralda Anvilvow'],[5,0,'Boulderborn'],[5,5,'The Granite Knight'],[1,3,'Keeper Orsik'],[0,0,'Halvard the Mason'],[3,0,'Krag Rockbreaker'],[1,4,'Flint Deepdelver'],[4,3,'Pebble Hollyhock'],[5,2,'Geomancer Core']],
+ yellow:[[2,4,'Lyria Swiftarrow'],[4,1,'Zip Thistlefoot'],[0,1,'Jax Lightfinger'],[2,2,'Aerin the Storm-Sage'],[3,4,'Bolt-Eye Varga'],[0,5,'Dawnspear Celia'],[4,4,'Sunny Tumblewick'],[5,2,'The Coil Engine'],[2,0,'Kael Thunderblade'],[1,1,'Nibb Sparkfuse']],
+ white:[[0,5,'Saint Elowen'],[0,3,'High Priest Anselm'],[2,3,'Lumina'],[1,5,'Oathkeeper Brom'],[4,3,'Rosie Goodbarrel'],[5,3,'The Lantern Golem'],[2,5,'Ithil Silverhand'],[0,4,'Dove Marlow'],[1,3,'Abbot Grimwold'],[3,5,'Ugra the Redeemed']],
+ black:[[0,1,'Silas Nightveil'],[2,1,'Vex Shadowstep'],[3,1,'Grisha the Knife'],[0,2,'Morwen the Necromancer'],[4,1,'Sly Hobbins'],[2,4,'Fael Duskarrow'],[3,0,'Gorath Blackblade'],[1,1,'Coal the Tunneljack'],[5,1,'The Hollow Hand'],[0,3,'Edda the Mourner']],
+ purple:[[2,2,'Archmage Velanthir'],[0,2,'Tobias Runewright'],[4,2,'Fizzwick Spellpocket'],[5,2,'The Prism Automaton'],[2,3,'Oracle Sennet'],[1,2,'Dagna Runesmith'],[3,2,'Mad Gorza'],[0,1,'Pell the Illusionist'],[2,5,'Ilse Starward'],[4,4,'Hex-Shot Hattie']]
+};
+// [archetype, name] — archetype indexes ARCH
+const MONSTERS={
+ red:[[0,'Cinder Goblin'],[2,'Hellhound'],[8,'Fire Imp'],[3,'Lava Troll'],[5,'Ember Wraith'],[9,'Magma Golem'],[6,'Flame Ogre'],[10,'Salamander'],[7,'Magma Slime'],[11,'Red Dragon']],
+ blue:[[0,'Sea Goblin'],[1,'Drowned Skeleton'],[2,'Frost Wolf'],[3,'Ice Troll'],[4,'Tide Spider'],[5,'Frost Wraith'],[7,'Water Slime'],[9,'Ice Golem'],[10,'Kraken Eye'],[11,'Frost Dragon']],
+ green:[[0,'Bog Goblin'],[2,'Dire Wolf'],[3,'Moss Troll'],[4,'Giant Spider'],[6,'Swamp Ogre'],[7,'Green Slime'],[8,'Thorn Pixie'],[9,'Treant'],[10,'Basilisk'],[11,'Forest Wyrm']],
+ brown:[[0,'Rock Goblin'],[1,'Dust Skeleton'],[2,'Hyena Pack'],[3,'Cave Troll'],[6,'Hill Ogre'],[7,'Mud Slime'],[9,'Stone Golem'],[10,'Earth Basilisk'],[4,'Burrow Spider'],[11,'Earth Dragon']],
+ yellow:[[0,'Spark Goblin'],[2,'Storm Wolf'],[5,'Storm Spirit'],[8,'Lightning Imp'],[4,'Amber Spider'],[9,'Brass Golem'],[6,'Sand Ogre'],[10,'Sun Basilisk'],[7,'Static Ooze'],[11,'Storm Dragon']],
+ white:[[1,'Bone Sentry'],[2,'Pale Wolf'],[5,'Ghost Lantern'],[3,'Snow Troll'],[9,'Marble Golem'],[10,'Cockatrice'],[4,'Silk Moth'],[7,'Pearl Slime'],[8,'Moon Sprite'],[11,'Silver Dragon']],
+ black:[[0,'Shadow Goblin'],[1,'Skeleton Warrior'],[2,'Shadow Hound'],[5,'Wraith'],[4,'Night Spider'],[6,'Grave Ogre'],[7,'Tar Slime'],[8,'Shadow Imp'],[9,'Obsidian Golem'],[11,'Shadow Dragon']],
+ purple:[[0,'Hexling'],[1,'Rune Skeleton'],[2,'Warp Wolf'],[5,'Mana Wraith'],[7,'Gelatinous Cube'],[8,'Imp Familiar'],[9,'Crystal Golem'],[10,'Medusa Eye'],[4,'Mind Spider'],[11,'Void Dragon']]
+};
+
+// Build all 400 dice
+const DICE=[], DIE={};
+for(const c of COLORS){
+  HEROES[c.id].forEach(([r,k,name],i)=>{const C=CLS[k],R=RAC[r];
+    DICE.push({id:`${c.id}-h-${i}`,color:c.id,type:'hero',rarity:'epic',name,race:r,cls:k,sub:`${R.name} ${C.name}`,hp:C.hp+R.hp,atk:C.atk,def:C.def,ranged:C.ranged,ab:C.ab,perk:R.perk,cost:C.cost+R.cost});});
+  MONSTERS[c.id].forEach(([a,name],i)=>{const A=ARCH[a];
+    DICE.push({id:`${c.id}-m-${i}`,color:c.id,type:'mon',rarity:a===11?'legendary':'rare',name,arch:a,sub:A.kind,hp:A.hp,atk:A.atk,def:A.def,ranged:A.ranged,ab:A.ab||null,pas:A.pas||null,cost:A.cost});});
+  let n=0;
+  JOBS.forEach((J,j)=>RAC.forEach((R,r)=>{
+    DICE.push({id:`${c.id}-c-${n++}`,color:c.id,type:'common',rarity:'common',name:`${JOBN[c.id][j]} ${R.name}`,race:r,job:j,sub:`${R.name} common`,hp:Math.max(5,J.hp+R.hp),atk:J.atk,def:J.def,ranged:J.ranged,ab:J.ab||null,perk:R.perk,cost:J.cost+(R.cost>=2?1:0)});
+  }));
+}
+DICE.forEach(d=>DIE[d.id]=d);
+const TYPE_ORDER={hero:0,mon:1,common:2};
+const typeName=t=>({hero:'Hero',mon:'Monster',common:'Common'})[t];
+
+// ================= Art =================
+const MARK={
+ 0:'M5 19 L17 7 M14 5 L19 5 L19 10 M8 13 L11 16',1:'M6 18 L16 8 M14 6 L18 10',
+ 2:'M12 3 L14.5 9.5 L21 10 L16 14.5 L17.5 21 L12 17.5 L6.5 21 L8 14.5 L3 10 L9.5 9.5Z',3:'M12 4 V20 M6 10 H18',
+ 4:'M8 4 Q20 12 8 20 M8 4 V20 M4 12 H19',5:'M12 3 L19 6 V12 Q19 18 12 21 Q5 18 5 12 V6Z',
+ fist:'M5 11 H19 V16 A4 4 0 0 1 15 20 H9 A4 4 0 0 1 5 16Z M8 11 V7 M12 11 V6 M16 11 V7',shield:'M12 3 L19 6 V12 Q19 18 12 21 Q5 18 5 12 V6Z',
+ bow:'M8 4 Q20 12 8 20 M8 4 V20 M4 12 H19',dagger:'M6 18 L16 8 M14 6 L18 10',star:'M12 3 L14.5 9.5 L21 10 L16 14.5 L17.5 21 L12 17.5 L6.5 21 L8 14.5 L3 10 L9.5 9.5Z'
+};
+function figure(race,mark,i,b){
+  const small=race===4, hy=small?30:25, hr=small?8.5:10, by=small?44:39;
+  let s=`<path d="M14 57 Q14 ${by} 32 ${by} Q50 ${by} 50 57 Z" fill="${i}"/>`;
+  if(race===5) s+=`<rect x="22" y="${hy-10}" width="20" height="19" rx="4" fill="${i}"/><rect x="26" y="${hy-3}" width="12" height="3" rx="1.5" fill="${b}"/>`;
+  else s+=`<circle cx="32" cy="${hy}" r="${hr}" fill="${i}"/>`;
+  if(race===2) s+=`<path d="M23 ${hy-1} L12 ${hy-9} L23 ${hy+4}Z M41 ${hy-1} L52 ${hy-9} L41 ${hy+4}Z" fill="${i}"/>`;
+  if(race===1) s+=`<path d="M22.5 ${hy+2} Q32 ${hy+21} 41.5 ${hy+2}" fill="${i}" stroke="${b}" stroke-width="1.6"/>`;
+  if(race===3) s+=`<path d="M26.5 ${hy+6} l1.6 -5 l1.6 5Z M34.3 ${hy+6} l1.6 -5 l1.6 5Z" fill="${b}"/>`;
+  if(race===4) s+=`<circle cx="25" cy="${hy-6}" r="3.6" fill="${i}"/><circle cx="32" cy="${hy-9}" r="3.6" fill="${i}"/><circle cx="39" cy="${hy-6}" r="3.6" fill="${i}"/>`;
+  if(race===0) s+=`<path d="M23 ${hy-3} Q32 ${hy-15} 41 ${hy-3}" stroke="${b}" stroke-width="1.6" fill="none" opacity=".55"/>`;
+  s+=`<g transform="translate(25.4 ${by+3}) scale(.55)" fill="none" stroke="${b}" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="${MARK[mark]}"/></g>`;
+  return s;
+}
+const MG=[
+ (i,b)=>`<ellipse cx="32" cy="34" rx="13" ry="12" fill="${i}"/><path d="M20 30 L5 20 L22 41Z M44 30 L59 20 L42 41Z" fill="${i}"/><circle cx="27" cy="32" r="2.6" fill="${b}"/><circle cx="37" cy="32" r="2.6" fill="${b}"/><path d="M26 40 Q32 44 38 40" stroke="${b}" stroke-width="2" fill="none"/><path d="M14 58 Q16 47 32 47 Q48 47 50 58Z" fill="${i}"/>`,
+ (i,b)=>`<circle cx="32" cy="26" r="14" fill="${i}"/><rect x="24" y="35" width="16" height="10" rx="3" fill="${i}"/><circle cx="26.5" cy="26" r="4" fill="${b}"/><circle cx="37.5" cy="26" r="4" fill="${b}"/><path d="M32 30 l-2 4 h4z" fill="${b}"/><path d="M28 39 v5 M32 39 v5 M36 39 v5" stroke="${b}" stroke-width="1.6"/><path d="M22 51 h20 M24 56 h16" stroke="${i}" stroke-width="3" stroke-linecap="round"/>`,
+ (i,b)=>`<path d="M14 13 L25 25 H39 L50 13 L48 35 L32 54 L16 35Z" fill="${i}"/><path d="M23 33 l6 2 M41 33 l-6 2" stroke="${b}" stroke-width="2.6" stroke-linecap="round"/><path d="M29 45 h6 l-3 3z" fill="${b}"/>`,
+ (i,b)=>`<ellipse cx="32" cy="37" rx="20" ry="18" fill="${i}"/><circle cx="25" cy="31" r="2.6" fill="${b}"/><circle cx="39" cy="31" r="2.6" fill="${b}"/><path d="M24 44 l2 -6 l2 6Z M36 44 l2 -6 l2 6Z" fill="${b}"/><path d="M20 25 L29 28 M44 25 L35 28" stroke="${b}" stroke-width="2.4" stroke-linecap="round"/>`,
+ (i,b)=>`<g stroke="${i}" stroke-width="3" fill="none" stroke-linecap="round"><path d="M26 34 L14 24 L8 32 M26 38 L12 38 L6 46 M27 42 L16 50 L12 58 M38 34 L50 24 L56 32 M38 38 L52 38 L58 46 M37 42 L48 50 L52 58"/></g><circle cx="32" cy="40" r="11" fill="${i}"/><circle cx="32" cy="25" r="7" fill="${i}"/><circle cx="29.5" cy="24" r="1.7" fill="${b}"/><circle cx="34.5" cy="24" r="1.7" fill="${b}"/>`,
+ (i,b)=>`<path d="M16 56 V30 a16 16 0 0 1 32 0 V56 l-5.3 -5 l-5.3 5 l-5.4 -5 l-5.3 5 l-5.4 -5Z" fill="${i}"/><ellipse cx="26" cy="31" rx="3" ry="4.5" fill="${b}"/><ellipse cx="38" cy="31" rx="3" ry="4.5" fill="${b}"/><ellipse cx="32" cy="42" rx="3.5" ry="2.5" fill="${b}"/>`,
+ (i,b)=>`<ellipse cx="32" cy="32" rx="17" ry="17" fill="${i}"/><path d="M20 26 H44" stroke="${b}" stroke-width="3" stroke-linecap="round"/><circle cx="26" cy="31" r="2.4" fill="${b}"/><circle cx="38" cy="31" r="2.4" fill="${b}"/><path d="M24 41 H40" stroke="${b}" stroke-width="2.6" stroke-linecap="round"/><path d="M12 60 Q14 50 32 50 Q50 50 52 60Z" fill="${i}"/>`,
+ (i,b)=>`<path d="M32 11 C40 23 52 29 52 41 A20 14 0 0 1 12 41 C12 29 24 23 32 11Z" fill="${i}"/><circle cx="26" cy="39" r="3" fill="${b}"/><circle cx="38" cy="39" r="3" fill="${b}"/><circle cx="45" cy="22" r="2.5" fill="${i}"/>`,
+ (i,b)=>`<path d="M14 30 L4 20 L8 40 L20 40Z M50 30 L60 20 L56 40 L44 40Z" fill="${i}" opacity=".75"/><circle cx="32" cy="33" r="12" fill="${i}"/><path d="M23 25 L20 11 L29 22Z M41 25 L44 11 L35 22Z" fill="${i}"/><path d="M26 31 l4 2 M38 31 l-4 2" stroke="${b}" stroke-width="2.4" stroke-linecap="round"/><path d="M27 39 Q32 43 37 39" stroke="${b}" stroke-width="2" fill="none"/><path d="M24 58 Q24 47 32 46 Q40 47 40 58Z" fill="${i}"/>`,
+ (i,b)=>`<rect x="22" y="9" width="20" height="16" rx="3" fill="${i}"/><rect x="14" y="27" width="36" height="22" rx="4" fill="${i}"/><rect x="8" y="29" width="6" height="16" rx="2" fill="${i}"/><rect x="50" y="29" width="6" height="16" rx="2" fill="${i}"/><rect x="18" y="51" width="10" height="7" rx="2" fill="${i}"/><rect x="36" y="51" width="10" height="7" rx="2" fill="${i}"/><rect x="26" y="15" width="12" height="3" rx="1.5" fill="${b}"/><path d="M22 35 L30 41 M42 33 L36 43" stroke="${b}" stroke-width="1.8"/>`,
+ (i,b)=>`<path d="M32 12 C48 12 56 23 56 33 C56 45 46 55 32 55 C18 55 8 45 8 33 C8 23 16 12 32 12Z" fill="${i}"/><ellipse cx="32" cy="33" rx="14" ry="10" fill="${b}"/><ellipse cx="32" cy="33" rx="3.5" ry="9" fill="${i}"/><path d="M15 16 l-6 -6 M49 16 l6 -6 M32 12 v-6" stroke="${i}" stroke-width="3" stroke-linecap="round"/>`,
+ (i,b)=>`<path d="M10 22 L22 32 L14 40Z M54 22 L42 32 L50 40Z" fill="${i}" opacity=".7"/><path d="M20 20 L32 14 L44 20 L46 36 L40 50 L32 56 L24 50 L18 36Z" fill="${i}"/><path d="M22 20 L16 6 L28 16Z M42 20 L48 6 L36 16Z" fill="${i}"/><path d="M24 30 l6 3 M40 30 l-6 3" stroke="${b}" stroke-width="2.6" stroke-linecap="round"/><circle cx="29" cy="48" r="1.8" fill="${b}"/><circle cx="35" cy="48" r="1.8" fill="${b}"/>`
+];
+function tileSVG(d){
+  const c=COL[d.color], i=c.ink, b=c.hex;
+  let g = d.type==='mon' ? MG[d.arch](i,b) : figure(d.race, d.type==='hero'?d.cls:JOBS[d.job].mark, i, b);
+  let mark='';
+  if(d.rarity==='legendary') mark=`<path d="M52 6 l2.4 5 5.4 .6 -4 3.7 1.1 5.3 -4.9 -2.7 -4.9 2.7 1.1 -5.3 -4 -3.7 5.4 -.6Z" fill="#f5c542" stroke="#5a4310" stroke-width="1.2"/>`;
+  else if(d.rarity==='epic') mark=`<path d="M53 6 l5 5 -5 5 -5 -5Z" fill="#c9a6f0" stroke="#3b2160" stroke-width="1.2"/>`;
+  else if(d.rarity==='rare') mark=`<circle cx="53" cy="11" r="3.6" fill="#9cc3ff" stroke="#173c70" stroke-width="1.2"/>`;
+  return `<svg class="tile" viewBox="0 0 64 64" aria-hidden="true"><rect x="2" y="2" width="60" height="60" rx="13" fill="${b}" stroke="${d.color==='white'?'#bdb3a0':d.color==='black'?'#77708a':'rgba(0,0,0,.28)'}" stroke-width="2"/><rect x="5" y="5" width="54" height="54" rx="10" fill="none" stroke="${i}" stroke-opacity=".18" stroke-width="1.5"/>${g}${mark}</svg>`;
+}
+const IC_ATK='<svg class="ic" viewBox="0 0 16 16" aria-hidden="true"><path d="M3 13 L11 5 M9 3 H13 V7 M5 9 L7 11" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round"/></svg>';
+const IC_DEF='<svg class="ic" viewBox="0 0 16 16" aria-hidden="true"><path d="M8 2 L13 4 V8 Q13 12 8 14 Q3 12 3 8 V4Z" stroke="currentColor" stroke-width="1.7" fill="none" stroke-linejoin="round"/></svg>';
+const PIPS={1:[4],2:[0,8],3:[0,4,8],4:[0,2,6,8],5:[0,2,4,6,8],6:[0,2,3,5,6,8]};
+function dieHTML(v,color,kind){
+  const c=color?COL[color]:null;
+  const style=c?`style="--dbg:${c.hex};--dpip:${c.ink}"`:'';
+  let pips='';for(let k=0;k<9;k++) pips+=`<i class="${PIPS[v]&&PIPS[v].includes(k)?'on':''}"></i>`;
+  return `<span class="die ${kind||''} ${c?'':'neutral'} ${color==='white'?'wh':''}" ${style} data-v="${v}">${pips}</span>`;
+}
+function setDie(el,v){el.dataset.v=v;[...el.children].forEach((p,k)=>p.classList.toggle('on',PIPS[v].includes(k)))}
+
+// ================= Settings & profile =================
+const DEF_SET={theme:'system',budget:30,dice:'normal',ai:'normal',sound:true,motion:'system',text:'normal',hints:true,sandbox:false};
+let S=Object.assign({},DEF_SET,store.get('settings',{}));
+let P=Object.assign({coins:0,col:{},started:false,tutDone:false,saved:[]},store.get('profile',{}));
+const saveS=()=>store.set('settings',S), saveP=()=>store.set('profile',P);
+function applySettings(){
+  const r=document.documentElement;
+  if(S.theme==='system') r.removeAttribute('data-theme'); else r.setAttribute('data-theme',S.theme);
+  r.dataset.text=S.text;
+  if(S.motion==='system') r.removeAttribute('data-motion'); else r.dataset.motion=S.motion;
+  $('#coinCount').textContent=P.coins;
+}
+const reduced=()=>S.motion==='reduce'||(S.motion==='system'&&matchMedia('(prefers-reduced-motion: reduce)').matches);
+
+// ================= Sound =================
+const Snd={ctx:null,
+  c(){if(!S.sound)return null;try{if(!this.ctx)this.ctx=new (window.AudioContext||window.webkitAudioContext)();if(this.ctx.state==='suspended')this.ctx.resume();return this.ctx}catch(e){return null}},
+  tone(f,d=.12,type='sine',v=.07,slide=0){const c=this.c();if(!c)return;const o=c.createOscillator(),g=c.createGain();o.type=type;o.frequency.setValueAtTime(f,c.currentTime);if(slide)o.frequency.exponentialRampToValueAtTime(Math.max(40,f+slide),c.currentTime+d);g.gain.setValueAtTime(v,c.currentTime);g.gain.exponentialRampToValueAtTime(.0001,c.currentTime+d);o.connect(g).connect(c.destination);o.start();o.stop(c.currentTime+d)},
+  click(){const c=this.c();if(!c)return;const n=c.sampleRate*.03,buf=c.createBuffer(1,n,c.sampleRate),dat=buf.getChannelData(0);for(let k=0;k<n;k++)dat[k]=(Math.random()*2-1)*(1-k/n);const s=c.createBufferSource(),f=c.createBiquadFilter(),g=c.createGain();f.type='bandpass';f.frequency.value=1800+Math.random()*1500;g.gain.value=.25;s.buffer=buf;s.connect(f).connect(g).connect(c.destination);s.start()},
+  dice(){for(let k=0;k<4;k++)setTimeout(()=>this.click(),k*55+Math.random()*30)},
+  hit(){this.tone(140,.18,'triangle',.12,-70)},
+  ko(){this.tone(320,.4,'sawtooth',.05,-250)},
+  heal(){this.tone(520,.12,'sine',.06,200);setTimeout(()=>this.tone(780,.15,'sine',.05),90)},
+  win(){[523,659,784,1046].forEach((f,k)=>setTimeout(()=>this.tone(f,.22,'triangle',.07),k*120))},
+  lose(){[392,330,262].forEach((f,k)=>setTimeout(()=>this.tone(f,.3,'triangle',.06),k*160))}
+};
+
+// ================= Navigation =================
+let screen='menu';
+function go(name){
+  if(screen==='battle'&&name!=='battle'&&B&&!B.over){ abortBattle(); }
+  screen=name;
+  $$('.screen').forEach(s=>s.hidden=s.id!=='scr-'+name);
+  if(name==='collection') renderCollection();
+  if(name==='shop') renderShop();
+  if(name==='howto') renderHowto();
+  if(name==='menu') renderMenu();
+  if(name!=='battle') coach.stop();
+  window.scrollTo(0,0);
+}
+document.addEventListener('click',e=>{
+  const g=e.target.closest('[data-go]'); if(g){go(g.dataset.go);return;}
+  const p=e.target.closest('[data-play]'); if(p){startMode(p.dataset.play);}
+});
+
+function toast(msg){const t=$('#toast');t.textContent=msg;t.hidden=false;clearTimeout(toast.t);toast.t=setTimeout(()=>t.hidden=true,2400)}
+function openModal(html,wide){$('#ovBox').onclick=null;$('#ovBox').className='modal'+(wide?' wide':'');$('#ovBox').innerHTML=html;$('#ov').hidden=false;const f=$('#ovBox button, #ovBox select');if(f)f.focus()}
+function closeModal(){$('#ov').hidden=true;$('#ovBox').innerHTML=''}
+$('#ov').addEventListener('click',e=>{if(e.target.id==='ov'&&!$('#ov').dataset.lock)closeModal()});
+
+// ================= Menu =================
+function renderMenu(){
+  $('#heroDice').innerHTML=['red-m-9','blue-h-0','green-m-1','yellow-h-1','brown-m-6','white-h-0','black-c-4','purple-m-9'].map(id=>tileSVG(DIE[id])).join('');
+  $('#wheelRow').innerHTML=COLORS.map(c=>`<span class="beat" title="${esc(c.pn)}: ${esc(c.pt)}">${tileSVG(DIE[c.id+'-c-0'])}<b>${c.name}</b> beats <span class="sw" style="background:${COL[c.beats].hex}"></span>${COL[c.beats].name}</span>`).join('');
+}
+
+// ================= Dice info =================
+function abilityLine(d){
+  const out=[];
+  if(d.ab) out.push(`<b>${ABIL[d.ab].n}</b> <span class="muted">(recharges ${ABIL[d.ab].cd} turns)</span>: ${ABIL[d.ab].x}`);
+  if(d.pas) out.push(`<b>${PAS[d.pas][0]}</b>: ${PAS[d.pas][1]}`);
+  if(d.perk) out.push(`<b>${PERK[d.perk][0]}</b>: ${PERK[d.perk][1]}`);
+  return out;
+}
+function statLine(d){return `HP ${d.hp} · ATK ${d.atk} · DEF ${d.def} · ${d.ranged?'Ranged':'Melee'}`}
+function dieInfo(d,u){
+  const c=COL[d.color];
+  const hp=u?`${u.hp}/${u.maxHp}`:d.hp;
+  return `<div class="info"><div class="info-head">${tileSVG(d)}<div><b>${esc(d.name)}</b><div class="muted" style="font-size:.78rem">${c.name} ${typeName(d.type)} · ${esc(d.sub)} · <span class="rar ${d.rarity}">${d.rarity}</span></div></div></div>
+  <dl><dt>Health</dt><dd>${hp}</dd><dt>Dice</dt><dd>${u?atkCount(u,0):d.atk} attack, ${u?defCount(u):d.def} defence · ${d.ranged?'ranged: reaches any rank':'melee: front rank only'}</dd>
+  ${abilityLine(d).map(l=>`<dt></dt><dd style="color:var(--ink)">${l}</dd>`).join('')}
+  <dt>${c.name}</dt><dd><b style="color:var(--ink)">${c.pn}</b>: ${c.pt} Beats ${COL[c.beats].name}; weak to ${beatenBy(c.id).name}.</dd>
+  <dt>Cost</dt><dd>${d.cost} points</dd></dl></div>`;
+}
+function showDie(id){
+  const d=DIE[id], own=P.col[id]||0;
+  openModal(`<div class="modal-head"><h3>${esc(d.name)}</h3><button class="btn small" onclick="closeModal()">Close</button></div>${dieInfo(d)}<p class="muted">You own ${own}.</p>`);
+}
+
+// ================= Collection & packs =================
+function owned(id){return P.col[id]||0}
+function addDie(id,n=1){P.col[id]=(P.col[id]||0)+n}
+function renderCollection(){
+  const ownU=DICE.filter(d=>owned(d.id)).length, tot=sum(Object.values(P.col));
+  $('#colSummary').textContent=`${ownU} of 400 different dice · ${tot} dice in all`;
+  $('#colBars').innerHTML=COLORS.map(c=>{const n=DICE.filter(d=>d.color===c.id&&owned(d.id)).length;return `<div class="colbar panel"><div class="top2"><span class="sw" style="background:${c.hex}"></span><span>${c.name}</span><span>${n}/50</span></div><div class="meter"><i style="width:${n*2}%;background:${c.hex}"></i></div></div>`}).join('');
+  const t=$('#cType').value, o=$('#cOwned').value;
+  const list=DICE.filter(d=>(t==='all'||d.type===t)&&(o==='all'||(o==='owned'?owned(d.id):!owned(d.id))));
+  $('#cGrid').innerHTML=list.map(d=>{const n=owned(d.id);return `<button class="ccard ${n?'':'locked'}" data-die="${d.id}" title="${esc(d.name)}">${n>1?`<span class="cnt">×${n}</span>`:''}${tileSVG(d)}<span class="nm">${esc(d.name)}</span><span class="rar ${d.rarity}">${COL[d.color].name} ${typeName(d.type)}</span></button>`}).join('')||'<p class="muted">No dice match.</p>';
+  if(!P.started) setTimeout(starterPick,50);
+}
+$('#cType').onchange=$('#cOwned').onchange=renderCollection;
+$('#cGrid').addEventListener('click',e=>{const b=e.target.closest('[data-die]');if(b)showDie(b.dataset.die)});
+
+function starterPick(after){
+  if(P.started||S.sandbox&&!after) return after&&after();
+  $('#ov').dataset.lock='1';
+  openModal(`<div><p class="eyebrow">New collection</p><h2>Choose your starter colour</h2><p class="muted" style="margin-top:6px">You get 10 commons, 2 heroes and 1 monster in that colour, plus 200 coins for packs.</p></div>
+   <div class="starter">${COLORS.map(c=>`<button data-starter="${c.id}">${tileSVG(DIE[c.id+'-h-0'])}<b>${c.name} · ${c.title}</b><small>${c.pn}: ${c.pt}</small></button>`).join('')}</div>`,true);
+  $('#ovBox').onclick=e=>{const b=e.target.closest('[data-starter]');if(!b)return;const c=b.dataset.starter;
+    const commons=shuffle(DICE.filter(d=>d.color===c&&d.type==='common')).slice(0,10);
+    const heroes=shuffle(DICE.filter(d=>d.color===c&&d.type==='hero')).slice(0,2);
+    const mon=shuffle(DICE.filter(d=>d.color===c&&d.type==='mon'&&d.rarity!=='legendary'&&d.cost<=5))[0];
+    [...commons,...heroes,mon].forEach(d=>addDie(d.id));
+    P.coins+=200;P.started=true;saveP();applySettings();delete $('#ov').dataset.lock;$('#ovBox').onclick=null;
+    showPack([...commons,...heroes,mon].map(d=>d.id),'Your starter dice',()=>{if(after)after();else if(screen==='collection')renderCollection()});
+  };
+}
+function rollPack(color){
+  const pool=color?DICE.filter(d=>d.color===color):DICE;
+  const com=pool.filter(d=>d.type==='common'), rare=pool.filter(d=>d.type!=='common'&&d.rarity!=='legendary'), leg=pool.filter(d=>d.rarity==='legendary');
+  const out=[];const nC=color?2:3,nR=color?2:1;
+  for(let k=0;k<nC;k++)out.push(pick(com).id);
+  for(let k=0;k<nR;k++)out.push(pick(rare).id);
+  const x=Math.random();
+  out.push((x<(color?.125:.1)?pick(leg):x<.45?pick(rare):pick(com)).id);
+  return out;
+}
+function showPack(ids,title,done){
+  // counts were already added by the caller; NEW marks the first copy
+  const firstSeen=new Set();const tally={};
+  ids.forEach(id=>{tally[id]=(tally[id]||0)+1});
+  ids.forEach(id=>{if((P.col[id]||0)-tally[id]===0)firstSeen.add(id)});
+  openModal(`<div class="modal-head"><h3>${esc(title)}</h3><span class="muted">Tap to reveal</span></div>
+   <div class="reveal">${ids.map((id,k)=>{const d=DIE[id];return `<div class="rcard" data-k="${k}"><div class="inner"><div class="face back"></div><div class="face front">${tileSVG(d)}<b style="font-size:.84rem;line-height:1.15">${esc(d.name)}</b><span class="rar ${d.rarity}">${COL[d.color].name} ${typeName(d.type)}</span>${firstSeen.has(id)?'<span class="new">NEW</span>':''}</div></div></div>`}).join('')}</div>
+   <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn" id="revealAll">Reveal all</button><button class="btn primary" id="packDone">Done</button></div>`,true);
+  const cards=$$('.rcard',$('#ovBox'));
+  cards.forEach(c=>c.onclick=()=>{if(!c.classList.contains('flip')){c.classList.add('flip');Snd.click()}});
+  $('#revealAll').onclick=async()=>{for(const c of cards){if(!c.classList.contains('flip')){c.classList.add('flip');Snd.click();await sleep(reduced()?0:160)}}};
+  $('#packDone').onclick=()=>{closeModal();done&&done()};
+  if(reduced()) cards.forEach(c=>c.classList.add('flip'));
+}
+let packColor='red';
+function renderShop(){
+  $('#artMixed').innerHTML=['red-c-0','blue-m-2','green-h-0','purple-c-7','yellow-m-9'].map(id=>tileSVG(DIE[id])).join('');
+  $('#artColor').innerHTML=[0,1,2,3,4].map(k=>tileSVG(DIE[`${packColor}-${['c','h','m','c','m'][k]}-${k}`])).join('');
+  $('#packColors').innerHTML=COLORS.map(c=>`<button class="cchip ${packColor===c.id?'on':''}" data-pc="${c.id}"><span class="sw" style="background:${c.hex}"></span>${c.name}</button>`).join('');
+  $('#buyMixed').disabled=P.coins<100; $('#buyColor').disabled=P.coins<150;
+  $('#buyMixed').textContent=P.coins<100?`Need ${100-P.coins} more coins`:'Open mixed pack';
+  $('#buyColor').textContent=P.coins<150?`Need ${150-P.coins} more coins`:`Open ${COL[packColor].name} pack`;
+  if(!P.started&&!S.sandbox) setTimeout(()=>starterPick(renderShop),50);
+}
+$('#packColors').addEventListener('click',e=>{const b=e.target.closest('[data-pc]');if(b){packColor=b.dataset.pc;renderShop()}});
+$('#buyMixed').onclick=()=>buy(null,100);
+$('#buyColor').onclick=()=>buy(packColor,150);
+function buy(color,price){if(P.coins<price)return;P.coins-=price;const ids=rollPack(color);ids.forEach(id=>addDie(id));saveP();applySettings();showPack(ids,color?`${COL[color].name} pack`:'Mixed pack',renderShop)}
+
+// ================= Army builder =================
+const PRESETS=[
+ {name:'Ember Vanguard',units:[['red-h-2','front'],['red-h-0','front'],['red-c-0','front'],['red-h-3','back'],['red-h-8','back']]},
+ {name:'Greenwood Hunt',units:[['green-h-3','front'],['green-m-1','front'],['green-c-6','front'],['green-h-0','back'],['green-h-1','back'],['green-h-4','back']]},
+ {name:'Shadow Court',units:[['black-m-1','front'],['black-h-6','front'],['black-c-0','front'],['black-m-3','back'],['black-h-3','back']]},
+ {name:'Stone Wall',units:[['brown-m-6','front'],['brown-h-0','front'],['brown-c-6','front'],['brown-h-7','back'],['brown-h-4','back']]},
+ {name:'Rainbow Mix',units:[['white-h-0','front'],['yellow-h-8','front'],['blue-c-0','front'],['purple-h-0','back'],['white-h-1','back'],['yellow-h-0','back']]},
+ {name:"Dragon's Hoard",units:[['red-m-6','front'],['green-m-0','front'],['black-m-0','front'],['purple-m-9','back'],['white-c-12','back']]}
+];
+const armyCost=a=>sum(a.map(s=>DIE[s.id].cost));
+function assignRows(units){
+  const front=[],back=[];
+  units.filter(s=>!DIE[s.id].ranged).forEach(s=>(front.length<3?front:back).push(s));
+  units.filter(s=>DIE[s.id].ranged).forEach(s=>(back.length<3?back:front).push(s));
+  if(!front.length&&back.length)front.push(back.pop());
+  front.forEach(s=>s.row='front');back.forEach(s=>s.row='back');
+  return [...front,...back];
+}
+function randomArmy(budget,poolFn){
+  let best=[];
+  for(let attempt=0;attempt<12;attempt++){
+    const pool=DICE.filter(d=>d.cost<=budget&&poolFn(d.id)>0);
+    const units=[],used={};let left=budget;
+    const theme=Math.random()<.5?pick(COLORS).id:null;
+    for(let t=0;t<120&&units.length<6;t++){
+      const cand=pool.filter(d=>d.cost<=left&&(used[d.id]||0)<poolFn(d.id)&&(!theme||d.color===theme||Math.random()<.25));
+      if(!cand.length)break;
+      const d=pick(cand); units.push({id:d.id}); used[d.id]=(used[d.id]||0)+1; left-=d.cost;
+    }
+    if(armyCost(units)>armyCost(best)) best=units;
+    if(budget-armyCost(best)<=2&&best.length>=3) break;
+  }
+  return assignRows(best);
+}
+let BU=null; // builder state
+function startMode(mode){
+  coach.stop();
+  if(mode==='tutorial'){startTutorial();return;}
+  const diff=mode==='cpu'?[null,$('#cpuDiff').value]:mode==='aivai'?[$('#aiDiffA').value,$('#aiDiffB').value]:[null,null];
+  const ctrl=mode==='cpu'?['human','ai']:mode==='pvp'?['human','human']:['ai','ai'];
+  BU={mode,diff,ctrl,step:0,armies:[[],[]],names:['',''],filter:{color:'all'}};
+  const begin=()=>{
+    const lastA=store.get('lastArmy',null);
+    const okLast=lastA&&lastA.every(s=>DIE[s.id])&&validFor(lastA,0)===''?lastA:null;
+    BU.armies[0]=mode==='cpu'?(okLast||randomArmy(S.budget,poolCount(0))):randomArmy(S.budget,()=>9);
+    BU.armies[1]=randomArmy(S.budget,()=>9);
+    go('build');renderBuilder();
+  };
+  if(mode==='cpu'&&!P.started&&!S.sandbox){starterPick(begin);return;}
+  begin();
+}
+function usesCollection(side){return BU&&BU.mode==='cpu'&&side===0&&!S.sandbox}
+function poolCount(side){return id=>usesCollection(side)?owned(id):99}
+function validFor(army,side){
+  if(!army.length) return 'Add at least one die.';
+  if(armyCost(army)>S.budget) return `This army costs ${armyCost(army)} points. The limit is ${S.budget}.`;
+  if(army.length>6) return 'An army holds 6 dice at most.';
+  if(BU&&usesCollection(side)){const c={};for(const s of army){c[s.id]=(c[s.id]||0)+1;if(c[s.id]>owned(s.id))return `You only own ${owned(s.id)} of ${DIE[s.id].name}.`}}
+  return '';
+}
+function sideLabel(mode,side){return mode==='cpu'?(side?'Computer':'You'):mode==='pvp'?`Player ${side+1}`:(side?'Red AI':'Blue AI')}
+function renderBuilder(){
+  const side=BU.step, army=BU.armies[side];
+  const lbl=sideLabel(BU.mode,side);
+  $('#bSide').textContent=lbl+(BU.ctrl[side]==='ai'?` · ${BU.diff[side]} AI`:'');
+  $('#bTitle').textContent=BU.ctrl[side]==='ai'?(BU.mode==='cpu'?"The computer's army":`${lbl}'s army`):'Muster your army';
+  const cost=armyCost(army);
+  $('#bCost').textContent=cost;$('#bBudget').textContent=S.budget;$('#bCount').textContent=army.length;
+  $('#bMeter').classList.toggle('over',cost>S.budget);$('#bMeter i').style.width=Math.min(100,cost/S.budget*100)+'%';
+  // presets
+  $('#presetSel').innerHTML=`<option value="">Choose an army…</option><optgroup label="Ready-made">${PRESETS.map((p,k)=>`<option value="p${k}">${esc(p.name)} (${armyCost(p.units.map(u=>({id:u[0]})))})</option>`).join('')}</optgroup>${P.saved.length?`<optgroup label="Saved">${P.saved.map((p,k)=>`<option value="s${k}">${esc(p.name)} (${armyCost(p.units)})</option>`).join('')}</optgroup>`:''}`;
+  // slots
+  ['front','back'].forEach(row=>{
+    const el=row==='front'?$('#slotsFront'):$('#slotsBack');
+    const inRow=army.map((s,k)=>({s,k})).filter(x=>x.s.row===row);
+    const other=army.filter(s=>s.row!==row).length;
+    let h='';
+    for(let k=0;k<3;k++){const x=inRow[k];
+      if(!x){h+=`<div class="slot">Empty</div>`;continue;}
+      const d=DIE[x.s.id];
+      h+=`<div class="slot filled" title="${esc(d.name)}: ${statLine(d)}">${tileSVG(d)}<span class="nm">${esc(d.name)}</span><span class="cost">${d.cost} pts</span><span class="row-btns"><button data-mv="${x.k}" ${other>=3?'disabled':''}>${row==='front'?'To back':'To front'}</button><button data-rm="${x.k}" aria-label="Remove ${esc(d.name)}">Remove</button></span></div>`;
+    }
+    el.innerHTML=h;
+  });
+  // filters
+  const f=BU.filter;
+  $('#bColors').innerHTML=`<button class="cchip ${f.color==='all'?'on':''}" data-fc="all">All colours</button>`+COLORS.map(c=>`<button class="cchip ${f.color===c.id?'on':''}" data-fc="${c.id}"><span class="sw" style="background:${c.hex}"></span>${c.name}</button>`).join('');
+  const pc=poolCount(side);
+  $('#bPoolNote').textContent=usesCollection(side)?`Showing dice you own (${DICE.filter(d=>owned(d.id)).length} kinds). Turn on "All dice unlocked" in Settings to use every die.`:'Every die is available for this army.';
+  const q=$('#bSearch').value.trim().toLowerCase(), t=$('#bType').value, srt=$('#bSort').value;
+  const used={};army.forEach(s=>used[s.id]=(used[s.id]||0)+1);
+  let list=DICE.filter(d=>pc(d.id)>0&&(f.color==='all'||d.color===f.color)&&(t==='all'||d.type===t)&&(!q||(d.name+' '+d.sub).toLowerCase().includes(q)));
+  list.sort((a,b)=>srt==='name'?a.name.localeCompare(b.name):srt==='hp'?b.hp-a.hp:(b.cost-a.cost)||TYPE_ORDER[a.type]-TYPE_ORDER[b.type]);
+  const left=S.budget-cost;
+  $('#bList').innerHTML=list.slice(0,400).map(d=>{
+    const avail=pc(d.id)-(used[d.id]||0);
+    const can=army.length<6&&d.cost<=left&&avail>0;
+    const al=abilityLine(d);
+    return `<div class="drow">${tileSVG(d)}<div style="min-width:0"><div class="nm">${esc(d.name)}</div><div class="sub">${COL[d.color].name} ${typeName(d.type)} · ${esc(d.sub)} · <span class="rar ${d.rarity}">${d.rarity}</span></div><div class="statline">${statLine(d)}</div>${al[0]?`<div class="ab">${al[0]}</div>`:''}</div>
+    <div class="side"><span class="cost">${d.cost} pts</span>${usesCollection(side)?`<span class="muted" style="font-size:.72rem">own ${owned(d.id)}</span>`:''}<button class="btn small ${can?'primary':''}" data-add="${d.id}" ${can?'':'disabled'}>Add</button></div></div>`;
+  }).join('')||`<p class="muted">No dice match. ${usesCollection(side)?'Open packs in the shop to get more.':''}</p>`;
+  const w=validFor(army,side);$('#bWarn').textContent=army.length?w:'';
+  $('#bNext').disabled=!!w;
+  $('#bNext').textContent=side===0?'Next: '+sideLabel(BU.mode,1):'Start battle';
+  $('#bBack').textContent=side===0?'Back to menu':'Back: '+sideLabel(BU.mode,0);
+  $('#bRandom').textContent=BU.ctrl[side]==='ai'?'Reroll':'Random';
+}
+$('#bColors').addEventListener('click',e=>{const b=e.target.closest('[data-fc]');if(b){BU.filter.color=b.dataset.fc;renderBuilder()}});
+$('#bType').onchange=$('#bSort').onchange=()=>renderBuilder();
+$('#bSearch').oninput=()=>renderBuilder();
+$('#bList').addEventListener('click',e=>{const b=e.target.closest('[data-add]');if(!b)return;const d=DIE[b.dataset.add];const a=BU.armies[BU.step];
+  const f=a.filter(s=>s.row==='front').length,bk=a.filter(s=>s.row==='back').length;
+  let row=d.ranged?(bk<3?'back':'front'):(f<3?'front':'back');
+  a.push({id:d.id,row});Snd.click();renderBuilder()});
+['#slotsFront','#slotsBack'].forEach(s=>$(s).addEventListener('click',e=>{const a=BU.armies[BU.step];
+  const m=e.target.closest('[data-mv]'),r=e.target.closest('[data-rm]');
+  if(m){const u=a[+m.dataset.mv];u.row=u.row==='front'?'back':'front';renderBuilder()}
+  if(r){a.splice(+r.dataset.rm,1);renderBuilder()}}));
+$('#bRandom').onclick=()=>{BU.armies[BU.step]=randomArmy(S.budget,poolCount(BU.step));renderBuilder()};
+$('#bClear').onclick=()=>{BU.armies[BU.step]=[];renderBuilder()};
+$('#presetSel').onchange=e=>{const v=e.target.value;if(!v)return;
+  const src=v[0]==='p'?PRESETS[+v.slice(1)].units.map(u=>({id:u[0],row:u[1]})):P.saved[+v.slice(1)].units.map(u=>({id:u.id,row:u.row}));
+  BU.armies[BU.step]=src;renderBuilder();const w=validFor(src,BU.step);if(w)toast(w)};
+$('#bSave').onclick=()=>{const a=BU.armies[BU.step];if(!a.length){toast('Add some dice first.');return}
+  openModal(`<div class="modal-head"><h3>Save this army</h3></div><label for="saveName">Name</label><input type="text" id="saveName" maxlength="30" value="${esc('Army '+(P.saved.length+1))}"><div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn" onclick="closeModal()">Cancel</button><button class="btn primary" id="saveGo">Save</button></div>`);
+  $('#saveName').focus();$('#saveName').select();
+  $('#saveGo').onclick=()=>{const n=$('#saveName').value.trim()||'Army';P.saved.unshift({name:n,units:a.map(s=>({id:s.id,row:s.row}))});P.saved=P.saved.slice(0,10);saveP();closeModal();toast(`Saved “${n}”.`);renderBuilder()}};
+$('#bBack').onclick=()=>{if(BU.step===0)go('menu');else{BU.step=0;renderBuilder();window.scrollTo(0,0)}};
+$('#bNext').onclick=()=>{if(BU.step===0){if(BU.mode==='cpu')store.set('lastArmy',BU.armies[0]);BU.step=1;renderBuilder();window.scrollTo(0,0)}else startBattle({mode:BU.mode,ctrl:BU.ctrl,diff:BU.diff,armies:BU.armies})};
+
+// ================= Battle engine =================
+let B=null;
+const ABORT={abort:true};
+const SPD={dice:{slow:900,normal:520,fast:240,instant:0},hold:{slow:1000,normal:650,fast:320,instant:120},ai:{slow:1100,normal:600,fast:220}};
+const spMul=()=>B&&B.watch?B.speed:1;
+const diceMs=()=>(reduced()?0:SPD.dice[S.dice])/spMul();
+const holdMs=()=>SPD.hold[S.dice]/spMul();
+const aiMs=()=>SPD.ai[S.ai]/spMul();
+async function pause(ms){const t=B.token;await sleep(ms);while(B.paused&&t===B.token)await sleep(120);if(t!==B.token)throw ABORT;}
+
+function makeUnit(spec,side,i){const d=DIE[spec.id];return{uid:side+'-'+i,id:d.id,d,side,name:d.name,color:d.color,row:spec.row||'front',hp:d.hp,maxHp:d.hp,atk:d.atk,def:d.def,ranged:d.ranged,ab:d.ab||null,pas:d.pas||null,perk:d.perk||null,cost:d.cost,cd:0,acted:false,poison:0,stun:0,hex:0,hexNow:false,chill:false,guard:false,guardBy:-1,luckUsed:false,reUsed:false,dmg:0,kos:0,stunnedNow:false}}
+const foes=s=>B.units.filter(x=>x.side!==s&&x.hp>0);
+const friends=s=>B.units.filter(x=>x.side===s&&x.hp>0);
+const canReach=u=>u.ranged||u.row==='front';
+function basicT(u){if(!canReach(u))return[];const f=foes(u.side);let p=u.ranged?f:f.filter(e=>e.row==='front');const tz=f.filter(e=>e.row==='front'&&e.pas==='taunt');if(tz.length)p=p.filter(e=>tz.includes(e));return p}
+function abilT(u){if(!u.ab||u.cd>0)return[];const a=ABIL[u.ab];if(a.t==='none')return foes(u.side).length?['ALL']:[];if(a.t==='ally')return friends(u.side);if(a.t==='any')return foes(u.side);if(!canReach(u))return[];return u.ranged?foes(u.side):foes(u.side).filter(e=>e.row==='front')}
+const canAct=u=>u.hp>0&&!u.acted&&(u.side!==B.turn||B.used<B.limit)&&(basicT(u).length>0||abilT(u).length>0);
+const edge=(a,t)=>COL[a.color].beats===t.color;
+const atkCount=(u,extra)=>Math.max(1,u.atk+extra-(u.hexNow?1:0)-(u.chill?1:0));
+const defCount=t=>Math.max(0,t.def+(t.guard?1:0));
+function computeHit(att,tgt,o={},fixedA){
+  const notes=[];const ed=!fixedA&&edge(att,tgt);
+  let a=fixedA?fixedA.slice():rollN(atkCount(att,(o.extra||0)+(ed?1:0)));
+  if(!fixedA&&att.color==='yellow'&&a.includes(1)){a=a.map(x=>x===1?r6():x);notes.push('Spark rerolled 1s')}
+  if(ed)notes.unshift(`${COL[att.color].name} beats ${COL[tgt.color].name}: +1 die`);
+  let aSum=sum(a);
+  const sixes=a.filter(x=>x===6).length;
+  if(att.perk==='keen'&&sixes){aSum+=2*sixes;notes.push(`Keen +${2*sixes}`)}
+  if(att.color==='red'&&sixes){aSum+=sixes;notes.push(`Blaze +${sixes}`)}
+  const d=o.ignoreDef?[]:rollN(defCount(tgt));
+  let dSum=sum(d);
+  if(!o.ignoreDef&&tgt.perk==='stout'){dSum+=1;notes.push('Stout +1')}
+  if(att.color==='purple'&&dSum>0){dSum-=1;notes.push('Pierce −1')}
+  let dmg=Math.max(0,aSum-dSum);
+  if(dmg>0&&att.perk==='fury'&&att.hp*2<=att.maxHp){dmg+=2;notes.push('Fury +2')}
+  if(dmg>0&&att.pas==='pack'){const p=B.units.filter(x=>x!==att&&x.side===att.side&&x.hp>0&&x.pas==='pack').length;if(p){dmg+=p;notes.push(`Pack +${p}`)}}
+  if(dmg>=3&&tgt.color==='brown'){dmg-=1;notes.push('Bulwark −1')}
+  let dodge=null;if(tgt.perk==='nimble'){dodge=r6();if(dodge===6&&dmg>0){dmg=0;notes.push('Nimble dodge!')}}
+  return{a,d,aSum,dSum,dmg,dodge,notes};
+}
+function areaHit(att,t,total,kind){
+  const notes=[];let dmg,d=[];
+  if(kind==='blast')dmg=Math.ceil(total/2);
+  else{d=rollN(defCount(t));let ds=sum(d)+(t.perk==='stout'?1:0);if(att.color==='purple'&&ds>0)ds--;dmg=Math.max(0,total-ds)}
+  if(edge(att,t)){dmg+=2;notes.push('edge +2')}
+  if(dmg>=3&&t.color==='brown')dmg--;
+  if(t.perk==='nimble'&&r6()===6&&dmg>0){dmg=0;notes.push('dodged')}
+  return{dmg,d,notes};
+}
+
+// --- effects
+function float(u,text,cls){B.floats.push({uid:u.uid,text,cls})}
+function flushFloats(){for(const f of B.floats){const el=$(`.unit[data-uid="${f.uid}"]`);if(!el)continue;const s=document.createElement('span');s.className='float '+f.cls;s.textContent=f.text;el.appendChild(s);if(f.cls==='dmg'&&!reduced())el.classList.add('hit');setTimeout(()=>s.remove(),1200)}B.floats=[]}
+function paint(){renderBattle();flushFloats()}
+function log(side,html){B.log.push({side,html});const li=document.createElement('li');li.className=side==null?'':'s'+side;li.innerHTML=html;const ol=$('#log');ol.prepend(li);while(ol.children.length>120)ol.lastChild.remove()}
+const nm=u=>`<b>${esc(u.name)}</b>`;
+function heal(u,n){const amt=Math.min(n,u.maxHp-u.hp);if(amt<=0||u.hp<=0)return 0;u.hp+=amt;B.stats[u.side].heal+=amt;float(u,'+'+amt,'heal');return amt}
+function hurt(t,n,src){
+  if(n<=0||t.hp<=0)return 0;const real=Math.min(n,t.hp);t.hp-=n;float(t,'−'+n,'dmg');
+  if(src){src.dmg+=real;B.stats[src.side].dmg+=real;
+    if(src.hp>0&&src.pas==='drain')heal(src,Math.ceil(real/2));
+    if(src.hp>0&&src.color==='black')heal(src,1);}
+  if(t.hp<=0)knockOut(t,src);
+  return real;
+}
+function knockOut(t,src){
+  if(t.pas==='reassemble'&&!t.reUsed){t.reUsed=true;t.hp=4;float(t,'Back up!','info');log(t.side,`${nm(t)} falls apart, then pulls itself back together with 4 health.`);return}
+  t.hp=0;t.poison=0;t.stun=0;t.guard=false;
+  if(src){src.kos++;B.stats[src.side].kos++}
+  log(t.side,`${nm(t)} is knocked out.`);Snd.ko();
+  if(t.color==='white'){const al=friends(t.side).filter(x=>x.hp<x.maxHp).sort((a,b)=>a.hp/a.maxHp-b.hp/b.maxHp)[0];if(al){const h=heal(al,3);if(h)log(t.side,`Blessing: ${nm(al)} heals ${h}.`)}}
+}
+function advance(){for(const s of [0,1]){const f=friends(s);if(f.length&&!f.some(x=>x.row==='front')){f.forEach(x=>x.row='front');log(s,`${esc(B.names[s])}'s back rank steps up to the front.`)}}}
+
+// --- dice tray
+async function tray(o){
+  // o: {who, aDice, aColor, aTot, defWho, dDice, dColor, dTot, res, notes, kindA, kindD}
+  $('#tWhoA').textContent=o.who||'';$('#tWhoD').textContent=o.defWho||'';
+  $('#tRes').textContent='';$('#tNotes').textContent='';$('#tTot').textContent='…';
+  $('#tDiceA').innerHTML=(o.aDice||[]).map(v=>dieHTML(v,o.aColor,o.kindA||'')).join('');
+  $('#tDiceD').innerHTML=(o.dDice||[]).map(v=>dieHTML(v,o.dColor,'def')).join('')||(o.defWho?'<span class="muted" style="font-size:.78rem">no defence dice</span>':'');
+  const els=$$('#tray .die');const ms=diceMs();
+  if(ms>0&&els.length){Snd.dice();els.forEach(e=>e.classList.add('roll'));const t0=performance.now();
+    while(performance.now()-t0<ms){els.forEach(e=>setDie(e,r6()));await pause(65)}
+    els.forEach(e=>e.classList.remove('roll'));
+    const all=[...(o.aDice||[]),...(o.dDice||[])];els.forEach((e,k)=>setDie(e,all[k]));
+  }
+  $('#tTot').textContent=o.dTot!=null?`${o.aTot} – ${o.dTot}`:(o.aTot!=null?String(o.aTot):'');
+  $('#tRes').textContent=o.res||'';$('#tNotes').textContent=(o.notes||[]).join(' · ');
+}
+async function attackRoll(u,t,o={},label){
+  let r=computeHit(u,t,o);
+  await tray({who:`${u.name} · ${label||'Attack'}`,aDice:r.a,aColor:u.color,aTot:r.aSum,defWho:t.name,dDice:r.d,dColor:t.color,dTot:o.ignoreDef?null:r.dSum,res:r.dmg?`${r.dmg} damage`:'Blocked',notes:r.notes});
+  if(r.dmg===0&&u.perk==='lucky'&&!u.luckUsed){u.luckUsed=true;log(u.side,`${nm(u)} is Lucky and rolls again.`);await pause(holdMs()*.6);
+    r=computeHit(u,t,o);
+    await tray({who:`${u.name} · Lucky reroll`,aDice:r.a,aColor:u.color,aTot:r.aSum,defWho:t.name,dDice:r.d,dColor:t.color,dTot:o.ignoreDef?null:r.dSum,res:r.dmg?`${r.dmg} damage`:'Blocked',notes:r.notes});}
+  u.chill=false;
+  if(r.dmg>0){Snd.hit();hurt(t,r.dmg,u);if(u.color==='blue'&&t.hp>0){t.chill=true}}
+  log(u.side,`${nm(u)} ${label?'uses '+label+' on':'attacks'} ${nm(t)}: ${r.aSum}${o.ignoreDef?'':' vs '+r.dSum}${r.notes.length?' ('+esc(r.notes.join(', '))+')':''} → ${r.dmg?r.dmg+' damage':'no damage'}.`);
+  return r;
+}
+async function doAction(u,kind,t){
+  B.busy=true;B.sel=u;B.tg=[];B.hints={};paint();
+  if(kind==='attack'){await attackRoll(u,t)}
+  else{
+    const A=ABIL[u.ab];u.cd=A.cd;
+    switch(u.ab){
+      case 'cleave':{const others=foes(u.side).filter(e=>e.row===t.row&&e!==t);const r=await attackRoll(u,t,{},'Cleave');const t2=others.length?pick(others):null;
+        if(t2&&t2.hp>0){await pause(holdMs()*.5);const r2=computeHit(u,t2,{},r.a);await tray({who:`${u.name} · Cleave (second target)`,aDice:r2.a,aColor:u.color,aTot:r2.aSum,defWho:t2.name,dDice:r2.d,dColor:t2.color,dTot:r2.dSum,res:r2.dmg?`${r2.dmg} damage`:'Blocked',notes:r2.notes});if(r2.dmg){Snd.hit();hurt(t2,r2.dmg,u)}log(u.side,`The swing carries on to ${nm(t2)} → ${r2.dmg?r2.dmg+' damage':'no damage'}.`)}
+        break;}
+      case 'backstab':await attackRoll(u,t,{ignoreDef:true},'Backstab');break;
+      case 'aimed':await attackRoll(u,t,{extra:1},'Aimed Shot');break;
+      case 'sneak':await attackRoll(u,t,{},'Sneak');break;
+      case 'smash':await attackRoll(u,t,{extra:2},'Smash');break;
+      case 'bite':{const r=await attackRoll(u,t,{},'Poison Bite');if(r.dmg>0&&t.hp>0){if(t.perk==='stone'){float(t,'Immune','info');log(t.side,`${nm(t)} is Stoneborn and shrugs off the poison.`)}else{t.poison=3;float(t,'Poisoned','info')}}break;}
+      case 'engulf':{const r=await attackRoll(u,t,{},'Engulf');if(r.dmg>0&&t.hp>0){t.stun=1;float(t,'Stuck!','info');log(t.side,`${nm(t)} is stuck and will lose its next action.`)}break;}
+      case 'blast':case 'breath':{const n=u.ab==='blast'?2:3;const a=rollN(n);const tot=sum(a);
+        await tray({who:`${u.name} · ${A.n}`,aDice:a,aColor:u.color,aTot:tot,defWho:'Every enemy',dDice:[],res:u.ab==='blast'?`${Math.ceil(tot/2)} each`:'minus defence',notes:[]});
+        const parts=[];for(const e of foes(u.side)){const h=areaHit(u,e,tot,u.ab);if(h.dmg)hurt(e,h.dmg,u);else float(e,'0','info');parts.push(`${esc(e.name)} ${h.dmg}${h.notes.length?' ('+h.notes.join(', ')+')':''}`)}
+        Snd.hit();log(u.side,`${nm(u)} unleashes ${A.n} (${tot}): ${parts.join(', ')}.`);break;}
+      case 'mend':{const a=[r6()];await tray({who:`${u.name} · Mend`,aDice:a,aColor:u.color,aTot:a[0]+2,defWho:t.name,dDice:[],res:'Heal',notes:['1 die + 2']});const h=heal(t,a[0]+2);Snd.heal();log(u.side,`${nm(u)} mends ${nm(t)} for ${h}.`);break;}
+      case 'guard':{t.guard=true;t.guardBy=u.side;float(t,'Guarded','info');await tray({who:`${u.name} · Guard`,aDice:[],defWho:t.name,res:'+1 defence die',notes:['until your next turn']});log(u.side,`${nm(u)} guards ${nm(t)}.`);break;}
+      case 'hex':{t.hex=2;float(t,'Hexed','info');await tray({who:`${u.name} · Hex`,aDice:[],defWho:t.name,res:'−1 attack die',notes:['for 2 turns']});log(u.side,`${nm(u)} hexes ${nm(t)}.`);break;}
+      case 'gaze':{const a=[r6()];const ok=a[0]>=3;await tray({who:`${u.name} · Stone Gaze`,aDice:a,aColor:u.color,aTot:a[0],defWho:t.name,dDice:[],res:ok?'Frozen!':'Resisted',notes:['3 or more freezes']});if(ok&&t.hp>0){t.stun=1;float(t,'Frozen','info')}log(u.side,`${nm(u)} turns its gaze on ${nm(t)}: ${a[0]}, ${ok?'frozen for a turn':'no effect'}.`);break;}
+    }
+  }
+  u.acted=true;B.used++;advance();B.busy=false;
+  paint();
+  coach.emit('resolved',{u,kind});
+  checkWin();
+  await pause(holdMs());
+}
+function checkWin(){
+  if(B.over)return true;
+  const a=friends(0).length,b=friends(1).length;
+  if(a&&b)return false;
+  endBattle(a?0:b?1:-1);return true;
+}
+
+// --- turns
+async function beginTurn(side){
+  if(B.over)return;
+  B.turn=side;B.turnNo++;if(side===B.first)B.round++;
+  if(B.round>30){endBattle('time');return}
+  B.sel=null;B.tg=[];B.pending=null;B.hints={};B.inspect=null;
+  B.used=0;B.limit=(B.turnNo===1&&B.mode!=='tutorial')?Math.ceil(friends(side).length/2):99;
+  if(B.limit<99)log(side,`Opening turn: ${esc(B.names[side])} gets ${B.limit} actions.`);
+  B.units.forEach(x=>{if(x.guardBy===side){x.guard=false;x.guardBy=-1}});
+  for(const u of friends(side)){
+    u.acted=false;u.stunnedNow=false;if(u.cd>0)u.cd--;
+    u.hexNow=u.hex>0;if(u.hex>0)u.hex--;
+    if(u.poison>0){u.poison--;log(side,`Poison: ${nm(u)} loses 2.`);hurt(u,2,null)}
+    if(u.hp>0&&u.pas==='regen'){const h=heal(u,2);if(h)log(side,`${nm(u)} regenerates ${h}.`)}
+    if(u.hp>0&&u.color==='green')heal(u,1);
+    if(u.hp>0&&u.stun){u.stun=0;u.stunnedNow=true;u.acted=true;float(u,'Skips turn','info');log(side,`${nm(u)} loses this action.`)}
+  }
+  advance();
+  paint();
+  if(checkWin())return;
+  coach.emit('turnStart',{side});
+  if(B.ctrl[side]==='human'&&B.ctrl[1-side]==='human'){await passScreen(side)}
+  if(B.over)return;
+  if(!friends(side).some(canAct)){await pause(holdMs());return endTurn()}
+  if(B.ctrl[side]==='ai')runAI(side);
+  else if(B.mode!=='tutorial'){autoSelect();paint()}
+}
+function autoSelect(){const n=friends(B.turn).find(canAct);if(n)selectUnit(n,true)}
+async function endTurn(){
+  if(B.over||B.ending)return;B.ending=true;
+  coach.emit('turnEnd',{side:B.turn});
+  try{await pause(120)}catch(e){B.ending=false;return}
+  B.ending=false;
+  beginTurn(1-B.turn).catch(swallow);
+}
+function swallow(e){if(e!==ABORT)console.error(e)}
+function passScreen(side){
+  return new Promise(res=>{
+    $('#ov').dataset.lock='1';
+    openModal(`<div style="text-align:center;display:grid;gap:12px;justify-items:center"><p class="eyebrow">Pass the device</p><h2>${esc(B.names[side])}, your turn</h2><p class="muted">Round ${B.round}. ${friends(side).length} dice ready.</p><button class="btn primary" id="passGo">Start turn</button></div>`);
+    $('#passGo').onclick=()=>{delete $('#ov').dataset.lock;closeModal();res()};
+  });
+}
+
+// --- AI
+const threat=u=>u.atk*2.2+(u.ab?1.5:0)+(u.ab==='mend'?2:0)+(u.ab==='breath'||u.ab==='blast'?2.5:0)+(u.pas==='drain'?1:0);
+function evalHit(att,t,o,n){let tot=0,ko=0;for(let k=0;k<n;k++){const r=computeHit(att,t,o);tot+=Math.min(r.dmg,t.hp);if(r.dmg>=t.hp)ko++}return{avg:tot/n,ko:ko/n}}
+function koVal(t){let v=4+threat(t)*1.2+t.cost*.4;if(t.pas==='reassemble'&&!t.reUsed)v*=.35;return v}
+function aiOptions(u,diff){
+  const out=[],n=diff==='easy'?14:diff==='normal'?30:60;
+  const focus=t=>diff==='hard'?(1-t.hp/t.maxHp)*2:0;
+  const hitV=(t,o,bonus=0)=>{const e=evalHit(u,t,o,n);return e.avg+e.ko*koVal(t)+focus(t)+bonus};
+  for(const t of basicT(u))out.push({u,kind:'attack',t,v:hitV(t,{})});
+  const ts=abilT(u);
+  if(ts.length){
+    for(const t of ts){let v=0;
+      switch(u.ab){
+        case 'cleave':v=hitV(t,{})*1.55;break;
+        case 'backstab':v=hitV(t,{ignoreDef:true})+.5;break;
+        case 'aimed':v=hitV(t,{extra:1});break;
+        case 'sneak':v=hitV(t,{})+(t.row==='back'?1.2:0);break;
+        case 'smash':v=hitV(t,{extra:2});break;
+        case 'bite':v=hitV(t,{})+(t.perk==='stone'||t.poison?0:3);break;
+        case 'engulf':v=hitV(t,{})+(t.stun?0:threat(t)*.4);break;
+        case 'blast':case 'breath':{v=0;const avg=u.ab==='blast'?3.5:10.5;for(const e of foes(u.side)){let d=u.ab==='blast'?avg:Math.max(0,avg-3.5*defCount(e));if(edge(u,e))d+=2;v+=Math.min(e.hp,d)+(e.hp<=d?koVal(e)*.6:0)}break;}
+        case 'mend':{const miss=t.maxHp-t.hp;v=miss<3?-1:Math.min(miss,5.5)*1.1+(t.hp<=5?2:0);break;}
+        case 'guard':v=t.guard||t.row!=='front'?-.5:(t.hp<t.maxHp*.75?2.6:1.2);break;
+        case 'hex':v=t.hex||t.hexNow?.2:1.5+threat(t)*.35;break;
+        case 'gaze':v=t.stun?0:.67*threat(t)*1.1+.5;break;
+      }
+      out.push({u,kind:'ability',t:t==='ALL'?null:t,v});
+    }
+  }
+  return out;
+}
+function aiChoose(side){
+  const diff=B.diff[side]||'normal';
+  const ready=friends(side).filter(canAct);if(!ready.length)return null;
+  let opts=[];
+  if(diff==='easy'){opts=aiOptions(ready[0],diff);if(Math.random()<.3)return pick(opts);opts.forEach(o=>o.v+=Math.random()*5)}
+  else{ready.forEach(u=>opts.push(...aiOptions(u,diff)));if(diff==='normal')opts.forEach(o=>o.v+=Math.random()*1.6)}
+  opts.sort((a,b)=>b.v-a.v);return opts[0]||null;
+}
+async function runAI(side){
+  try{
+    await pause(aiMs());
+    while(!B.over&&B.turn===side){
+      const c=aiChoose(side);if(!c)break;
+      B.sel=c.u;B.tg=c.t?[c.t]:[];paint();
+      await pause(aiMs()*.7);
+      await doAction(c.u,c.kind,c.t);
+      if(B.over)return;
+      await pause(aiMs()*.4);
+    }
+    if(!B.over&&B.turn===side)endTurn();
+  }catch(e){swallow(e)}
+}
+
+// --- human input
+const isHumanTurn=()=>B&&!B.over&&B.ctrl[B.turn]==='human'&&!B.busy;
+function selectUnit(u,quiet){B.sel=u;B.pending=null;B.tg=[];B.hints={};B.inspect=null;if(!quiet)coach.emit('select',{u})}
+function setPending(kind){
+  const u=B.sel;if(!u)return;
+  const ts=kind==='attack'?basicT(u):abilT(u);if(!ts.length)return;
+  if(kind==='ability'&&ts[0]==='ALL'){humanDo(u,'ability',null);return}
+  B.pending=kind;B.tg=ts;B.hints={};
+  if(S.hints){
+    for(const t of ts){
+      if(kind==='ability'&&['mend','guard','hex','gaze'].includes(u.ab))continue;
+      const o=kind==='attack'?{}:u.ab==='backstab'?{ignoreDef:true}:u.ab==='aimed'?{extra:1}:u.ab==='smash'?{extra:2}:{};
+      const e=evalHit(u,t,o,240);B.hints[t.uid]=`~${e.avg.toFixed(1)}${e.ko>.02?` · ${Math.round(e.ko*100)}% KO`:''}`;
+    }
+  }
+  coach.emit('pending',{kind});paint();
+}
+async function humanDo(u,kind,t){
+  try{
+    await doAction(u,kind,t);
+    if(B.over)return;
+    if(!friends(B.turn).some(canAct)){await pause(200);endTurn()}
+    else{if(B.mode!=='tutorial')autoSelect();else B.sel=null;paint()}
+  }catch(e){swallow(e)}
+}
+$('#board').addEventListener('click',e=>{
+  const c=e.target.closest('.unit');if(!c||!B)return;
+  const u=B.units.find(x=>x.uid===c.dataset.uid);if(!u)return;
+  if(isHumanTurn()&&B.pending&&B.tg.includes(u)){humanDo(B.sel,B.pending,u);return}
+  if(isHumanTurn()&&u.side===B.turn&&canAct(u)){selectUnit(u);Snd.click();paint();return}
+  B.inspect=u;if(isHumanTurn()&&B.pending){B.pending=null;B.tg=[];B.hints={}}paint();
+});
+$('#orders').addEventListener('click',e=>{
+  const b=e.target.closest('[data-o]');if(!b||b.disabled)return;
+  const o=b.dataset.o;
+  if(o==='end'){if(isHumanTurn())endTurn();return}
+  if(!isHumanTurn())return;
+  if(o==='cancel'){B.pending=null;B.tg=[];B.hints={};paint();return}
+  if(o==='attack'||o==='ability'){if(B.pending===o){B.pending=null;B.tg=[];B.hints={};paint()}else setPending(o)}
+});
+document.addEventListener('keydown',e=>{
+  if(e.target.matches('input,select,textarea'))return;
+  if(e.key==='Escape'){if(!$('#ov').hidden&&!$('#ov').dataset.lock){closeModal();return}if(B&&B.pending){B.pending=null;B.tg=[];B.hints={};paint()}return}
+  if(screen!=='battle'||!isHumanTurn()||!$('#ov').hidden)return;
+  const k=e.key.toLowerCase();
+  if(k==='a'&&B.sel)setPending('attack');
+  else if(k==='s'&&B.sel)setPending('ability');
+  else if(k==='e')endTurn();
+  else if(k==='tab'&&!e.shiftKey&&!B.pending){const r=friends(B.turn).filter(canAct);if(r.length){e.preventDefault();const i=r.indexOf(B.sel);selectUnit(r[(i+1)%r.length]);paint()}}
+});
+
+// --- battle start / end
+function startBattle(cfg){
+  coach.stop();
+  const names=cfg.names||[sideLabel(cfg.mode,0),sideLabel(cfg.mode,1)];
+  B={mode:cfg.mode,ctrl:cfg.ctrl,diff:cfg.diff||[null,null],armies:cfg.armies.map(a=>a.map(s=>({...s}))),names,
+     units:[],turn:0,turnNo:0,used:0,limit:99,round:0,first:0,over:false,token:Math.random(),sel:null,tg:[],pending:null,hints:{},inspect:null,busy:false,ending:false,
+     floats:[],log:[],stats:[{dmg:0,heal:0,kos:0},{dmg:0,heal:0,kos:0}],paused:false,speed:1,watch:cfg.ctrl[0]==='ai'&&cfg.ctrl[1]==='ai'};
+  B.armies.forEach((a,s)=>assignRowsKeep(a).forEach((spec,i)=>B.units.push(makeUnit(spec,s,i))));
+  advance();
+  $('#log').innerHTML='';
+  $('#watch').hidden=!B.watch;$('#wPause').textContent='Pause';$$('#wSpeed button').forEach(b=>b.classList.toggle('on',b.dataset.sp==='1'));
+  $('#leaveBox').innerHTML='<button class="btn small" id="leaveBtn">Leave battle</button>';
+  go('battle');
+  tray({who:'Dice tray',aDice:[],defWho:'',res:''}).catch(()=>{});
+  paint();
+  (async()=>{
+    try{
+      if(cfg.first!=null){B.first=cfg.first}
+      else{
+        let a,b;do{a=r6();b=r6()}while(a===b);
+        await tray({who:`${names[0]} · initiative`,aDice:[a],aColor:'white',aTot:a,defWho:`${names[1]} · initiative`,dDice:[b],dColor:'black',dTot:b,res:`${names[a>b?0:1]} first`,notes:['highest roll goes first']});
+        B.first=a>b?0:1;log(null,`Initiative ${a} – ${b}. ${esc(names[B.first])} goes first.`);
+        await pause(holdMs()+300);
+      }
+      beginTurn(B.first).catch(swallow);
+    }catch(e){swallow(e)}
+  })();
+}
+function assignRowsKeep(a){
+  // respect chosen rows but never more than 3 per rank
+  const f=a.filter(s=>s.row==='front'),bk=a.filter(s=>s.row!=='front');
+  while(f.length>3)bk.push(f.pop());while(bk.length>3)f.push(bk.pop());
+  f.forEach(s=>s.row='front');bk.forEach(s=>s.row='back');return [...f,...bk];
+}
+function abortBattle(){if(!B)return;B.token=Math.random();B.over=true;coach.stop()}
+function endBattle(w){
+  if(B.over)return;B.over=true;B.sel=null;B.tg=[];B.pending=null;
+  let winner=w;
+  if(w==='time'){const f=s=>sum(friends(s).map(u=>u.hp/u.maxHp*u.cost));const a=f(0),b=f(1);winner=a===b?-1:a>b?0:1;log(null,'Round 30 reached. The side with the most strength left wins.')}
+  paint();
+  coach.emit('over',{winner});
+  let reward=0;
+  if(B.mode==='cpu'){reward=winner===0?{easy:40,normal:70,hard:110}[B.diff[1]]:15;P.coins+=reward;saveP();applySettings()}
+  if(B.mode==='tutorial'&&!P.tutDone&&winner===0){P.tutDone=true;reward=100;P.coins+=100;saveP();applySettings()}
+  const humanWon=(B.ctrl[0]==='human'&&B.ctrl[1]==='ai')?winner===0:null;
+  if(humanWon===false)Snd.lose();else Snd.win();
+  const mvp=B.units.slice().sort((a,b)=>(b.dmg+b.kos*6)-(a.dmg+a.kos*6))[0];
+  const title=winner===-1?'A draw':humanWon===true?'Victory':humanWon===false?'Defeat':`${B.names[winner]} wins`;
+  const tok=B.token;
+  setTimeout(()=>{if(!B||B.token!==tok)return;
+    $('#ov').dataset.lock='1';
+    openModal(`<div><p class="eyebrow">Round ${B.round}</p><h2>${esc(title)}</h2>${reward?`<p style="margin-top:6px"><span class="coins"><i class="coin"></i>+${reward} coins</span></p>`:''}</div>
+    <table class="result-table"><thead><tr><th></th><th>${esc(B.names[0])}</th><th>${esc(B.names[1])}</th></tr></thead><tbody>
+    <tr><td>Dice standing</td><td>${friends(0).length}/${B.units.filter(u=>u.side===0).length}</td><td>${friends(1).length}/${B.units.filter(u=>u.side===1).length}</td></tr>
+    <tr><td>Damage dealt</td><td>${B.stats[0].dmg}</td><td>${B.stats[1].dmg}</td></tr>
+    <tr><td>Healing</td><td>${B.stats[0].heal}</td><td>${B.stats[1].heal}</td></tr>
+    <tr><td>Knockouts</td><td>${B.stats[0].kos}</td><td>${B.stats[1].kos}</td></tr></tbody></table>
+    ${mvp?`<div class="info-head">${tileSVG(mvp.d)}<div><p class="eyebrow">Best die</p><b>${esc(mvp.name)}</b> <span class="muted">(${esc(B.names[mvp.side])}) · ${mvp.dmg} damage, ${mvp.kos} knockouts</span></div></div>`:''}
+    <div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end">
+      <button class="btn" id="rMenu">Main menu</button>
+      ${B.mode!=='tutorial'?'<button class="btn" id="rEdit">Change armies</button>':''}
+      <button class="btn primary" id="rAgain">${B.mode==='tutorial'?'Play the walkthrough again':'Rematch'}</button>
+    </div>`);
+    const done=()=>{delete $('#ov').dataset.lock;closeModal()};
+    $('#rMenu').onclick=()=>{done();go('menu')};
+    if($('#rEdit'))$('#rEdit').onclick=()=>{done();if(BU){BU.step=0;go('build');renderBuilder()}else go('menu')};
+    $('#rAgain').onclick=()=>{done();if(B.mode==='tutorial')startTutorial();else startBattle({mode:B.mode,ctrl:B.ctrl,diff:B.diff,armies:B.armies,names:B.names})};
+  },reduced()?200:900);
+}
+$('#wPause').onclick=()=>{if(!B)return;B.paused=!B.paused;$('#wPause').textContent=B.paused?'Resume':'Pause';renderTurnBox()};
+$('#wSpeed').addEventListener('click',e=>{const b=e.target.closest('[data-sp]');if(!b||!B)return;B.speed=+b.dataset.sp;$$('#wSpeed button').forEach(x=>x.classList.toggle('on',x===b))});
+$('#leaveBox').addEventListener('click',e=>{
+  if(e.target.id==='leaveBtn'){$('#leaveBox').innerHTML='<span class="muted" style="align-self:center;font-size:.85rem">Leave this battle?</span><button class="btn small" id="leaveYes">Leave</button><button class="btn small" id="leaveNo">Stay</button>';}
+  else if(e.target.id==='leaveYes'){abortBattle();go(BU&&B.mode!=='tutorial'?'build':'menu');if(BU&&screen==='build'){BU.step=0;renderBuilder()}}
+  else if(e.target.id==='leaveNo'){$('#leaveBox').innerHTML='<button class="btn small" id="leaveBtn">Leave battle</button>';}
+});
+
+// --- battle render
+function unitCard(u){
+  const human=isHumanTurn();
+  const cls=['unit','s'+u.side];
+  if(B.sel===u)cls.push('sel');
+  if(B.tg.includes(u))cls.push('tgt');
+  if(u.side===B.turn&&!B.over&&(u.acted||!canAct(u)))cls.push('done');
+  else if(human&&u.side===B.turn&&canAct(u)&&B.sel!==u)cls.push('ready');
+  const pct=Math.max(0,u.hp/u.maxHp*100);
+  const st=[];
+  if(u.guard)st.push('<span class="st good">Guard</span>');
+  if(u.poison)st.push(`<span class="st bad">Poison ${u.poison}</span>`);
+  if(u.stun)st.push('<span class="st bad">Stuck</span>');
+  if(u.hex||u.hexNow)st.push('<span class="st bad">Hex</span>');
+  if(u.chill)st.push('<span class="st bad">Chill</span>');
+  if(u.stunnedNow&&u.side===B.turn)st.push('<span class="st">Skipped</span>');
+  if(!canReach(u)&&!(u.ab&&ABIL[u.ab].t!=='enemy'))st.push('<span class="st">Reserve</span>');
+  const cd=u.ab?(u.cd>0?`<span class="chip cd" title="${ABIL[u.ab].n} ready in ${u.cd}">⟳${u.cd}</span>`:`<span class="chip ok" title="${ABIL[u.ab].n} ready">★</span>`):'';
+  const hint=B.hints[u.uid]?`<span class="hint">${B.hints[u.uid]}</span>`:'';
+  return `<button class="${cls.join(' ')}" data-uid="${u.uid}" title="${esc(u.name)} · ${u.hp}/${u.maxHp} health${u.ab?' · '+ABIL[u.ab].n:''}">${hint}${tileSVG(u.d)}<span class="u-name">${esc(u.name)}</span><span class="hpbar"><i class="${pct<=35?'low':''}" style="width:${pct}%"></i></span><span class="u-line"><span>${u.hp}/${u.maxHp}</span><span class="chip a" title="Attack dice">${IC_ATK}${atkCount(u,0)}</span><span class="chip d" title="Defence dice">${IC_DEF}${defCount(u)}</span>${cd}</span><span class="u-st">${st.join('')}</span></button>`;
+}
+function renderHalf(side){
+  const el=side?$('#sideB'):$('#sideA');
+  const alive=friends(side), out=B.units.filter(u=>u.side===side&&u.hp<=0);
+  const rank=row=>{const us=alive.filter(u=>u.row===row);return `<div class="rank-tag">${row} rank</div><div class="rank">${us.map(unitCard).join('')}</div>`};
+  const head=`<div class="half-head"><span class="dot"></span>${esc(B.names[side])}${B.ctrl[side]==='ai'?` <span class="muted" style="font-weight:500">· ${B.diff[side]} AI</span>`:''}<span class="out">${out.length?'Out: '+out.map(u=>tileSVG(u.d)).join(''):''}</span></div>`;
+  el.innerHTML=side?head+rank('back')+rank('front'):rank('front')+rank('back')+head;
+}
+function renderTurnBox(){
+  const s=B.turn;
+  $('#turnBox').innerHTML=B.over?`<span class="big">Battle over</span>`:`<span class="tdot" style="background:var(${s?'--foe':'--you'})"></span><div><div class="big">${esc(B.names[s])}</div><div class="muted" style="font-size:.8rem">Round ${Math.max(1,B.round)}${B.limit<99?` · opening turn: ${B.limit-B.used} of ${B.limit} actions left`:''}${B.paused?' · paused':''}</div></div>`;
+}
+function renderOrders(){
+  const o=$('#orders');
+  if(B.over){o.innerHTML='<p class="muted">The battle is over.</p>';return}
+  const s=B.turn;
+  if(B.ctrl[s]!=='human'){o.innerHTML=`<p class="muted">${esc(B.names[s])} is choosing…</p>${B.inspect?dieInfo(B.inspect.d,B.inspect):''}`;return}
+  const u=B.sel;
+  const ready=friends(s).filter(canAct).length;
+  const end=`<button class="btn" data-o="end" ${B.busy?'disabled':''}>End turn <span class="muted">(E)</span></button>`;
+  if(!u||u.side!==s||!canAct(u)){
+    o.innerHTML=`<p>${ready?`Pick one of your dice to give it orders. <b>${ready}</b> ready.`:'All your dice have acted.'}</p>${B.inspect?dieInfo(B.inspect.d,B.inspect):''}${end}`;return;
+  }
+  const bt=basicT(u),at=abilT(u),A=u.ab&&ABIL[u.ab];
+  const atkTxt=!canReach(u)?'Melee dice in the back rank cannot reach.':`Roll ${atkCount(u,0)} ${atkCount(u,0)>1?'dice':'die'} at ${u.ranged?'any enemy':'an enemy in the front rank'}.`;
+  const abTxt=!A?'':u.cd>0?`Ready in ${u.cd} ${u.cd>1?'turns':'turn'}. ${A.x}`:A.x;
+  o.innerHTML=`<div class="info-head">${tileSVG(u.d)}<div><b>${esc(u.name)}</b><div class="muted" style="font-size:.78rem">${u.hp}/${u.maxHp} health · ${COL[u.color].name} ${typeName(u.d.type)}</div></div></div>
+   <button class="act ${B.pending==='attack'?'on':''}" data-o="attack" ${bt.length?'':'disabled'}><kbd>A</kbd><b>Attack</b><span>${atkTxt}</span></button>
+   ${A?`<button class="act ${B.pending==='ability'?'on':''}" data-o="ability" ${at.length?'':'disabled'}><kbd>S</kbd><b>${A.n}</b><span>${abTxt}</span></button>`:''}
+   ${B.pending?`<p><b>Choose a target.</b> <span class="muted">Glowing dice can be picked.${S.hints&&Object.keys(B.hints).length?' Numbers show average damage.':''}</span></p><button class="btn small" data-o="cancel">Cancel (Esc)</button>`:''}
+   ${end}`;
+}
+function renderBattle(){if(!B)return;renderHalf(1);renderHalf(0);renderTurnBox();renderOrders();coach.place()}
+
+// ================= Tutorial / coach =================
+const coach={on:false,i:0,steps:[],
+  start(steps){this.on=true;this.i=0;this.steps=steps;this.show()},
+  stop(){this.on=false;$('#coach').hidden=true;$$('.coach-focus').forEach(e=>e.classList.remove('coach-focus'))},
+  show(){
+    if(!this.on)return;const st=this.steps[this.i];if(!st){this.stop();return}
+    const c=$('#coach');c.hidden=false;
+    c.innerHTML=`<div class="cstep">Walkthrough · ${this.i+1} of ${this.steps.length}</div><div>${st.t}</div><div class="cbtns"><button data-c="quit">End walkthrough</button>${st.wait?`<button data-c="next">Skip this step</button>`:`<button class="go" data-c="next">${st.last?'Got it':'Next'}</button>`}</div>`;
+    this.place();
+    const go=$('.go',c);if(go&&!st.wait)go.focus({preventScroll:true});
+  },
+  place(){
+    if(!this.on)return;const st=this.steps[this.i];if(!st)return;
+    $$('.coach-focus').forEach(e=>e.classList.remove('coach-focus'));
+    const c=$('#coach');const f=st.f?$(st.f):null;
+    const vw=innerWidth,vh=innerHeight,w=Math.min(340,vw-32);
+    if(f){f.classList.add('coach-focus');const r=f.getBoundingClientRect();const h=c.offsetHeight||160;
+      let top=r.bottom+14;if(top+h>vh-12)top=r.top-h-14;if(top<12)top=Math.min(vh-h-12,Math.max(12,r.top+12));
+      let left=Math.min(Math.max(16,r.left),vw-w-16);c.style.top=top+'px';c.style.left=left+'px';c.style.bottom='auto';
+    }else{c.style.top='auto';c.style.bottom='20px';c.style.left=Math.max(16,(vw-w)/2)+'px'}
+  },
+  next(){this.i++;if(this.i>=this.steps.length){this.stop();return}const st=this.steps[this.i];if(st.f){const f=$(st.f);if(f&&f.getBoundingClientRect().top<0||f&&f.getBoundingClientRect().bottom>innerHeight)f.scrollIntoView({block:'center',behavior:reduced()?'auto':'smooth'});}this.show()},
+  emit(ev,data){if(!this.on)return;const st=this.steps[this.i];if(st&&st.wait===ev&&(!st.ok||st.ok(data)))setTimeout(()=>this.next(),st.delay||250)}
+};
+$('#coach').addEventListener('click',e=>{const b=e.target.closest('[data-c]');if(!b)return;if(b.dataset.c==='quit')coach.stop();else coach.next()});
+addEventListener('resize',()=>coach.place());addEventListener('scroll',()=>coach.place(),{passive:true});
+function startTutorial(){
+  BU=null;
+  startBattle({mode:'tutorial',ctrl:['human','ai'],diff:[null,'easy'],first:0,names:['You','Goblin raiders'],
+    armies:[[{id:'red-h-0',row:'front'},{id:'green-h-0',row:'back'},{id:'white-h-1',row:'back'}],[{id:'green-m-0',row:'front'},{id:'green-m-0',row:'front'},{id:'red-m-2',row:'back'}]]});
+  coach.start([
+    {t:'Welcome to Dice Battles. Your army is along the bottom and the enemy is along the top. Knock out every enemy die to win.',f:'#board'},
+    {t:'Each army stands in two ranks. The <b>front rank</b> fights hand to hand. The <b>back rank</b> holds archers, casters and healers. When a front rank is wiped out, its back rank steps up.',f:'#sideA'},
+    {t:'It is your turn. Click <b>Grukk Emberfist</b>, your Orc Warrior, to give him orders.',f:'[data-uid="0-0"]',wait:'select',ok:d=>d.u.uid==='0-0'},
+    {t:'Every die gets one action a turn. The sword number is how many attack dice it rolls; the shield number is how many defence dice it rolls. Choose <b>Attack</b>.',f:'#orders',wait:'pending',ok:d=>d.kind==='attack'},
+    {t:'The glowing goblins are the targets you can reach. Melee dice can only hit the enemy front rank. The number above each one is your average damage. Click a goblin.',f:'#sideB',wait:'resolved'},
+    {t:'You rolled attack dice and the goblin rolled defence dice. Damage is your total minus theirs. Grukk is <b>Red</b> and goblins here are <b>Green</b>. Red beats Green, so you rolled one extra die.',f:'#tray'},
+    {t:'Now <b>Thalion Greenleaf</b>, your Ranger. Ranged dice reach either rank. Select him and use <b>Aimed Shot</b> on the Fire Imp at the back.',f:'[data-uid="0-1"]',wait:'resolved',ok:d=>d.u.uid==='0-1'},
+    {t:'Abilities need time to recharge. ★ means ready. ⟳2 means ready in 2 of your turns.',f:'[data-uid="0-1"]'},
+    {t:'Last, <b>High Priest Anselm</b>. He can <b>Mend</b> an ally or attack. When all your dice have acted, the turn ends by itself. You can also press End turn.',f:'[data-uid="0-2"]',wait:'turnEnd'},
+    {t:'The goblins move now. Their rolls appear in the dice tray and every action goes into the battle log.',f:'#logbox',wait:'turnStart',ok:d=>d.side===0,delay:500},
+    {t:'Every colour has a power and beats one other colour. Click any die, yours or theirs, to read it. Finish this fight to earn 100 coins, then open packs and build your own army.',last:true}
+  ]);
+}
+
+// ================= How to play =================
+function renderHowto(){
+  const tbl=(head,rows)=>`<div class="tbl"><table><thead><tr>${head.map(h=>`<th>${h}</th>`).join('')}</tr></thead><tbody>${rows.map(r=>`<tr>${r.map(c=>`<td>${c}</td>`).join('')}</tr>`).join('')}</tbody></table></div>`;
+  $('#howto').innerHTML=`
+  <div><p class="eyebrow">Rules</p><h2>How to play</h2></div>
+  <section><h3>Goal</h3><p>Knock out every die in the enemy army. Nobody dies. Beaten dice are just out of the fight. If round 30 ends with both sides standing, the side with the most strength left wins.</p></section>
+  <section><h3>Your army</h3><ul><li>Pick up to 6 dice within the points limit (${S.budget} points; change it in Settings).</li><li>Place them in two ranks of 3. Melee dice fight from the <b>front rank</b>. Ranged dice can act from either rank.</li><li>Melee dice in the back rank wait as reserves. When a front rank is wiped out, the whole back rank steps up.</li><li>Against the computer you build from the dice you own. Two-player and AI vs AI games can use all 400.</li></ul></section>
+  <section><h3>A turn</h3><ul><li>Initiative dice decide who goes first. To even things out, the first side only gets half its actions (rounded up) on the opening turn.</li><li>On your turn each of your dice takes one action: <b>Attack</b> or its <b>ability</b>. Pick a die, pick an action, pick a glowing target.</li><li>The turn ends when all your dice have acted, or when you press End turn.</li><li>Melee attacks can only target the enemy front rank. Ranged attacks can target anyone. A Golem with Taunt in the front rank must be hit first by basic attacks.</li></ul></section>
+  <section><h3>Dice</h3><p>The attacker rolls its attack dice (${IC_ATK}) and the defender rolls its defence dice (${IC_DEF}). Damage is the attack total minus the defence total. If it is 0 or less, the attack is blocked.</p><div class="demo-dice">${[5,3,6].map((v,k)=>dieHTML(v,k<2?'red':'red')).join('')}<b style="margin:0 6px">14</b> vs <b style="margin:0 6px">4</b>${dieHTML(4,'green','def')}<span class="muted" style="margin-left:6px">Red beats Green, so Red rolled 3 dice instead of 2. One 6 adds 1 for Blaze: 14 + 1 − 4 = 11 damage.</span></div></section>
+  <section><h3>Colours</h3><p>Every die has a colour. A die rolls <b>1 extra attack die</b> against the colour it beats. Area attacks deal 2 extra damage to that colour instead.</p>
+  ${tbl(['Colour','Power','Beats','Weak to'],COLORS.map(c=>[`<span class="sw" style="background:${c.hex};vertical-align:-2px"></span> <b>${c.name}</b> · ${c.title}`,`<b>${c.pn}</b>: ${c.pt}`,COL[c.beats].name,beatenBy(c.id).name]))}</section>
+  <section><h3>Heroes: race and class</h3><p>Each colour has 10 named heroes. A hero combines a race perk with a class and its ability.</p>
+  ${tbl(['Race','Health','Perk','Extra cost'],RAC.map(r=>[`<b>${r.name}</b>`,(r.hp>=0?'+':'')+r.hp,`<b>${PERK[r.perk][0]}</b>: ${PERK[r.perk][1]}`,'+'+r.cost]))}
+  ${tbl(['Class','Health','Attack','Defence','Reach','Ability','Base cost'],CLS.map(c=>[`<b>${c.name}</b>`,c.hp,c.atk,c.def,c.ranged?'Ranged':'Melee',`<b>${ABIL[c.ab].n}</b> (${ABIL[c.ab].cd}): ${ABIL[c.ab].x}`,c.cost]))}</section>
+  <section><h3>Monsters</h3><p>Each colour has 10 monsters. Every monster belongs to one of these kinds. Dragons are legendary.</p>
+  ${tbl(['Kind','Health','Attack','Defence','Reach','Special','Cost'],ARCH.map(a=>[`<b>${a.kind}</b>`,a.hp,a.atk,a.def,a.ranged?'Ranged':'Melee',a.ab?`<b>${ABIL[a.ab].n}</b> (${ABIL[a.ab].cd}): ${ABIL[a.ab].x}`:`<b>${PAS[a.pas][0]}</b>: ${PAS[a.pas][1]}`,a.cost]))}</section>
+  <section><h3>Commons</h3><p>Each colour has 30 commons: 5 jobs for each of the 6 races, like the Red <b>Street Fighter Orc</b>. They are cheap, keep their race perk and colour power, and fill out an army.</p>
+  ${tbl(['Job','Health','Attack','Defence','Reach','Special','Cost'],JOBS.map((j,k)=>[`<b>${COLORS.map(c=>JOBN[c.id][k]).slice(0,3).join(', ')}…</b>`,j.hp,j.atk,j.def,j.ranged?'Ranged':'Melee',j.ab?`<b>${ABIL[j.ab].n}</b>`:'—',j.cost]))}</section>
+  <section><h3>Effects</h3><ul><li><b>Poison</b>: loses 2 health at the start of each of its turns, for 3 turns.</li><li><b>Stuck / Frozen</b>: loses its next action.</li><li><b>Hex</b>: rolls 1 fewer attack die on its next 2 turns.</li><li><b>Chill</b>: rolls 1 fewer attack die on its next attack.</li><li><b>Guard</b>: rolls 1 extra defence die until the guarding side's next turn.</li></ul></section>
+  <section><h3>Collecting</h3><ul><li>Start by choosing a colour. You get 13 dice in it and 200 coins.</li><li>Beat the computer for coins: 40 on Easy, 70 on Normal, 110 on Hard, 15 for a loss. The walkthrough pays 100 once.</li><li>Mixed packs cost 100 and colour packs cost 150. You can field as many copies of a die as you own.</li><li>Rarity: commons have no mark, monsters a blue dot, heroes a violet diamond, dragons a gold star.</li></ul></section>
+  <section><h3>Keys</h3>${tbl(['Key','Action'],[['A','Attack with the selected die'],['S','Use its ability'],['Tab','Next ready die'],['E','End turn'],['Esc','Cancel or close']])}</section>`;
+}
+
+// ================= Settings modal =================
+function segHTML(key,opts){return `<div class="seg" data-set="${key}">${opts.map(([v,l])=>`<button data-v="${v}" class="${String(S[key])===String(v)?'on':''}">${l}</button>`).join('')}</div>`}
+function openSettings(){
+  openModal(`<div class="modal-head"><h3>Settings</h3><button class="btn small" onclick="closeModal()">Done</button></div>
+  <div class="setgrid">
+   <div class="setrow"><div class="lbl"><b>Theme</b><span>Light, dark, or follow your device</span></div>${segHTML('theme',[['system','Auto'],['light','Light'],['dark','Dark']])}</div>
+   <div class="setrow"><div class="lbl"><b>Army points</b><span>Points limit for every army</span></div>${segHTML('budget',[[20,'20'],[30,'30'],[45,'45']])}</div>
+   <div class="setrow"><div class="lbl"><b>Dice speed</b><span>How long dice tumble</span></div>${segHTML('dice',[['slow','Slow'],['normal','Normal'],['fast','Fast'],['instant','Instant']])}</div>
+   <div class="setrow"><div class="lbl"><b>Computer speed</b><span>Pause between computer moves</span></div>${segHTML('ai',[['slow','Slow'],['normal','Normal'],['fast','Fast']])}</div>
+   <div class="setrow"><div class="lbl"><b>Damage hints</b><span>Show average damage on targets</span></div>${segHTML('hints',[[true,'On'],[false,'Off']])}</div>
+   <div class="setrow"><div class="lbl"><b>Sound</b><span>Dice, hits and fanfare</span></div>${segHTML('sound',[[true,'On'],[false,'Off']])}</div>
+   <div class="setrow"><div class="lbl"><b>Motion</b><span>Animations and shakes</span></div>${segHTML('motion',[['system','Auto'],['full','Full'],['reduce','Reduced']])}</div>
+   <div class="setrow"><div class="lbl"><b>Text size</b></div>${segHTML('text',[['normal','Normal'],['large','Large']])}</div>
+   <div class="setrow"><div class="lbl"><b>All dice unlocked</b><span>Build vs-computer armies from all 400 dice</span></div>${segHTML('sandbox',[[false,'Off'],[true,'On']])}</div>
+   <div class="setrow"><div class="lbl"><b>Reset collection</b><span>Remove all dice and coins and start over</span></div><span id="resetBox"><button class="btn small" id="resetBtn">Reset</button></span></div>
+  </div>`);
+  $('#ovBox').onclick=e=>{
+    const b=e.target.closest('.seg[data-set] button');
+    if(b){const key=b.parentElement.dataset.set;let v=b.dataset.v;if(v==='true')v=true;else if(v==='false')v=false;else if(/^\d+$/.test(v))v=+v;S[key]=v;saveS();applySettings();$$('button',b.parentElement).forEach(x=>x.classList.toggle('on',x===b));if(key==='sound'&&v)Snd.click();
+      if(screen==='build'&&BU)renderBuilder();if(screen==='howto')renderHowto();if(screen==='battle'&&B)paint();return}
+    if(e.target.id==='resetBtn'){$('#resetBox').innerHTML='<button class="btn small" id="resetYes" style="border-color:var(--hp);color:var(--hp)">Yes, reset</button> <button class="btn small" id="resetNo">Keep</button>'}
+    if(e.target.id==='resetNo'){$('#resetBox').innerHTML='<button class="btn small" id="resetBtn">Reset</button>'}
+    if(e.target.id==='resetYes'){P={coins:0,col:{},started:false,tutDone:false,saved:[]};saveP();store.set('lastArmy',null);applySettings();closeModal();toast('Collection reset.');if(screen==='collection')renderCollection();if(screen==='shop')renderShop()}
+  };
+}
+$('#openSettings').onclick=openSettings;
+
+// ================= Boot =================
+applySettings();
+renderMenu();
+if(window.claude&&window.claude.hot&&window.claude.hot.snapshot){try{window.claude.hot.snapshot(()=>({}))}catch(e){}}
+</script>
+
+</body>
+</html>
