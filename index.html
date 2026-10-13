@@ -92,8 +92,80 @@ header.top{display:flex;align-items:center;gap:10px 16px;padding-block:12px;flex
 .meter{height:8px;border-radius:99px;background:var(--well);overflow:hidden;margin-top:4px}
 .meter i{display:block;height:100%;background:var(--accent);transition:width .25s}
 .meter.over i{background:var(--hp)}
-.build-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.25fr);gap:14px;align-items:start}
-.roster{padding:14px;display:grid;gap:12px;position:sticky;top:calc(env(safe-area-inset-top,0px) + 8px)}
+.build-grid{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(320px,1fr);gap:14px;align-items:start}
+.roster{padding:14px;display:grid;gap:12px;position:sticky;top:calc(env(safe-area-inset-top,0px) + 10px);max-height:calc(100vh - 20px - env(safe-area-inset-top,0px));overflow:auto;box-shadow:var(--shadow)}
+.roster-actions{display:flex;gap:8px;position:sticky;bottom:-14px;background:var(--panel);padding-block:10px 4px;margin-bottom:-4px;border-top:1px solid var(--line)}
+.roster-actions .btn{flex:1}
+.roster-actions .btn.primary{flex:2;font-size:1rem;padding:.7rem .9rem}
+.minibar{display:none}
+.ibtn{display:inline-grid;place-items:center;width:1.35rem;height:1.35rem;border-radius:50%;border:1px solid var(--line);background:var(--panel);color:var(--muted);font:700 .72rem/1 Georgia,serif;font-style:italic;vertical-align:1px;margin-left:4px;padding:0;flex:none}
+.ibtn:hover{border-color:var(--accent);color:var(--ink)}
+.tip{position:fixed;z-index:90;width:min(330px,calc(100vw - 24px));background:var(--panel);color:var(--ink);border:1px solid var(--line);border-radius:12px;box-shadow:0 14px 34px -12px rgba(0,0,0,.45);padding:12px 13px;pointer-events:none;font-size:.84rem;display:grid;gap:7px;line-height:1.4}
+.tip-head{display:flex;gap:10px;align-items:center}
+.tip-head .tile{width:46px;height:46px;flex:none}
+.tip-head b{font-size:.98rem}
+.tip-head .muted{font-size:.76rem}
+.tip-stats{display:flex;gap:5px;flex-wrap:wrap;align-items:center}
+.tchip{font-size:.72rem;font-weight:700;padding:0 .4rem;border-radius:5px;background:var(--well);line-height:1.6;font-variant-numeric:tabular-nums}
+.tip-fluff{font-style:italic;color:var(--muted);border-left:3px solid var(--line);padding-left:8px}
+.tip-own,.tip-status{font-size:.76rem;font-weight:700;color:var(--accent)}
+.dpage{display:grid;grid-template-columns:140px minmax(0,1fr);gap:18px}
+.dpage-art{display:flex;flex-direction:column;align-items:center;gap:6px;text-align:center}
+.dpage-art .tile{width:120px;height:120px}
+.ownline{font-weight:700;font-size:.86rem}
+.dpage-body{display:grid;gap:12px;min-width:0}
+.dpage-body section{display:grid;gap:6px}
+.dpage-body h3{font-size:.95rem}
+.dpage-body p{max-width:62ch}
+blockquote.fluff{margin:0;padding:.6rem .9rem;border-left:4px solid var(--accent);background:var(--well);border-radius:0 10px 10px 0;font-style:italic}
+.recgrid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px}
+.recgrid div{background:var(--well);border-radius:9px;padding:6px;text-align:center;display:grid}
+.recgrid b{font-family:var(--display);font-size:1.2rem;font-variant-numeric:tabular-nums}
+.recgrid span{font-size:.72rem;color:var(--muted)}
+.dpage-foot{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.realm-sec{display:grid;gap:10px;margin-bottom:22px}
+.realm-head{display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding-bottom:8px;border-bottom:2px solid var(--rc)}
+.realm-head h3{font-size:1.1rem}
+.sw.big{width:22px;height:22px;border-radius:6px}
+.armies{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:10px}
+.army{padding:14px;display:grid;gap:10px}
+.army-head{display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;align-items:baseline}
+.army-tiles{display:flex;gap:6px;flex-wrap:wrap}
+.atile{position:relative;cursor:pointer}
+.atile .tile{width:40px;height:40px}
+.atile small{position:absolute;right:-3px;bottom:-3px;background:var(--ink);color:var(--panel);font-size:.6rem;font-weight:800;border-radius:4px;padding:0 .25rem}
+.army-btns{display:flex;gap:6px;flex-wrap:wrap}
+.realms{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px}
+.realm{padding:16px;display:grid;gap:8px;border-top:4px solid var(--rc)}
+.realm-top{display:flex;gap:12px;align-items:center}
+.realm-top .tile{width:56px;height:56px;flex:none}
+.market{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px}
+.mcard{position:relative;display:flex;flex-direction:column;align-items:center;gap:5px;padding:12px 8px;border:1px solid var(--line);border-radius:12px;background:var(--panel);text-align:center}
+.mcard .tile{width:56px;height:56px}
+.mcard b{font-size:.84rem;line-height:1.15}
+.mcard .ibtn{position:absolute;top:8px;right:8px}
+.mcard.sold{opacity:.6}
+.soldtag{font-size:.75rem;font-weight:800;color:var(--accent)}
+.ptabs{display:inline-flex}
+#spot{position:fixed;z-index:58;border-radius:14px;pointer-events:none;box-shadow:0 0 0 9999px rgba(12,10,16,.55);outline:3px solid var(--accent);outline-offset:2px;transition:all .25s ease}
+#spot::after{content:"";position:absolute;inset:-8px;border-radius:18px;border:3px solid var(--accent);animation:spotPulse 1.4s infinite}
+@keyframes spotPulse{0%{opacity:.9;transform:scale(1)}100%{opacity:0;transform:scale(1.06)}}
+@media (max-width:900px){
+  .build-grid{grid-template-columns:minmax(0,1fr)}
+  .roster{position:static;max-height:none;order:-1;box-shadow:none}
+  .roster-actions{position:static;margin:0;border-top:0;padding:0}
+  #scr-build{padding-bottom:84px}
+  .minibar{display:flex;align-items:center;gap:10px;position:fixed;left:0;right:0;bottom:0;z-index:40;background:var(--panel);border-top:1px solid var(--line);padding:10px 16px calc(10px + env(safe-area-inset-bottom,0px));box-shadow:0 -8px 20px -14px rgba(0,0,0,.5)}
+  .minibar[hidden]{display:none}
+  .mini-tiles{display:flex;gap:3px;cursor:pointer}
+  .mini-tiles span{width:26px;height:26px;display:block}
+  .mini-tiles span.empty{border:1.5px dashed var(--line);border-radius:6px}
+  .mini-tiles .tile{width:26px;height:26px}
+  .mini-cost{font-variant-numeric:tabular-nums;font-size:.86rem;margin-left:auto}
+  .dpage{grid-template-columns:minmax(0,1fr)}
+  .dpage-art{flex-direction:row;flex-wrap:wrap;justify-content:flex-start;text-align:left}
+  .dpage-art .tile{width:72px;height:72px}
+}
 .roster .tools{display:flex;flex-wrap:wrap;gap:6px}
 .rank-label{font-size:.72rem;text-transform:uppercase;letter-spacing:.12em;color:var(--muted);font-weight:700;display:flex;justify-content:space-between}
 .slots{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
@@ -107,7 +179,7 @@ header.top{display:flex;align-items:center;gap:10px 16px;padding-block:12px;flex
 .filters{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
 .cchip{display:inline-flex;align-items:center;gap:5px;border:1px solid var(--line);background:var(--panel);border-radius:999px;padding:.25rem .6rem;font-size:.82rem;font-weight:600}
 .cchip.on{border-color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent)}
-.dlist{display:grid;gap:6px;max-height:70vh;overflow:auto;padding-right:2px}
+.dlist{display:grid;gap:6px}
 .drow{display:grid;grid-template-columns:44px minmax(0,1fr) auto;gap:10px;align-items:center;padding:8px;border:1px solid var(--line);border-radius:10px;background:var(--page)}
 .drow .tile{width:44px;height:44px}
 .drow .nm{font-weight:700;font-size:.92rem;line-height:1.2}
@@ -247,6 +319,12 @@ header.top{display:flex;align-items:center;gap:10px 16px;padding-block:12px;flex
 .rcard .front{transform:rotateY(180deg);background:var(--page)}
 .rcard .front .tile{width:60px;height:60px}
 .rcard .new{font-size:.66rem;font-weight:900;letter-spacing:.1em;color:var(--on-accent);background:var(--accent);border-radius:5px;padding:0 .35rem}
+.spoils{display:grid;gap:8px;padding:12px;border-radius:12px;background:var(--well)}
+.spoil-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:8px}
+.spoil{display:flex;flex-direction:column;align-items:center;gap:4px;padding:10px 6px;border:1px solid var(--line);border-radius:10px;background:var(--panel);text-align:center}
+.spoil:hover{border-color:var(--accent)}
+.spoil .tile{width:50px;height:50px}
+.spoil b{font-size:.82rem;line-height:1.15}
 .result-table{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums;font-size:.9rem}
 .result-table th,.result-table td{padding:6px 8px;border-bottom:1px solid var(--line);text-align:right}
 .result-table th:first-child,.result-table td:first-child{text-align:left}
@@ -269,12 +347,16 @@ header.top{display:flex;align-items:center;gap:10px 16px;padding-block:12px;flex
 .demo-dice{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
 
 /* Coach */
-.coach{position:fixed;z-index:60;width:min(340px,calc(100vw - 32px));background:var(--ink);color:var(--panel);border-radius:14px;padding:14px 16px;box-shadow:0 12px 30px -10px rgba(0,0,0,.6);display:grid;gap:10px;font-size:.92rem}
-.coach .cstep{font-size:.7rem;letter-spacing:.12em;text-transform:uppercase;opacity:.7;font-weight:700}
+.coach{position:fixed;z-index:60;width:min(400px,calc(100vw - 24px));background:var(--panel);color:var(--ink);border:2px solid var(--accent);border-radius:16px;padding:16px 18px;box-shadow:0 18px 40px -10px rgba(0,0,0,.6);display:grid;gap:10px;font-size:1.02rem;line-height:1.5}
+.coach .ctitle{font-family:var(--display);font-size:1.15rem;font-weight:900}
+.coach .cstep{display:flex;gap:5px;align-items:center;font-size:.72rem;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);font-weight:700}
+.coach .cdot{width:8px;height:8px;border-radius:50%;background:var(--line)}
+.coach .cdot.on{background:var(--accent)}
+.coach .cwait{font-size:.82rem;font-weight:700;color:var(--accent)}
 .coach .cbtns{display:flex;gap:6px;justify-content:flex-end;flex-wrap:wrap}
-.coach .cbtns button{border:1px solid color-mix(in srgb,var(--panel) 40%,transparent);background:transparent;color:var(--panel);border-radius:8px;padding:.35rem .7rem;font-weight:600;font-size:.85rem}
+.coach .cbtns button{border:1px solid var(--line);background:var(--panel);color:var(--ink);border-radius:9px;padding:.45rem .8rem;font-weight:700;font-size:.9rem}
 .coach .cbtns button.go{background:var(--accent);border-color:var(--accent);color:var(--on-accent)}
-.coach-focus{outline:3px solid var(--accent)!important;outline-offset:4px;border-radius:12px}
+.coach-focus{scroll-margin:90px}
 
 .toast{position:fixed;left:50%;bottom:calc(16px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:var(--panel);padding:.6rem 1rem;border-radius:10px;z-index:70;font-weight:600;box-shadow:var(--shadow);max-width:calc(100vw - 32px)}
 
@@ -309,11 +391,11 @@ html[data-motion="reduce"] *{animation:none!important;transition:none!important}
     </button>
     <nav aria-label="Main">
       <button class="btn small ghost" data-go="menu">Play</button>
-      <button class="btn small ghost" data-go="collection">Collection</button>
+      <button class="btn small ghost" data-go="collection">Portfolio</button>
       <button class="btn small ghost" data-go="shop">Shop</button>
       <button class="btn small ghost" data-go="howto">How to play</button>
       <button class="btn small ghost" id="openSettings">Settings</button>
-      <span class="coins" title="Coins"><i class="coin"></i><span id="coinCount">0</span></span>
+      <span class="coins" title="Your gold"><i class="coin"></i><span id="coinCount">0</span> gold</span>
     </nav>
   </header>
 
@@ -330,12 +412,12 @@ html[data-motion="reduce"] *{animation:none!important;transition:none!important}
     <div class="modes">
       <div class="mode panel">
         <h3>Battle the computer</h3>
-        <p>Build an army from the dice you own. Winning pays coins for new packs.</p>
+        <p>Build an army from your portfolio. Winning pays gold and lets you claim a die from the beaten army.</p>
         <div class="ctl"><label for="cpuDiff">Difficulty <select id="cpuDiff"><option value="easy">Easy</option><option value="normal" selected>Normal</option><option value="hard">Hard</option></select></label><button class="btn primary" data-play="cpu">Build army</button></div>
       </div>
       <div class="mode panel">
         <h3>Two players</h3>
-        <p>Share one screen and take turns. Both players can use all 400 dice.</p>
+        <p>Share one screen and take turns. Both players build from your portfolio.</p>
         <div class="ctl"><button class="btn primary" data-play="pvp">Build armies</button></div>
       </div>
       <div class="mode panel">
@@ -345,7 +427,7 @@ html[data-motion="reduce"] *{animation:none!important;transition:none!important}
       </div>
       <div class="mode panel">
         <h3>Walkthrough</h3>
-        <p>A short guided battle that teaches ranks, dice, colours and abilities. Pays 100 coins the first time.</p>
+        <p>A short guided battle that teaches ranks, dice, colours and abilities. Pays 100 gold the first time.</p>
         <div class="ctl"><button class="btn primary" data-play="tutorial">Start walkthrough</button></div>
       </div>
     </div>
@@ -359,22 +441,10 @@ html[data-motion="reduce"] *{animation:none!important;transition:none!important}
   <!-- BUILDER -->
   <section id="scr-build" class="screen" hidden>
     <div class="build-head">
-      <div><p class="eyebrow" id="bSide">Player 1</p><h2 id="bTitle">Muster your army</h2></div>
-      <div class="budget"><div><span class="num" id="bCost">0</span> <span class="muted">/ <span id="bBudget">30</span> points · <span id="bCount">0</span>/6 dice</span></div><div class="meter" id="bMeter"><i></i></div></div>
+      <div><p class="eyebrow" id="bSide">Player 1</p><h2 id="bTitle">Muster your army</h2><p class="muted" id="bHelp" style="margin-top:4px"></p></div>
+      <button class="btn small" id="bTour">Show me how</button>
     </div>
     <div class="build-grid">
-      <div class="roster panel">
-        <div class="tools">
-          <label for="presetSel" class="muted" style="font-size:.82rem;align-self:center">Load</label>
-          <select id="presetSel"></select>
-          <button class="btn small" id="bRandom">Random</button>
-          <button class="btn small" id="bClear">Clear</button>
-          <button class="btn small" id="bSave">Save army</button>
-        </div>
-        <div><div class="rank-label"><span>Front rank</span><span>fights hand to hand</span></div><div class="slots" id="slotsFront"></div></div>
-        <div><div class="rank-label"><span>Back rank</span><span>ranged, casters, reserves</span></div><div class="slots" id="slotsBack"></div></div>
-        <p class="muted" style="font-size:.8rem">Melee dice in the back rank wait as reserves. When your front rank falls, the back rank steps up.</p>
-      </div>
       <div class="recruit panel">
         <div class="filters" id="bColors"></div>
         <div class="filters">
@@ -382,15 +452,25 @@ html[data-motion="reduce"] *{animation:none!important;transition:none!important}
           <select id="bSort" aria-label="Sort"><option value="cost">Sort by cost</option><option value="name">Sort by name</option><option value="hp">Sort by health</option></select>
           <input type="search" id="bSearch" placeholder="Search dice" aria-label="Search dice" style="flex:1 1 140px">
         </div>
-        <p class="muted" style="font-size:.8rem" id="bPoolNote"></p>
+        <p class="muted" style="font-size:.82rem" id="bPoolNote"></p>
         <div class="dlist" id="bList"></div>
       </div>
+      <aside class="roster panel" id="rosterPanel" aria-label="Your army">
+        <div class="budget"><div style="display:flex;justify-content:space-between;align-items:baseline;gap:8px"><span><span class="num" id="bCost">0</span> <span class="muted">/ <span id="bBudget">30</span> points</span></span><span class="muted"><b id="bCount">0</b>/6 dice</span></div><div class="meter" id="bMeter"><i></i></div></div>
+        <div class="tools">
+          <select id="presetSel" aria-label="Load an army" style="flex:1 1 150px"></select>
+          <button class="btn small" id="bRandom">Random</button>
+          <button class="btn small" id="bClear">Clear</button>
+          <button class="btn small" id="bSave">Save</button>
+        </div>
+        <div><div class="rank-label"><span>Front rank</span><span>fights hand to hand</span></div><div class="slots" id="slotsFront"></div></div>
+        <div><div class="rank-label"><span>Back rank</span><span>ranged, casters, reserves</span></div><div class="slots" id="slotsBack"></div></div>
+        <p class="muted" style="font-size:.8rem">Melee dice in the back rank wait as reserves. When your front rank falls, the back rank steps up.</p>
+        <span class="warn" id="bWarn"></span>
+        <div class="roster-actions"><button class="btn" id="bBack">Back</button><button class="btn primary" id="bNext">Next</button></div>
+      </aside>
     </div>
-    <div class="build-foot">
-      <button class="btn" id="bBack">Back</button>
-      <span class="warn" id="bWarn"></span>
-      <button class="btn primary" id="bNext">Next</button>
-    </div>
+    <div class="minibar" id="bMini"></div>
   </section>
 
   <!-- BATTLE -->
@@ -418,35 +498,50 @@ html[data-motion="reduce"] *{animation:none!important;transition:none!important}
     </div>
   </section>
 
-  <!-- COLLECTION -->
+  <!-- PORTFOLIO -->
   <section id="scr-collection" class="screen" hidden>
     <div class="col-head">
-      <div><p class="eyebrow">Your dice</p><h2>Collection</h2><p class="muted" id="colSummary"></p></div>
-      <div class="filters">
+      <div><p class="eyebrow">Your collection</p><h2>Dice portfolio</h2><p class="muted" id="colSummary"></p></div>
+      <div class="seg ptabs" id="pTabs"><button data-pt="album" class="on">Dice album</button><button data-pt="armies">Armies</button><button data-pt="realms">Realms guide</button></div>
+    </div>
+    <div id="pAlbum">
+      <div class="filters" id="cColors" style="margin-bottom:8px"></div>
+      <div class="filters" style="margin-bottom:14px">
         <select id="cType" aria-label="Type"><option value="all">All types</option><option value="hero">Heroes</option><option value="mon">Monsters</option><option value="common">Commons</option></select>
         <select id="cOwned" aria-label="Show"><option value="all">Owned and missing</option><option value="owned">Owned only</option><option value="missing">Missing only</option></select>
+        <span class="muted" style="font-size:.82rem">Click any die for its guide page: what it does, its history and its battle record.</span>
       </div>
+      <div id="cGrid"></div>
     </div>
-    <div class="colbars" id="colBars"></div>
-    <div class="cgrid" id="cGrid"></div>
+    <div id="pArmies" hidden></div>
+    <div id="pRealms" hidden></div>
   </section>
 
   <!-- SHOP -->
   <section id="scr-shop" class="screen" hidden>
-    <div class="col-head"><div><p class="eyebrow">Spend coins</p><h2>Dice shop</h2><p class="muted">Win battles against the computer to earn coins: 40 on Easy, 70 on Normal, 110 on Hard, and 15 for a loss.</p></div></div>
+    <div class="col-head"><div><p class="eyebrow">Spend gold</p><h2>Dice shop</h2><p class="muted">Earn gold by beating the computer: 40 on Easy, 70 on Normal, 110 on Hard, 15 for a loss. A win also lets you claim one die from the army you beat.</p></div></div>
+    <h3 style="margin:4px 0 10px">Market · today's dice</h3>
+    <div class="market" id="market"></div>
+    <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:10px 0 22px"><button class="btn small" id="refreshMarket">New stock · 20 gold</button><span class="muted" style="font-size:.84rem">The stock also changes after every battle. Commons cost 30, monsters 90, heroes 160 and dragons 450.</span></div>
+    <h3 style="margin-bottom:10px">Packs</h3>
     <div class="shop">
       <div class="pack panel">
         <div class="packart" id="artMixed"></div>
-        <h3>Mixed pack · 100 coins</h3>
-        <ul><li>5 dice from any colour</li><li>3 commons, 1 hero or monster</li><li>1 wild slot: 1 in 10 is a dragon</li></ul>
+        <h3>Mixed pack · 100 gold</h3>
+        <ul><li>5 dice from any realm</li><li>3 commons, 1 hero or monster</li><li>1 wild slot: 1 in 10 is a dragon</li></ul>
         <button class="btn primary" id="buyMixed">Open mixed pack</button>
       </div>
       <div class="pack panel">
         <div class="packart" id="artColor"></div>
-        <h3>Colour pack · 150 coins</h3>
-        <ul><li>5 dice, all one colour</li><li>2 commons, 2 heroes or monsters</li><li>1 wild slot: 1 in 8 is a dragon</li></ul>
+        <h3>Colour pack · 150 gold</h3>
+        <ul><li>5 dice, all from one realm</li><li>2 commons, 2 heroes or monsters</li><li>1 wild slot: 1 in 8 is a dragon</li></ul>
         <div class="colorpick" id="packColors"></div>
         <button class="btn primary" id="buyColor">Open colour pack</button>
+      </div>
+      <div class="pack panel">
+        <h3>Sell spare dice</h3>
+        <p class="muted" id="spareInfo"></p>
+        <div id="spareBox"></div>
       </div>
     </div>
   </section>
@@ -458,7 +553,9 @@ html[data-motion="reduce"] *{animation:none!important;transition:none!important}
 </div>
 
 <div class="overlay" id="ov" hidden><div class="modal" id="ovBox" role="dialog" aria-modal="true"></div></div>
+<div id="spot" hidden></div>
 <div class="coach" id="coach" hidden role="dialog" aria-live="polite"></div>
+<div class="tip" id="tip" hidden role="tooltip"></div>
 <div class="toast" id="toast" hidden></div>
 
 <script>
@@ -647,7 +744,8 @@ function setDie(el,v){el.dataset.v=v;[...el.children].forEach((p,k)=>p.classList
 // ================= Settings & profile =================
 const DEF_SET={theme:'system',budget:30,dice:'normal',ai:'normal',sound:true,motion:'system',text:'normal',hints:true,sandbox:false};
 let S=Object.assign({},DEF_SET,store.get('settings',{}));
-let P=Object.assign({coins:0,col:{},started:false,tutDone:false,saved:[]},store.get('profile',{}));
+const NEW_P=()=>({coins:0,col:{},started:false,tutDone:false,saved:[],stats:{},record:{w:0,l:0,d:0},armyRec:{},market:null,tourBuild:false});
+let P=Object.assign(NEW_P(),store.get('profile',{}));
 const saveS=()=>store.set('settings',S), saveP=()=>store.set('profile',P);
 function applySettings(){
   const r=document.documentElement;
@@ -655,6 +753,7 @@ function applySettings(){
   r.dataset.text=S.text;
   if(S.motion==='system') r.removeAttribute('data-motion'); else r.dataset.motion=S.motion;
   $('#coinCount').textContent=P.coins;
+  delete S.sandbox;
 }
 const reduced=()=>S.motion==='reduce'||(S.motion==='system'&&matchMedia('(prefers-reduced-motion: reduce)').matches);
 
@@ -682,6 +781,8 @@ function go(name){
   if(name==='howto') renderHowto();
   if(name==='menu') renderMenu();
   if(name!=='battle') coach.stop();
+  hideTip();
+  $('#bMini').hidden=name!=='build';
   window.scrollTo(0,0);
 }
 document.addEventListener('click',e=>{
@@ -690,14 +791,74 @@ document.addEventListener('click',e=>{
 });
 
 function toast(msg){const t=$('#toast');t.textContent=msg;t.hidden=false;clearTimeout(toast.t);toast.t=setTimeout(()=>t.hidden=true,2400)}
-function openModal(html,wide){$('#ovBox').onclick=null;$('#ovBox').className='modal'+(wide?' wide':'');$('#ovBox').innerHTML=html;$('#ov').hidden=false;const f=$('#ovBox button, #ovBox select');if(f)f.focus()}
+function openModal(html,wide){hideTip();$('#ovBox').onclick=null;$('#ovBox').className='modal'+(wide?' wide':'');$('#ovBox').innerHTML=html;$('#ov').hidden=false;$$('#ovBox [data-close]').forEach(b=>b.onclick=closeModal);const f=$('#ovBox button, #ovBox select');if(f)f.focus()}
 function closeModal(){$('#ov').hidden=true;$('#ovBox').innerHTML=''}
 $('#ov').addEventListener('click',e=>{if(e.target.id==='ov'&&!$('#ov').dataset.lock)closeModal()});
 
 // ================= Menu =================
 function renderMenu(){
-  $('#heroDice').innerHTML=['red-m-9','blue-h-0','green-m-1','yellow-h-1','brown-m-6','white-h-0','black-c-4','purple-m-9'].map(id=>tileSVG(DIE[id])).join('');
-  $('#wheelRow').innerHTML=COLORS.map(c=>`<span class="beat" title="${esc(c.pn)}: ${esc(c.pt)}">${tileSVG(DIE[c.id+'-c-0'])}<b>${c.name}</b> beats <span class="sw" style="background:${COL[c.beats].hex}"></span>${COL[c.beats].name}</span>`).join('');
+  $('#heroDice').innerHTML=['red-m-9','blue-h-0','green-m-1','yellow-h-1','brown-m-6','white-h-0','black-c-4','purple-m-9'].map(id=>tileSVG(DIE[id]).replace('<svg ',`<svg data-tip="${id}" `)).join('');
+  $('#wheelRow').innerHTML=COLORS.map(c=>`<span class="beat" data-tip="${c.id}-c-0">${tileSVG(DIE[c.id+'-c-0'])}<b>${c.name}</b> beats <span class="sw" style="background:${COL[c.beats].hex}"></span>${COL[c.beats].name}</span>`).join('');
+}
+
+// ================= Lore =================
+const WORLD_INTRO='Long ago the Great Die fell out of the sky, struck the top of the world and burst into eight colours. Each colour landed in a different realm, and each realm learned to carve dice from whatever it had: obsidian, sea-glass, amber, granite, storm-glass, marble, jet and crystal. Nobody remembers who threw the Great Die. Everybody wants it back.';
+const REALM={
+ red:{name:'the Ember Reach',city:'Cindermarch',history:'The Ember Reach is a land of forge-cities built on cooling lava. Its first dice were chipped from obsidian by smiths who believed a hot temper was a gift, and Red players still roll as if the dice owe them money.',twist:'born in the lava vents of the Ember Reach and still smells faintly of smoke'},
+ blue:{name:'the Tidewater Isles',city:'Saltmere',history:'The Tidewater Isles are a scatter of islands where every argument is settled at sea. Blue dice are cut from sea-glass, and islanders swear you can hear the tide if you hold one to your ear.',twist:'dragged up from the deep trenches off the Tidewater Isles'},
+ green:{name:'the Wildwood',city:'the Elder Grove',history:'The Wildwood is an ancient forest that grows back whatever you take from it. Green dice are not carved but grown: seeds pressed into amber and left to harden for a hundred summers.',twist:'grown wild in the tangled heart of the Wildwood'},
+ brown:{name:'the Stonehold Deeps',city:'Anvilhall',history:'The Stonehold Deeps are mountain halls dug so far down that the miners forgot which way was up. Brown dice are the heaviest in the world and land with a deeply satisfying thunk.',twist:'dug out of the lowest tunnels of the Stonehold Deeps'},
+ yellow:{name:'the Storm Steppes',city:'Thunderspire',history:'The Storm Steppes are open grassland where lightning strikes twice before breakfast. Yellow dice are fused from sand where the bolts land, and they still crackle on dry days.',twist:'charged by the lightning that walks the Storm Steppes'},
+ white:{name:'the Dawn Cloisters',city:'Lumen Abbey',history:'The Dawn Cloisters are quiet abbeys on the eastern cliffs that catch the first light of every day. Their dice are carved from pale marble and blessed before each match, which the other realms find unbearable.',twist:'pale as the marble of the Dawn Cloisters and twice as stubborn'},
+ black:{name:'the Shadowmarch',city:'Duskhollow',history:'The Shadowmarch is a twilight country of long shadows and longer memories. Black dice are cut from jet and never quite show the number you expect until they stop rolling.',twist:'raised in the long dusk of the Shadowmarch'},
+ purple:{name:'the Arcane Spires',city:'Prismgate',history:'The Arcane Spires are towers of glass where wizards argue about probability for a living. Purple dice are grown from crystal and are rumoured to remember every roll they have ever made.',twist:'warped by the spellwork that leaks out of the Arcane Spires'}
+};
+const RACE_LORE=['Humans turn up everywhere and argue with everyone, and their luck has a habit of arriving at the last possible moment.','Dwarves measure time in shifts and loyalty in decades, and nothing short of a mountain has ever moved a dwarf off a shield.','Elves remember the old wars personally, which makes them precise and slightly tiring to talk to.','Orcs fight best when the odds look worst, and are offended by anyone who retreats before lunch.','Halflings are small, quick and very hard to hit, mostly because they were never where you aimed.','Golemkin were built for a war nobody remembers. They kept the armour and gave up on the war.'];
+const CLASS_LINE=['trained for years to hold the line','learned the trade in back alleys and kept the habits','studied magic in the Arcane Spires on borrowed books','took vows at a roadside shrine and has kept every one','can track a fox across bare rock','swore an oath to guard those who cannot guard themselves'];
+const DEEDS=['once held the gates of {city} alone for a night and a day','is still owed a reward for driving off the {foe} that troubled {city}','won a famous wager against a {foe} and has never stopped mentioning it','keeps a lucky die that has never once rolled a one','led the defence of {city} when the last bell rang','was banished from {city} twice and invited back three times','trained half the new recruits in {city} and frightened the other half','tracked a {foe} for forty days and came back with one tooth and a very long story','keeps the dice of every opponent they have beaten, in a very large bag','is the subject of four songs, three of them unflattering','turned down a crown because it would not fit over the helmet','swears the {foe} started it'];
+const QUOTES=[
+ ['Stand behind me. No, further.','The line holds because I do.','I don\'t retreat. I advance in another direction.','Roll high or go home.'],
+ ['You never saw me. Remember that.','Every lock is just a question.','I like my fights short and my exits close.','Trust me. Or don\'t. It\'s faster either way.'],
+ ['Probability is merely a suggestion.','Stand back. Further than that.','I have read about this.','Fire solves most problems. Most.'],
+ ['Hold still, this will sting.','Faith and a good bandage.','Nobody falls on my watch.','Pray, then duck.'],
+ ['I\'ve had it in my sights since breakfast.','Wind from the west. Perfect.','Quiet. It\'s close.','One arrow is enough. Two to be safe.'],
+ ['Behind my shield, you are safe.','I swore an oath. Several, actually.','Light keeps its promises.','Stand firm. Stand together.']
+];
+const KIND_LORE=[
+ ['Goblins travel in loud gangs and steal anything not nailed down, then the nails.',['"Shiny!"','Goblin rule one: grab it. Goblin rule two: there is no rule two.']],
+ ['Skeletons are soldiers who forgot to stop. Knock one down and it patiently puts itself back together.',['A rattle in the dark, then another.','It has all the time in the world. Literally.']],
+ ['Wolves, hounds and hyenas hunt in packs, and each one fights harder when it can hear the others.',['A howl, answered from three sides.','Never turn your back on the pack.']],
+ ['Trolls are enormous, hungry and very hard to finish. Cut one and the wound is closing before you can sheathe your sword.',['"Troll not like fire. Troll like snacks."','It heals faster than you can worry.']],
+ ['Spiders wait in the corners of every realm, patient as poison.',['The web was there before you were.','One bite. Then the waiting.']],
+ ['Spirits are what is left when a grudge outlives its owner. They feed on the strength of the living.',['A cold breath on the back of your neck.','It wants what you have. All of it.']],
+ ['Ogres solve every problem by hitting it, and they have very few problems left.',['"SMASH first. Think later. Maybe."','The ground shakes long before you see it.']],
+ ['Oozes are hungry puddles that swallow whatever wanders in, armour and all.',['It ate the boots. Then the boots it was wearing.','Squelch.']],
+ ['Imps are small, spiteful and full of curses borrowed from bigger demons.',['"Your sword arm feels heavy, doesn\'t it?"','Small horns, big grudge.']],
+ ['Golems are guardians built from the realm\'s own stone, glass or metal. They stand at the front and refuse to move.',['It was told to guard. It never stopped.','You go through it, or not at all.']],
+ ['Gazers are floating eyes, or lizards made mostly of eye, whose stare can freeze a fighter mid-swing.',['Don\'t look. Seriously, don\'t look.','The stare lasts longer than the scream.']],
+ ['Dragons are the oldest things in the realms and the reason so many old maps have scorch marks.',['The hoard remembers every coin. So does the dragon.','When it breathes in, run.']]
+];
+const JOB_LORE=['fights for prize money and pride in the pits and alleys of {city}','keeps watch on the walls of {city} and knows every face that passes','learned to shoot by keeping birds off the harvest outside {city}','runs messages, and occasionally mischief, across {realm}','is halfway through a long apprenticeship and very keen to show off'];
+const COMMON_FLUFF=['"First real fight? Course not."','"I\'m only here for the pay."','"Mum said I\'d never amount to anything. Look at me now."','"Point me at it."','"Is it lunchtime yet?"','"I\'ve got a good feeling about this one."','"They don\'t pay me enough for this."','"Watch and learn."','"I trained for this. Twice."','"Who\'s the big one?"','"Just one more round."','"I\'m small, but I bite."'];
+function hashStr(s){let h=2166136261;for(let i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619)}return h>>>0}
+const capFirst=s=>s.charAt(0).toUpperCase()+s.slice(1);
+function lore(d){
+  const R=REALM[d.color], h=hashStr(d.id), foeColor=COL[d.color].beats;
+  const foeList=MONSTERS[foeColor].filter(m=>m[0]!==11);
+  const foe=foeList[h%foeList.length][1];
+  const fill=s=>s.replace(/\{city\}/g,R.city).replace(/\{realm\}/g,R.name).replace(/\{foe\}/g,foe);
+  if(d.type==='hero'){
+    const first=d.name.replace(/^(The|Sir|Captain|Brother|Mother|Grandmother|High Priest|Saint|Archmage|Oracle|Keeper|Abbot|Thane)\s+/,'').split(' ')[0];
+    const nm=d.name.startsWith('The ')?d.name:first;
+    return {history:`${d.name} is ${/^[AEIOU]/.test(RAC[d.race].name)?'an':'a'} ${RAC[d.race].name} ${CLS[d.cls].name} of ${R.name}. ${RACE_LORE[d.race]} ${capFirst(nm)} ${CLASS_LINE[d.cls]}, and ${fill(DEEDS[h%DEEDS.length])}.`,fluff:`“${QUOTES[d.cls][(h>>>4)%4]}”`};
+  }
+  if(d.type==='mon'){
+    const K=KIND_LORE[d.arch];
+    const hist=d.arch===11?`${K[0]} Only one ${d.name} has ever been seen, and people in ${R.name} still tell stories about the day it rose. It was ${R.twist}.`:`${K[0]} The ${d.name} was ${R.twist}.`;
+    return {history:hist,fluff:K[1][(h>>>3)%2]};
+  }
+  const job=JOBN[d.color][d.job];
+  return {history:`Every town in ${R.name} has a ${job}. This one ${fill(JOB_LORE[d.job])}. ${RACE_LORE[d.race]}`,fluff:COMMON_FLUFF[h%COMMON_FLUFF.length]};
 }
 
 // ================= Dice info =================
@@ -709,47 +870,160 @@ function abilityLine(d){
   return out;
 }
 function statLine(d){return `HP ${d.hp} · ATK ${d.atk} · DEF ${d.def} · ${d.ranged?'Ranged':'Melee'}`}
+const RAR_PRICE={common:30,rare:90,epic:160,legendary:450}, RAR_SELL={common:8,rare:25,epic:45,legendary:120};
+function statChips(d,u){
+  return `<span class="tchip">HP ${u?`${u.hp}/${u.maxHp}`:d.hp}</span><span class="chip a" title="Attack dice">${IC_ATK}${u?atkCount(u,0):d.atk}</span><span class="chip d" title="Defence dice">${IC_DEF}${u?defCount(u):d.def}</span><span class="tchip">${d.ranged?'Ranged':'Melee'}</span><span class="tchip">${d.cost} pts</span>`;
+}
 function dieInfo(d,u){
   const c=COL[d.color];
-  const hp=u?`${u.hp}/${u.maxHp}`:d.hp;
   return `<div class="info"><div class="info-head">${tileSVG(d)}<div><b>${esc(d.name)}</b><div class="muted" style="font-size:.78rem">${c.name} ${typeName(d.type)} · ${esc(d.sub)} · <span class="rar ${d.rarity}">${d.rarity}</span></div></div></div>
-  <dl><dt>Health</dt><dd>${hp}</dd><dt>Dice</dt><dd>${u?atkCount(u,0):d.atk} attack, ${u?defCount(u):d.def} defence · ${d.ranged?'ranged: reaches any rank':'melee: front rank only'}</dd>
-  ${abilityLine(d).map(l=>`<dt></dt><dd style="color:var(--ink)">${l}</dd>`).join('')}
-  <dt>${c.name}</dt><dd><b style="color:var(--ink)">${c.pn}</b>: ${c.pt} Beats ${COL[c.beats].name}; weak to ${beatenBy(c.id).name}.</dd>
-  <dt>Cost</dt><dd>${d.cost} points</dd></dl></div>`;
+  <div class="tip-stats">${statChips(d,u)}</div>
+  ${abilityLine(d).map(l=>`<div>${l}</div>`).join('')}
+  <div><b>${c.pn}</b>: ${c.pt} <span class="muted">Beats ${COL[c.beats].name}, weak to ${beatenBy(c.id).name}.</span></div>
+  <button class="btn small" data-info="${d.id}">Read its guide page</button></div>`;
 }
-function showDie(id){
-  const d=DIE[id], own=P.col[id]||0;
-  openModal(`<div class="modal-head"><h3>${esc(d.name)}</h3><button class="btn small" onclick="closeModal()">Close</button></div>${dieInfo(d)}<p class="muted">You own ${own}.</p>`);
+function tipHTML(d,u){
+  const c=COL[d.color], L=lore(d);
+  let st='';
+  if(u){const s=[];if(u.guard)s.push('Guarded');if(u.poison)s.push('Poisoned');if(u.stun)s.push('Stuck');if(u.hex||u.hexNow)s.push('Hexed');if(u.chill)s.push('Chilled');if(u.ab)s.push(u.cd>0?`${ABIL[u.ab].n} ready in ${u.cd}`:`${ABIL[u.ab].n} ready`);if(s.length)st=`<div class="tip-status">${s.join(' · ')}</div>`}
+  return `<div class="tip-head">${tileSVG(d)}<div><b>${esc(d.name)}</b><div class="muted">${c.name} ${typeName(d.type)} · ${esc(d.sub)}</div><span class="rar ${d.rarity}">${d.rarity}</span></div></div>
+  <div class="tip-stats">${statChips(d,u)}</div>${st}
+  ${abilityLine(d).map(l=>`<div>${l}</div>`).join('')}
+  <div><b>${c.pn}</b>: ${c.pt} <span class="muted">Beats ${COL[c.beats].name}.</span></div>
+  <div class="tip-fluff">${esc(L.fluff)}</div>
+  ${u?'':`<div class="tip-own">${owned(d.id)?`In your portfolio: ${owned(d.id)}`:'Not in your portfolio yet'}</div>`}`;
 }
+// --- hover tooltips (mouse) and info buttons (touch)
+const tip={timer:0,cur:null,x:0,y:0};
+const canHover=()=>matchMedia('(hover: hover)').matches;
+document.addEventListener('mouseover',e=>{
+  if(!canHover())return;
+  const t=e.target.closest&&e.target.closest('[data-tip],.unit[data-uid]');
+  if(!t){hideTip();return}
+  if(tip.cur===t)return;
+  tip.cur=t;clearTimeout(tip.timer);$('#tip').hidden=true;
+  tip.timer=setTimeout(()=>showTip(t),260);
+});
+document.addEventListener('mousemove',e=>{tip.x=e.clientX;tip.y=e.clientY;if(!$('#tip').hidden)placeTip()},{passive:true});
+document.addEventListener('scroll',()=>hideTip(),{passive:true,capture:true});
+document.addEventListener('pointerdown',()=>hideTip(),true);
+function showTip(t){
+  let html='';
+  if(t.dataset.tip){const d=DIE[t.dataset.tip];if(!d)return;html=tipHTML(d)}
+  else if(t.dataset.uid&&B){const u=B.units.find(x=>x.uid===t.dataset.uid);if(!u)return;html=tipHTML(u.d,u)}
+  if(!html||!$('#ov').hidden)return;
+  const el=$('#tip');el.innerHTML=html;el.hidden=false;placeTip();
+}
+function hideTip(){clearTimeout(tip.timer);tip.cur=null;$('#tip').hidden=true}
+function placeTip(){
+  const el=$('#tip'),w=el.offsetWidth,h=el.offsetHeight;
+  let left=tip.x+18,top=tip.y+18;
+  if(left+w>innerWidth-8)left=tip.x-w-18;
+  if(left<8)left=8;
+  if(top+h>innerHeight-8)top=Math.max(8,tip.y-h-18);
+  el.style.left=left+'px';el.style.top=top+'px';
+}
+const infoBtn=d=>`<button class="ibtn" data-info="${d.id}" aria-label="About ${esc(d.name)}">i</button>`;
+document.addEventListener('click',e=>{const b=e.target.closest('[data-info]');if(!b)return;e.stopPropagation();hideTip();showDie(b.dataset.info)},true);
 
-// ================= Collection & packs =================
+// --- guide page for one die
+function showDie(id){
+  const d=DIE[id], own=owned(id), L=lore(d), c=COL[d.color], st=P.stats[id];
+  const rec=st?`<div class="recgrid"><div><b>${st[0]}</b><span>battles</span></div><div><b>${st[1]}</b><span>wins</span></div><div><b>${st[2]}</b><span>knockouts</span></div><div><b>${st[3]}</b><span>damage</span></div></div>`:'<p class="muted">Not fielded yet. Its record starts the first time it fights for you.</p>';
+  openModal(`<div class="modal-head"><div><p class="eyebrow">${c.name} · ${esc(REALM[d.color].name)}</p><h2>${esc(d.name)}</h2></div><button class="btn small" data-close>Close</button></div>
+  <div class="dpage">
+    <div class="dpage-art">${tileSVG(d)}<span class="rar ${d.rarity}">${d.rarity} ${typeName(d.type).toLowerCase()}</span><span class="muted" style="font-size:.82rem">${esc(d.sub)}</span><span class="ownline">${own?`You own ${own}`:'Not owned yet'}</span></div>
+    <div class="dpage-body">
+      <section><h3>What it does</h3><div class="tip-stats">${statChips(d)}</div>${abilityLine(d).map(l=>`<p>${l}</p>`).join('')}<p><b>${c.pn}</b> (${c.name} power): ${c.pt} Beats ${COL[c.beats].name}; weak to ${beatenBy(c.id).name}.</p></section>
+      <section><h3>History</h3><p>${esc(L.history)}</p></section>
+      <blockquote class="fluff">${esc(L.fluff)}</blockquote>
+      <section><h3>Service record</h3>${rec}</section>
+    </div>
+  </div>
+  <div class="dpage-foot">${own>1?`<button class="btn small" id="sellOne">Sell one spare for ${RAR_SELL[d.rarity]} gold</button>`:''}${!own?`<span class="muted">Get it from packs, the market, or by beating an army that fields it.</span>`:''}</div>`,true);
+  if($('#sellOne'))$('#sellOne').onclick=()=>{if(owned(id)<2)return;P.col[id]--;P.coins+=RAR_SELL[d.rarity];saveP();applySettings();toast(`Sold a spare ${d.name} for ${RAR_SELL[d.rarity]} gold.`);showDie(id);refreshScreen()};
+}
+function refreshScreen(){if(screen==='collection')renderCollection();if(screen==='shop')renderShop();if(screen==='build'&&BU)renderBuilder()}
+
+// ================= Portfolio =================
 function owned(id){return P.col[id]||0}
 function addDie(id,n=1){P.col[id]=(P.col[id]||0)+n}
+let pTab='album';
+const pFilter={color:'all'};
 function renderCollection(){
   const ownU=DICE.filter(d=>owned(d.id)).length, tot=sum(Object.values(P.col));
-  $('#colSummary').textContent=`${ownU} of 400 different dice · ${tot} dice in all`;
-  $('#colBars').innerHTML=COLORS.map(c=>{const n=DICE.filter(d=>d.color===c.id&&owned(d.id)).length;return `<div class="colbar panel"><div class="top2"><span class="sw" style="background:${c.hex}"></span><span>${c.name}</span><span>${n}/50</span></div><div class="meter"><i style="width:${n*2}%;background:${c.hex}"></i></div></div>`}).join('');
-  const t=$('#cType').value, o=$('#cOwned').value;
-  const list=DICE.filter(d=>(t==='all'||d.type===t)&&(o==='all'||(o==='owned'?owned(d.id):!owned(d.id))));
-  $('#cGrid').innerHTML=list.map(d=>{const n=owned(d.id);return `<button class="ccard ${n?'':'locked'}" data-die="${d.id}" title="${esc(d.name)}">${n>1?`<span class="cnt">×${n}</span>`:''}${tileSVG(d)}<span class="nm">${esc(d.name)}</span><span class="rar ${d.rarity}">${COL[d.color].name} ${typeName(d.type)}</span></button>`}).join('')||'<p class="muted">No dice match.</p>';
-  if(!P.started) setTimeout(starterPick,50);
+  const R=P.record;
+  $('#colSummary').innerHTML=`<b>${ownU}</b> of 400 different dice · ${tot} dice in all · record <b>${R.w}</b>–<b>${R.l}</b>${R.d?`–${R.d}`:''}`;
+  $$('#pTabs button').forEach(b=>b.classList.toggle('on',b.dataset.pt===pTab));
+  $('#pAlbum').hidden=pTab!=='album';$('#pArmies').hidden=pTab!=='armies';$('#pRealms').hidden=pTab!=='realms';
+  if(pTab==='album')renderAlbum();else if(pTab==='armies')renderArmies();else renderRealms();
+  if(!P.started) setTimeout(()=>starterPick(renderCollection),50);
 }
-$('#cType').onchange=$('#cOwned').onchange=renderCollection;
-$('#cGrid').addEventListener('click',e=>{const b=e.target.closest('[data-die]');if(b)showDie(b.dataset.die)});
+$('#pTabs').addEventListener('click',e=>{const b=e.target.closest('[data-pt]');if(b){pTab=b.dataset.pt;renderCollection()}});
+function renderAlbum(){
+  $('#cColors').innerHTML=`<button class="cchip ${pFilter.color==='all'?'on':''}" data-pc2="all">All realms</button>`+COLORS.map(c=>`<button class="cchip ${pFilter.color===c.id?'on':''}" data-pc2="${c.id}"><span class="sw" style="background:${c.hex}"></span>${c.name}</button>`).join('');
+  const t=$('#cType').value, o=$('#cOwned').value;
+  let h='';
+  for(const c of COLORS){
+    if(pFilter.color!=='all'&&pFilter.color!==c.id)continue;
+    const all=DICE.filter(d=>d.color===c.id), n=all.filter(d=>owned(d.id)).length;
+    const list=all.filter(d=>(t==='all'||d.type===t)&&(o==='all'||(o==='owned'?owned(d.id):!owned(d.id))));
+    if(!list.length)continue;
+    h+=`<section class="realm-sec"><div class="realm-head" style="--rc:${c.hex}"><span class="sw big" style="background:${c.hex}"></span><div><h3>${c.name} · ${esc(REALM[c.id].name)}</h3><span class="muted">${n} of 50 collected${n===50?' · complete set':''}</span></div><div class="meter" style="flex:1;max-width:220px"><i style="width:${n*2}%;background:${c.hex}"></i></div></div>
+    <div class="cgrid">${list.map(d=>{const k=owned(d.id);return `<button class="ccard ${k?'':'locked'}" data-die="${d.id}" data-tip="${d.id}" aria-label="${esc(d.name)}${k?'':' (not owned)'}">${k>1?`<span class="cnt">×${k}</span>`:''}${tileSVG(d)}<span class="nm">${esc(d.name)}</span><span class="rar ${d.rarity}">${typeName(d.type)}</span></button>`}).join('')}</div></section>`;
+  }
+  $('#cGrid').innerHTML=h||'<p class="muted">No dice match these filters.</p>';
+}
+$('#cType').onchange=$('#cOwned').onchange=()=>renderAlbum();
+$('#cColors').addEventListener('click',e=>{const b=e.target.closest('[data-pc2]');if(b){pFilter.color=b.dataset.pc2;renderAlbum()}});
+$('#cGrid').addEventListener('click',e=>{const b=e.target.closest('[data-die]');if(b){hideTip();showDie(b.dataset.die)}});
+const armySig=a=>a.map(s=>s.id).sort().join(',');
+function renderArmies(){
+  const box=$('#pArmies');
+  const last=store.get('lastArmy',null);
+  const card=(name,units,k)=>{const rec=P.armyRec[armySig(units)]||{w:0,l:0};const can=units.every(s=>DIE[s.id]);if(!can)return '';
+    const missing=units.filter((s,i)=>units.slice(0,i+1).filter(x=>x.id===s.id).length>owned(s.id)).length;
+    return `<div class="army panel"><div class="army-head"><h3>${esc(name)}</h3><span class="muted">${armyCost(units)} pts · ${units.length} dice · ${rec.w}–${rec.l}</span></div>
+    <div class="army-tiles">${units.map(s=>`<span class="atile" data-tip="${s.id}" data-die="${s.id}">${tileSVG(DIE[s.id])}<small>${s.row==='front'?'F':'B'}</small></span>`).join('')}</div>
+    ${missing?`<p class="warn" style="font-size:.82rem">${missing} ${missing>1?'dice are':'die is'} no longer in your portfolio.</p>`:''}
+    <div class="army-btns">${k!=null?`<button class="btn small primary" data-usearmy="${k}" ${missing?'disabled':''}>Battle with it</button><span data-delbox="${k}"><button class="btn small" data-delarmy="${k}">Delete</button></span>`:`<button class="btn small primary" data-uselast ${missing?'disabled':''}>Battle with it</button>`}</div></div>`};
+  let h='';
+  if(last&&last.length)h+=`<div><p class="eyebrow" style="margin-bottom:8px">Most recent army</p>${card('Last army you fielded',last,null)}</div>`;
+  h+=`<div><p class="eyebrow" style="margin:6px 0 8px">Saved armies</p>${P.saved.length?`<div class="armies">${P.saved.map((a,k)=>card(a.name,a.units,k)).join('')}</div>`:'<p class="muted">Save an army in the builder and it will appear here with its win–loss record.</p>'}</div>`;
+  box.innerHTML=h;
+}
+$('#pArmies').addEventListener('click',e=>{
+  const u=e.target.closest('[data-usearmy]'),ul=e.target.closest('[data-uselast]'),dl=e.target.closest('[data-delarmy]'),dy=e.target.closest('[data-delyes]'),dn=e.target.closest('[data-delno]'),dd=e.target.closest('[data-die]');
+  if(u){startMode('cpu',P.saved[+u.dataset.usearmy].units.map(s=>({...s})));return}
+  if(ul){startMode('cpu',store.get('lastArmy',[]).map(s=>({...s})));return}
+  if(dl){const k=dl.dataset.delarmy;$(`[data-delbox="${k}"]`).innerHTML=`<button class="btn small" data-delyes="${k}" style="border-color:var(--hp);color:var(--hp)">Delete for good</button> <button class="btn small" data-delno>Keep</button>`;return}
+  if(dy){P.saved.splice(+dy.dataset.delyes,1);saveP();renderArmies();return}
+  if(dn){renderArmies();return}
+  if(dd){hideTip();showDie(dd.dataset.die)}
+});
+function renderRealms(){
+  $('#pRealms').innerHTML=`<div class="panel" style="padding:16px;margin-bottom:12px"><p class="eyebrow">The Great Die</p><p style="max-width:70ch;margin-top:6px">${esc(WORLD_INTRO)}</p></div>
+  <div class="realms">${COLORS.map(c=>{const R=REALM[c.id],n=DICE.filter(d=>d.color===c.id&&owned(d.id)).length;
+    return `<div class="realm panel" style="--rc:${c.hex}"><div class="realm-top">${tileSVG(DIE[c.id+'-m-9'])}<div><p class="eyebrow">${c.name} · ${c.title}</p><h3>${esc(capFirst(R.name))}</h3><span class="muted" style="font-size:.82rem">Capital: ${esc(R.city)} · ${n}/50 collected</span></div></div>
+    <p>${esc(R.history)}</p>
+    <p><b>${c.pn}</b>: ${c.pt}</p>
+    <p class="muted" style="font-size:.86rem">Beats ${COL[c.beats].name} · weak to ${beatenBy(c.id).name} · Legendary: ${esc(DIE[c.id+'-m-9'].name)}</p>
+    <div class="army-tiles">${[0,1,2].map(k=>{const d=DIE[`${c.id}-h-${k}`];return `<span class="atile" data-tip="${d.id}" data-die="${d.id}">${tileSVG(d)}</span>`}).join('')}</div></div>`}).join('')}</div>`;
+}
+$('#pRealms').addEventListener('click',e=>{const dd=e.target.closest('[data-die]');if(dd){hideTip();showDie(dd.dataset.die)}});
 
 function starterPick(after){
-  if(P.started||S.sandbox&&!after) return after&&after();
+  if(P.started) return after&&after();
   $('#ov').dataset.lock='1';
-  openModal(`<div><p class="eyebrow">New collection</p><h2>Choose your starter colour</h2><p class="muted" style="margin-top:6px">You get 10 commons, 2 heroes and 1 monster in that colour, plus 200 coins for packs.</p></div>
-   <div class="starter">${COLORS.map(c=>`<button data-starter="${c.id}">${tileSVG(DIE[c.id+'-h-0'])}<b>${c.name} · ${c.title}</b><small>${c.pn}: ${c.pt}</small></button>`).join('')}</div>`,true);
+  openModal(`<div><p class="eyebrow">New portfolio</p><h2>Choose your home realm</h2><p class="muted" style="margin-top:6px">You start with 10 commons, 2 heroes and 1 monster from that realm, plus 200 gold. Earn more by winning battles, buying from the market and opening packs.</p></div>
+   <div class="starter">${COLORS.map(c=>`<button data-starter="${c.id}" data-tip="${c.id}-h-0">${tileSVG(DIE[c.id+'-h-0'])}<b>${c.name} · ${esc(capFirst(REALM[c.id].name))}</b><small>${c.pn}: ${c.pt}</small></button>`).join('')}</div>`,true);
   $('#ovBox').onclick=e=>{const b=e.target.closest('[data-starter]');if(!b)return;const c=b.dataset.starter;
     const commons=shuffle(DICE.filter(d=>d.color===c&&d.type==='common')).slice(0,10);
     const heroes=shuffle(DICE.filter(d=>d.color===c&&d.type==='hero')).slice(0,2);
     const mon=shuffle(DICE.filter(d=>d.color===c&&d.type==='mon'&&d.rarity!=='legendary'&&d.cost<=5))[0];
     [...commons,...heroes,mon].forEach(d=>addDie(d.id));
     P.coins+=200;P.started=true;saveP();applySettings();delete $('#ov').dataset.lock;$('#ovBox').onclick=null;
-    showPack([...commons,...heroes,mon].map(d=>d.id),'Your starter dice',()=>{if(after)after();else if(screen==='collection')renderCollection()});
+    showPack([...commons,...heroes,mon].map(d=>d.id),'Your starter dice',()=>{if(after)after();else refreshScreen()});
   };
 }
 function rollPack(color){
@@ -763,12 +1037,11 @@ function rollPack(color){
   return out;
 }
 function showPack(ids,title,done){
-  // counts were already added by the caller; NEW marks the first copy
   const firstSeen=new Set();const tally={};
   ids.forEach(id=>{tally[id]=(tally[id]||0)+1});
   ids.forEach(id=>{if((P.col[id]||0)-tally[id]===0)firstSeen.add(id)});
-  openModal(`<div class="modal-head"><h3>${esc(title)}</h3><span class="muted">Tap to reveal</span></div>
-   <div class="reveal">${ids.map((id,k)=>{const d=DIE[id];return `<div class="rcard" data-k="${k}"><div class="inner"><div class="face back"></div><div class="face front">${tileSVG(d)}<b style="font-size:.84rem;line-height:1.15">${esc(d.name)}</b><span class="rar ${d.rarity}">${COL[d.color].name} ${typeName(d.type)}</span>${firstSeen.has(id)?'<span class="new">NEW</span>':''}</div></div></div>`}).join('')}</div>
+  openModal(`<div class="modal-head"><h3>${esc(title)}</h3><span class="muted">Tap a card to reveal it</span></div>
+   <div class="reveal">${ids.map((id,k)=>{const d=DIE[id];return `<div class="rcard" data-k="${k}" data-tip="${id}"><div class="inner"><div class="face back"></div><div class="face front">${tileSVG(d)}<b style="font-size:.84rem;line-height:1.15">${esc(d.name)}</b><span class="rar ${d.rarity}">${COL[d.color].name} ${typeName(d.type)}</span>${firstSeen.has(id)?'<span class="new">NEW</span>':''}</div></div></div>`}).join('')}</div>
    <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn" id="revealAll">Reveal all</button><button class="btn primary" id="packDone">Done</button></div>`,true);
   const cards=$$('.rcard',$('#ovBox'));
   cards.forEach(c=>c.onclick=()=>{if(!c.classList.contains('flip')){c.classList.add('flip');Snd.click()}});
@@ -776,20 +1049,46 @@ function showPack(ids,title,done){
   $('#packDone').onclick=()=>{closeModal();done&&done()};
   if(reduced()) cards.forEach(c=>c.classList.add('flip'));
 }
+
+// ================= Shop & market =================
 let packColor='red';
+function rollMarket(){
+  const com=DICE.filter(d=>d.type==='common'),rare=DICE.filter(d=>d.type!=='common'&&d.rarity!=='legendary'),leg=DICE.filter(d=>d.rarity==='legendary');
+  const ids=new Set();
+  while(ids.size<3)ids.add(pick(com).id);
+  while(ids.size<5)ids.add(pick(rare).id);
+  ids.add((Math.random()<.12?pick(leg):pick(rare)).id);
+  return [...ids].map(id=>({id,sold:false}));
+}
 function renderShop(){
+  if(!P.market||!P.market.length){P.market=rollMarket();saveP()}
   $('#artMixed').innerHTML=['red-c-0','blue-m-2','green-h-0','purple-c-7','yellow-m-9'].map(id=>tileSVG(DIE[id])).join('');
   $('#artColor').innerHTML=[0,1,2,3,4].map(k=>tileSVG(DIE[`${packColor}-${['c','h','m','c','m'][k]}-${k}`])).join('');
   $('#packColors').innerHTML=COLORS.map(c=>`<button class="cchip ${packColor===c.id?'on':''}" data-pc="${c.id}"><span class="sw" style="background:${c.hex}"></span>${c.name}</button>`).join('');
   $('#buyMixed').disabled=P.coins<100; $('#buyColor').disabled=P.coins<150;
-  $('#buyMixed').textContent=P.coins<100?`Need ${100-P.coins} more coins`:'Open mixed pack';
-  $('#buyColor').textContent=P.coins<150?`Need ${150-P.coins} more coins`:`Open ${COL[packColor].name} pack`;
-  if(!P.started&&!S.sandbox) setTimeout(()=>starterPick(renderShop),50);
+  $('#buyMixed').textContent=P.coins<100?`Need ${100-P.coins} more gold`:'Open mixed pack · 100 gold';
+  $('#buyColor').textContent=P.coins<150?`Need ${150-P.coins} more gold`:`Open ${COL[packColor].name} pack · 150 gold`;
+  $('#market').innerHTML=P.market.map((m,k)=>{const d=DIE[m.id],price=RAR_PRICE[d.rarity];
+    return `<div class="mcard ${m.sold?'sold':''}" data-tip="${d.id}">${tileSVG(d)}<b>${esc(d.name)}</b><span class="rar ${d.rarity}">${COL[d.color].name} ${typeName(d.type)}</span><span class="muted" style="font-size:.76rem">${owned(d.id)?`You own ${owned(d.id)}`:'New to you'}</span>
+    ${m.sold?'<span class="soldtag">Bought</span>':`<button class="btn small ${P.coins>=price?'primary':''}" data-buy="${k}" ${P.coins>=price?'':'disabled'}>Buy · ${price} gold</button>`}${infoBtn(d)}</div>`}).join('');
+  $('#refreshMarket').disabled=P.coins<20;
+  const spares=DICE.filter(d=>owned(d.id)>1),spareVal=sum(spares.map(d=>(owned(d.id)-1)*RAR_SELL[d.rarity])),spareN=sum(spares.map(d=>owned(d.id)-1));
+  $('#spareInfo').innerHTML=spareN?`You have <b>${spareN}</b> spare ${spareN>1?'dice':'die'} (copies beyond the first). Selling them all, keeping one of each, pays <b>${spareVal} gold</b>.`:'You have no spare dice. Duplicates you get from packs show up here.';
+  $('#spareBox').innerHTML=spareN?'<button class="btn small" id="sellSpares">Sell all spares</button>':'';
+  if(!P.started) setTimeout(()=>starterPick(renderShop),50);
 }
 $('#packColors').addEventListener('click',e=>{const b=e.target.closest('[data-pc]');if(b){packColor=b.dataset.pc;renderShop()}});
 $('#buyMixed').onclick=()=>buy(null,100);
 $('#buyColor').onclick=()=>buy(packColor,150);
 function buy(color,price){if(P.coins<price)return;P.coins-=price;const ids=rollPack(color);ids.forEach(id=>addDie(id));saveP();applySettings();showPack(ids,color?`${COL[color].name} pack`:'Mixed pack',renderShop)}
+$('#market').addEventListener('click',e=>{const b=e.target.closest('[data-buy]');if(!b)return;const m=P.market[+b.dataset.buy],d=DIE[m.id],price=RAR_PRICE[d.rarity];
+  if(m.sold||P.coins<price)return;P.coins-=price;addDie(d.id);m.sold=true;saveP();applySettings();Snd.win();toast(`${d.name} joins your portfolio.`);renderShop()});
+$('#refreshMarket').onclick=()=>{if(P.coins<20)return;P.coins-=20;P.market=rollMarket();saveP();applySettings();renderShop()};
+$('#spareBox').addEventListener('click',e=>{
+  if(e.target.id==='sellSpares'){$('#spareBox').innerHTML='<button class="btn small" id="sellYes" style="border-color:var(--hp);color:var(--hp)">Yes, sell them</button> <button class="btn small" id="sellNo">Keep them</button>';return}
+  if(e.target.id==='sellNo'){renderShop();return}
+  if(e.target.id==='sellYes'){let g=0;for(const d of DICE){const n=owned(d.id);if(n>1){g+=(n-1)*RAR_SELL[d.rarity];P.col[d.id]=1}}P.coins+=g;saveP();applySettings();toast(`Sold your spares for ${g} gold.`);renderShop()}
+});
 
 // ================= Army builder =================
 const PRESETS=[
@@ -826,8 +1125,8 @@ function randomArmy(budget,poolFn){
   return assignRows(best);
 }
 let BU=null; // builder state
-function startMode(mode){
-  coach.stop();
+function startMode(mode,preArmy){
+  coach.stop();hideTip();
   if(mode==='tutorial'){startTutorial();return;}
   const diff=mode==='cpu'?[null,$('#cpuDiff').value]:mode==='aivai'?[$('#aiDiffA').value,$('#aiDiffB').value]:[null,null];
   const ctrl=mode==='cpu'?['human','ai']:mode==='pvp'?['human','human']:['ai','ai'];
@@ -835,20 +1134,22 @@ function startMode(mode){
   const begin=()=>{
     const lastA=store.get('lastArmy',null);
     const okLast=lastA&&lastA.every(s=>DIE[s.id])&&validFor(lastA,0)===''?lastA:null;
-    BU.armies[0]=mode==='cpu'?(okLast||randomArmy(S.budget,poolCount(0))):randomArmy(S.budget,()=>9);
-    BU.armies[1]=randomArmy(S.budget,()=>9);
+    if(preArmy&&validFor(preArmy,0)==='')BU.armies[0]=preArmy;
+    else BU.armies[0]=mode==='aivai'?randomArmy(S.budget,()=>9):(okLast||randomArmy(S.budget,poolCount(0)));
+    BU.armies[1]=mode==='pvp'?randomArmy(S.budget,poolCount(1)):randomArmy(S.budget,()=>9);
     go('build');renderBuilder();
+    if(!P.tourBuild&&BU.ctrl[0]==='human'){P.tourBuild=true;saveP();setTimeout(startBuilderTour,300)}
   };
-  if(mode==='cpu'&&!P.started&&!S.sandbox){starterPick(begin);return;}
+  if(mode!=='aivai'&&!P.started){starterPick(begin);return;}
   begin();
 }
-function usesCollection(side){return BU&&BU.mode==='cpu'&&side===0&&!S.sandbox}
+function usesCollection(side){return !!BU&&((BU.mode==='cpu'&&side===0)||BU.mode==='pvp')}
 function poolCount(side){return id=>usesCollection(side)?owned(id):99}
 function validFor(army,side){
   if(!army.length) return 'Add at least one die.';
   if(armyCost(army)>S.budget) return `This army costs ${armyCost(army)} points. The limit is ${S.budget}.`;
   if(army.length>6) return 'An army holds 6 dice at most.';
-  if(BU&&usesCollection(side)){const c={};for(const s of army){c[s.id]=(c[s.id]||0)+1;if(c[s.id]>owned(s.id))return `You only own ${owned(s.id)} of ${DIE[s.id].name}.`}}
+  if(usesCollection(side)){const c={};for(const s of army){c[s.id]=(c[s.id]||0)+1;if(c[s.id]>owned(s.id))return `You own ${owned(s.id)} of ${DIE[s.id].name}, so it can't go in ${c[s.id]>1?'again':'this army'}.`}}
   return '';
 }
 function sideLabel(mode,side){return mode==='cpu'?(side?'Computer':'You'):mode==='pvp'?`Player ${side+1}`:(side?'Red AI':'Blue AI')}
@@ -856,13 +1157,14 @@ function renderBuilder(){
   const side=BU.step, army=BU.armies[side];
   const lbl=sideLabel(BU.mode,side);
   $('#bSide').textContent=lbl+(BU.ctrl[side]==='ai'?` · ${BU.diff[side]} AI`:'');
-  $('#bTitle').textContent=BU.ctrl[side]==='ai'?(BU.mode==='cpu'?"The computer's army":`${lbl}'s army`):'Muster your army';
+  $('#bTitle').textContent=BU.ctrl[side]==='ai'?(BU.mode==='cpu'?"The computer's army":`${lbl}'s army`):(BU.mode==='pvp'?`${lbl}, muster your army`:'Muster your army');
+  $('#bHelp').textContent=BU.ctrl[side]==='ai'?'The computer picked these dice. Reroll them, or change them yourself.':(canHover()?'Hover over a die to read about it. Press Add to put it in your army.':'Tap ⓘ on a die to read about it. Press Add to put it in your army.');
   const cost=armyCost(army);
   $('#bCost').textContent=cost;$('#bBudget').textContent=S.budget;$('#bCount').textContent=army.length;
   $('#bMeter').classList.toggle('over',cost>S.budget);$('#bMeter i').style.width=Math.min(100,cost/S.budget*100)+'%';
-  // presets
-  $('#presetSel').innerHTML=`<option value="">Choose an army…</option><optgroup label="Ready-made">${PRESETS.map((p,k)=>`<option value="p${k}">${esc(p.name)} (${armyCost(p.units.map(u=>({id:u[0]})))})</option>`).join('')}</optgroup>${P.saved.length?`<optgroup label="Saved">${P.saved.map((p,k)=>`<option value="s${k}">${esc(p.name)} (${armyCost(p.units)})</option>`).join('')}</optgroup>`:''}`;
-  // slots
+  const pc=poolCount(side);
+  const canField=units=>{const c={};return units.every(u=>{c[u[0]]=(c[u[0]]||0)+1;return pc(u[0])>=c[u[0]]})};
+  $('#presetSel').innerHTML=`<option value="">Load an army…</option>${P.saved.length?`<optgroup label="Your saved armies">${P.saved.map((p,k)=>`<option value="s${k}">${esc(p.name)} (${armyCost(p.units)} pts)</option>`).join('')}</optgroup>`:''}<optgroup label="Ready-made">${PRESETS.map((p,k)=>{const ok=canField(p.units);return `<option value="p${k}" ${ok?'':'disabled'}>${esc(p.name)} (${armyCost(p.units.map(u=>({id:u[0]})))} pts)${ok?'':' · missing dice'}</option>`}).join('')}</optgroup>`;
   ['front','back'].forEach(row=>{
     const el=row==='front'?$('#slotsFront'):$('#slotsBack');
     const inRow=army.map((s,k)=>({s,k})).filter(x=>x.s.row===row);
@@ -871,55 +1173,70 @@ function renderBuilder(){
     for(let k=0;k<3;k++){const x=inRow[k];
       if(!x){h+=`<div class="slot">Empty</div>`;continue;}
       const d=DIE[x.s.id];
-      h+=`<div class="slot filled" title="${esc(d.name)}: ${statLine(d)}">${tileSVG(d)}<span class="nm">${esc(d.name)}</span><span class="cost">${d.cost} pts</span><span class="row-btns"><button data-mv="${x.k}" ${other>=3?'disabled':''}>${row==='front'?'To back':'To front'}</button><button data-rm="${x.k}" aria-label="Remove ${esc(d.name)}">Remove</button></span></div>`;
+      h+=`<div class="slot filled" data-tip="${d.id}">${tileSVG(d)}<span class="nm">${esc(d.name)}</span><span class="cost">${d.cost} pts</span><span class="row-btns"><button data-mv="${x.k}" ${other>=3?'disabled':''} aria-label="Move ${esc(d.name)} to the ${row==='front'?'back':'front'} rank">${row==='front'?'↓ Back':'↑ Front'}</button><button data-rm="${x.k}" aria-label="Remove ${esc(d.name)}">✕</button></span></div>`;
     }
     el.innerHTML=h;
   });
-  // filters
   const f=BU.filter;
   $('#bColors').innerHTML=`<button class="cchip ${f.color==='all'?'on':''}" data-fc="all">All colours</button>`+COLORS.map(c=>`<button class="cchip ${f.color===c.id?'on':''}" data-fc="${c.id}"><span class="sw" style="background:${c.hex}"></span>${c.name}</button>`).join('');
-  const pc=poolCount(side);
-  $('#bPoolNote').textContent=usesCollection(side)?`Showing dice you own (${DICE.filter(d=>owned(d.id)).length} kinds). Turn on "All dice unlocked" in Settings to use every die.`:'Every die is available for this army.';
+  const kinds=DICE.filter(d=>pc(d.id)>0).length;
+  $('#bPoolNote').innerHTML=usesCollection(side)?`Your portfolio: <b>${kinds}</b> kinds of dice. Win battles and visit the shop to collect more.`:'The computer can field any of the 400 dice.';
   const q=$('#bSearch').value.trim().toLowerCase(), t=$('#bType').value, srt=$('#bSort').value;
   const used={};army.forEach(s=>used[s.id]=(used[s.id]||0)+1);
   let list=DICE.filter(d=>pc(d.id)>0&&(f.color==='all'||d.color===f.color)&&(t==='all'||d.type===t)&&(!q||(d.name+' '+d.sub).toLowerCase().includes(q)));
   list.sort((a,b)=>srt==='name'?a.name.localeCompare(b.name):srt==='hp'?b.hp-a.hp:(b.cost-a.cost)||TYPE_ORDER[a.type]-TYPE_ORDER[b.type]);
   const left=S.budget-cost;
-  $('#bList').innerHTML=list.slice(0,400).map(d=>{
+  $('#bList').innerHTML=list.map(d=>{
     const avail=pc(d.id)-(used[d.id]||0);
     const can=army.length<6&&d.cost<=left&&avail>0;
+    const why=army.length>=6?'Army full':avail<=0?'All in use':d.cost>left?'Too costly':'';
     const al=abilityLine(d);
-    return `<div class="drow">${tileSVG(d)}<div style="min-width:0"><div class="nm">${esc(d.name)}</div><div class="sub">${COL[d.color].name} ${typeName(d.type)} · ${esc(d.sub)} · <span class="rar ${d.rarity}">${d.rarity}</span></div><div class="statline">${statLine(d)}</div>${al[0]?`<div class="ab">${al[0]}</div>`:''}</div>
-    <div class="side"><span class="cost">${d.cost} pts</span>${usesCollection(side)?`<span class="muted" style="font-size:.72rem">own ${owned(d.id)}</span>`:''}<button class="btn small ${can?'primary':''}" data-add="${d.id}" ${can?'':'disabled'}>Add</button></div></div>`;
-  }).join('')||`<p class="muted">No dice match. ${usesCollection(side)?'Open packs in the shop to get more.':''}</p>`;
+    return `<div class="drow" data-tip="${d.id}">${tileSVG(d)}<div style="min-width:0"><div class="nm">${esc(d.name)} ${infoBtn(d)}</div><div class="sub">${COL[d.color].name} ${typeName(d.type)} · ${esc(d.sub)} · <span class="rar ${d.rarity}">${d.rarity}</span></div><div class="statline">${statLine(d)}</div>${al[0]?`<div class="ab">${al[0]}</div>`:''}</div>
+    <div class="side"><span class="cost">${d.cost} pts</span>${usesCollection(side)?`<span class="muted" style="font-size:.72rem">${avail} of ${owned(d.id)} free</span>`:''}<button class="btn small ${can?'primary':''}" data-add="${d.id}" ${can?'':'disabled'} title="${why}">${can?'Add':why}</button></div></div>`;
+  }).join('')||`<p class="muted">No dice match. ${usesCollection(side)?'Visit the shop or win battles to collect more.':''}</p>`;
   const w=validFor(army,side);$('#bWarn').textContent=army.length?w:'';
-  $('#bNext').disabled=!!w;
-  $('#bNext').textContent=side===0?'Next: '+sideLabel(BU.mode,1):'Start battle';
-  $('#bBack').textContent=side===0?'Back to menu':'Back: '+sideLabel(BU.mode,0);
+  const nextTxt=side===0?'Next: '+sideLabel(BU.mode,1)+'’s army':'Start battle';
+  $('#bNext').disabled=!!w;$('#bNext').textContent=nextTxt;
+  $('#bBack').textContent=side===0?'Back to menu':'Back';
   $('#bRandom').textContent=BU.ctrl[side]==='ai'?'Reroll':'Random';
+  // floating summary bar (narrow screens)
+  $('#bMini').innerHTML=`<div class="mini-tiles">${[0,1,2,3,4,5].map(i=>army[i]?`<span>${tileSVG(DIE[army[i].id])}</span>`:'<span class="empty"></span>').join('')}</div><div class="mini-cost"><b>${cost}</b>/${S.budget} pts</div><button class="btn primary small" id="bNext2" ${w?'disabled':''}>${side===0?'Next':'Start battle'}</button>`;
 }
+$('#bMini').addEventListener('click',e=>{if(e.target.id==='bNext2')$('#bNext').click();else if(e.target.closest('.mini-tiles'))$('#rosterPanel').scrollIntoView({behavior:reduced()?'auto':'smooth',block:'start'})});
 $('#bColors').addEventListener('click',e=>{const b=e.target.closest('[data-fc]');if(b){BU.filter.color=b.dataset.fc;renderBuilder()}});
 $('#bType').onchange=$('#bSort').onchange=()=>renderBuilder();
 $('#bSearch').oninput=()=>renderBuilder();
-$('#bList').addEventListener('click',e=>{const b=e.target.closest('[data-add]');if(!b)return;const d=DIE[b.dataset.add];const a=BU.armies[BU.step];
+$('#bList').addEventListener('click',e=>{const b=e.target.closest('[data-add]');if(!b||b.disabled)return;const d=DIE[b.dataset.add];const a=BU.armies[BU.step];
   const f=a.filter(s=>s.row==='front').length,bk=a.filter(s=>s.row==='back').length;
   let row=d.ranged?(bk<3?'back':'front'):(f<3?'front':'back');
-  a.push({id:d.id,row});Snd.click();renderBuilder()});
+  a.push({id:d.id,row});Snd.click();renderBuilder();toast(`${d.name} added to the ${row} rank.`)});
 ['#slotsFront','#slotsBack'].forEach(s=>$(s).addEventListener('click',e=>{const a=BU.armies[BU.step];
   const m=e.target.closest('[data-mv]'),r=e.target.closest('[data-rm]');
   if(m){const u=a[+m.dataset.mv];u.row=u.row==='front'?'back':'front';renderBuilder()}
-  if(r){a.splice(+r.dataset.rm,1);renderBuilder()}}));
+  if(r){hideTip();a.splice(+r.dataset.rm,1);renderBuilder()}}));
 $('#bRandom').onclick=()=>{BU.armies[BU.step]=randomArmy(S.budget,poolCount(BU.step));renderBuilder()};
 $('#bClear').onclick=()=>{BU.armies[BU.step]=[];renderBuilder()};
 $('#presetSel').onchange=e=>{const v=e.target.value;if(!v)return;
   const src=v[0]==='p'?PRESETS[+v.slice(1)].units.map(u=>({id:u[0],row:u[1]})):P.saved[+v.slice(1)].units.map(u=>({id:u.id,row:u.row}));
   BU.armies[BU.step]=src;renderBuilder();const w=validFor(src,BU.step);if(w)toast(w)};
 $('#bSave').onclick=()=>{const a=BU.armies[BU.step];if(!a.length){toast('Add some dice first.');return}
-  openModal(`<div class="modal-head"><h3>Save this army</h3></div><label for="saveName">Name</label><input type="text" id="saveName" maxlength="30" value="${esc('Army '+(P.saved.length+1))}"><div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn" onclick="closeModal()">Cancel</button><button class="btn primary" id="saveGo">Save</button></div>`);
+  openModal(`<div class="modal-head"><h3>Save this army</h3></div><label for="saveName">Name</label><input type="text" id="saveName" maxlength="30" value="${esc('Army '+(P.saved.length+1))}"><div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn" data-close>Cancel</button><button class="btn primary" id="saveGo">Save</button></div>`);
   $('#saveName').focus();$('#saveName').select();
-  $('#saveGo').onclick=()=>{const n=$('#saveName').value.trim()||'Army';P.saved.unshift({name:n,units:a.map(s=>({id:s.id,row:s.row}))});P.saved=P.saved.slice(0,10);saveP();closeModal();toast(`Saved “${n}”.`);renderBuilder()}};
+  $('#saveGo').onclick=()=>{const n=$('#saveName').value.trim()||'Army';P.saved.unshift({name:n,units:a.map(s=>({id:s.id,row:s.row}))});P.saved=P.saved.slice(0,12);saveP();closeModal();toast(`Saved “${n}” to your portfolio.`);renderBuilder()}};
 $('#bBack').onclick=()=>{if(BU.step===0)go('menu');else{BU.step=0;renderBuilder();window.scrollTo(0,0)}};
-$('#bNext').onclick=()=>{if(BU.step===0){if(BU.mode==='cpu')store.set('lastArmy',BU.armies[0]);BU.step=1;renderBuilder();window.scrollTo(0,0)}else startBattle({mode:BU.mode,ctrl:BU.ctrl,diff:BU.diff,armies:BU.armies})};
+$('#bNext').onclick=()=>{if($('#bNext').disabled)return;if(BU.step===0){if(BU.mode==='cpu')store.set('lastArmy',BU.armies[0]);BU.step=1;renderBuilder();window.scrollTo(0,0)}else startBattle({mode:BU.mode,ctrl:BU.ctrl,diff:BU.diff,armies:BU.armies})};
+$('#bTour').onclick=()=>startBuilderTour();
+function startBuilderTour(){
+  if(screen!=='build')return;
+  coach.start([
+    {t:'This list is your <b>portfolio</b>: every die you own. Scroll it, filter it by colour or type, or search by name.',f:'#bList',title:'Your dice'},
+    {t:canHover()?'Hover over any die to see what it does, its colour power and a bit of its story.':'Tap the ⓘ button on any die to read what it does, its colour power and its story.',f:'#bList .drow',title:'Read a die'},
+    {t:'Press <b>Add</b> to put a die in your army. Melee dice go to the front rank and ranged dice to the back.',f:'#bList .drow .side',title:'Add dice'},
+    {t:'Your army panel follows you as you scroll. Move dice between ranks with ↑ and ↓, or remove them with ✕.',f:'#rosterPanel',title:'Your army'},
+    {t:'Every die costs points. Stay within the limit, with up to 6 dice.',f:'#rosterPanel .budget',title:'Points'},
+    {t:'When your army is ready, press this button. It stays with the army panel, so it is always in reach.',f:'#bNext',title:'Go to battle',last:true}
+  ],'Builder tour');
+}
 
 // ================= Battle engine =================
 let B=null;
@@ -1250,9 +1567,19 @@ function endBattle(w){
   if(w==='time'){const f=s=>sum(friends(s).map(u=>u.hp/u.maxHp*u.cost));const a=f(0),b=f(1);winner=a===b?-1:a>b?0:1;log(null,'Round 30 reached. The side with the most strength left wins.')}
   paint();
   coach.emit('over',{winner});
-  let reward=0;
-  if(B.mode==='cpu'){reward=winner===0?{easy:40,normal:70,hard:110}[B.diff[1]]:15;P.coins+=reward;saveP();applySettings()}
-  if(B.mode==='tutorial'&&!P.tutDone&&winner===0){P.tutDone=true;reward=100;P.coins+=100;saveP();applySettings()}
+  let reward=0, spoils=[];
+  const tracked=B.mode==='cpu'?[0]:B.mode==='pvp'?[0,1]:[];
+  for(const u of B.units){ if(!tracked.includes(u.side))continue; const st=P.stats[u.id]||[0,0,0,0]; st[0]++; if(winner===u.side)st[1]++; st[2]+=u.kos; st[3]+=u.dmg; P.stats[u.id]=st; }
+  if(B.mode==='cpu'){
+    reward=winner===0?{easy:40,normal:70,hard:110}[B.diff[1]]:15;P.coins+=reward;
+    if(winner===0)P.record.w++;else if(winner===1)P.record.l++;else P.record.d++;
+    const sig=armySig(B.armies[0]);const ar=P.armyRec[sig]||{w:0,l:0};if(winner===0)ar.w++;else if(winner===1)ar.l++;P.armyRec[sig]=ar;
+    if(winner===0){const ids=[...new Set(B.armies[1].map(s=>s.id))].filter(id=>DIE[id].rarity!=='legendary'||B.diff[1]==='hard');spoils=shuffle(ids.sort((a,b)=>(owned(a)?1:0)-(owned(b)?1:0)).slice(0,5)).slice(0,3)}
+  }
+  if(B.mode==='pvp'){reward=20;P.coins+=reward}
+  if(B.mode==='tutorial'&&!P.tutDone&&winner===0){P.tutDone=true;reward=100;P.coins+=100;spoils=['green-m-0','red-m-2']}
+  if(B.mode!=='aivai')P.market=null;
+  saveP();applySettings();
   const humanWon=(B.ctrl[0]==='human'&&B.ctrl[1]==='ai')?winner===0:null;
   if(humanWon===false)Snd.lose();else Snd.win();
   const mvp=B.units.slice().sort((a,b)=>(b.dmg+b.kos*6)-(a.dmg+a.kos*6))[0];
@@ -1260,7 +1587,8 @@ function endBattle(w){
   const tok=B.token;
   setTimeout(()=>{if(!B||B.token!==tok)return;
     $('#ov').dataset.lock='1';
-    openModal(`<div><p class="eyebrow">Round ${B.round}</p><h2>${esc(title)}</h2>${reward?`<p style="margin-top:6px"><span class="coins"><i class="coin"></i>+${reward} coins</span></p>`:''}</div>
+    openModal(`<div><p class="eyebrow">Round ${B.round}</p><h2>${esc(title)}</h2>${reward?`<p style="margin-top:6px"><span class="coins"><i class="coin"></i>+${reward} gold</span></p>`:''}</div>
+    ${spoils.length?`<div class="spoils" id="spoils"><p><b>Spoils of war.</b> Claim one die from the army you beat. It goes into your portfolio.</p><div class="spoil-row">${spoils.map(id=>`<button class="spoil" data-spoil="${id}" data-tip="${id}">${tileSVG(DIE[id])}<b>${esc(DIE[id].name)}</b><span class="rar ${DIE[id].rarity}">${DIE[id].rarity}</span><span class="muted" style="font-size:.74rem">${owned(id)?`You own ${owned(id)}`:'New!'}</span></button>`).join('')}</div></div>`:''}
     <table class="result-table"><thead><tr><th></th><th>${esc(B.names[0])}</th><th>${esc(B.names[1])}</th></tr></thead><tbody>
     <tr><td>Dice standing</td><td>${friends(0).length}/${B.units.filter(u=>u.side===0).length}</td><td>${friends(1).length}/${B.units.filter(u=>u.side===1).length}</td></tr>
     <tr><td>Damage dealt</td><td>${B.stats[0].dmg}</td><td>${B.stats[1].dmg}</td></tr>
@@ -1273,6 +1601,7 @@ function endBattle(w){
       <button class="btn primary" id="rAgain">${B.mode==='tutorial'?'Play the walkthrough again':'Rematch'}</button>
     </div>`);
     const done=()=>{delete $('#ov').dataset.lock;closeModal()};
+    $$('[data-spoil]').forEach(b=>b.onclick=()=>{const id=b.dataset.spoil;addDie(id);saveP();Snd.win();hideTip();$('#spoils').innerHTML=`<div class="info-head">${tileSVG(DIE[id])}<div><b>${esc(DIE[id].name)}</b> joins your portfolio.<div class="muted" style="font-size:.8rem">Read its guide page any time from the Portfolio.</div></div></div>`});
     $('#rMenu').onclick=()=>{done();go('menu')};
     if($('#rEdit'))$('#rEdit').onclick=()=>{done();if(BU){BU.step=0;go('build');renderBuilder()}else go('menu')};
     $('#rAgain').onclick=()=>{done();if(B.mode==='tutorial')startTutorial();else startBattle({mode:B.mode,ctrl:B.ctrl,diff:B.diff,armies:B.armies,names:B.names})};
@@ -1305,7 +1634,7 @@ function unitCard(u){
   if(!canReach(u)&&!(u.ab&&ABIL[u.ab].t!=='enemy'))st.push('<span class="st">Reserve</span>');
   const cd=u.ab?(u.cd>0?`<span class="chip cd" title="${ABIL[u.ab].n} ready in ${u.cd}">⟳${u.cd}</span>`:`<span class="chip ok" title="${ABIL[u.ab].n} ready">★</span>`):'';
   const hint=B.hints[u.uid]?`<span class="hint">${B.hints[u.uid]}</span>`:'';
-  return `<button class="${cls.join(' ')}" data-uid="${u.uid}" title="${esc(u.name)} · ${u.hp}/${u.maxHp} health${u.ab?' · '+ABIL[u.ab].n:''}">${hint}${tileSVG(u.d)}<span class="u-name">${esc(u.name)}</span><span class="hpbar"><i class="${pct<=35?'low':''}" style="width:${pct}%"></i></span><span class="u-line"><span>${u.hp}/${u.maxHp}</span><span class="chip a" title="Attack dice">${IC_ATK}${atkCount(u,0)}</span><span class="chip d" title="Defence dice">${IC_DEF}${defCount(u)}</span>${cd}</span><span class="u-st">${st.join('')}</span></button>`;
+  return `<button class="${cls.join(' ')}" data-uid="${u.uid}" aria-label="${esc(u.name)}, ${u.hp} of ${u.maxHp} health">${hint}${tileSVG(u.d)}<span class="u-name">${esc(u.name)}</span><span class="hpbar"><i class="${pct<=35?'low':''}" style="width:${pct}%"></i></span><span class="u-line"><span>${u.hp}/${u.maxHp}</span><span class="chip a" title="Attack dice">${IC_ATK}${atkCount(u,0)}</span><span class="chip d" title="Defence dice">${IC_DEF}${defCount(u)}</span>${cd}</span><span class="u-st">${st.join('')}</span></button>`;
 }
 function renderHalf(side){
   const el=side?$('#sideB'):$('#sideA');
@@ -1341,48 +1670,57 @@ function renderOrders(){
 function renderBattle(){if(!B)return;renderHalf(1);renderHalf(0);renderTurnBox();renderOrders();coach.place()}
 
 // ================= Tutorial / coach =================
-const coach={on:false,i:0,steps:[],
-  start(steps){this.on=true;this.i=0;this.steps=steps;this.show()},
-  stop(){this.on=false;$('#coach').hidden=true;$$('.coach-focus').forEach(e=>e.classList.remove('coach-focus'))},
+const coach={on:false,i:0,steps:[],name:'Walkthrough',
+  start(steps,name){this.on=true;this.i=0;this.steps=steps;this.name=name||'Walkthrough';hideTip();this.scrollTo();this.show()},
+  stop(){this.on=false;$('#coach').hidden=true;$('#spot').hidden=true;$$('.coach-focus').forEach(e=>e.classList.remove('coach-focus'))},
   show(){
     if(!this.on)return;const st=this.steps[this.i];if(!st){this.stop();return}
     const c=$('#coach');c.hidden=false;
-    c.innerHTML=`<div class="cstep">Walkthrough · ${this.i+1} of ${this.steps.length}</div><div>${st.t}</div><div class="cbtns"><button data-c="quit">End walkthrough</button>${st.wait?`<button data-c="next">Skip this step</button>`:`<button class="go" data-c="next">${st.last?'Got it':'Next'}</button>`}</div>`;
+    const dots=this.steps.map((_,k)=>`<span class="cdot ${k<=this.i?'on':''}"></span>`).join('');
+    c.innerHTML=`<div class="cstep">${esc(this.name)} · ${this.i+1} of ${this.steps.length} <span style="display:flex;gap:4px;margin-left:auto">${dots}</span></div>${st.title?`<div class="ctitle">${st.title}</div>`:''}<div>${st.t}</div>${st.wait?'<div class="cwait">Do this on the board to continue.</div>':''}<div class="cbtns"><button data-c="quit">${st.last?'Close':'End tour'}</button>${st.wait?`<button data-c="next">Skip this step</button>`:`<button class="go" data-c="next">${st.last?'Got it':'Next'}</button>`}</div>`;
     this.place();
     const go=$('.go',c);if(go&&!st.wait)go.focus({preventScroll:true});
   },
   place(){
     if(!this.on)return;const st=this.steps[this.i];if(!st)return;
     $$('.coach-focus').forEach(e=>e.classList.remove('coach-focus'));
-    const c=$('#coach');const f=st.f?$(st.f):null;
-    const vw=innerWidth,vh=innerHeight,w=Math.min(340,vw-32);
-    if(f){f.classList.add('coach-focus');const r=f.getBoundingClientRect();const h=c.offsetHeight||160;
-      let top=r.bottom+14;if(top+h>vh-12)top=r.top-h-14;if(top<12)top=Math.min(vh-h-12,Math.max(12,r.top+12));
-      let left=Math.min(Math.max(16,r.left),vw-w-16);c.style.top=top+'px';c.style.left=left+'px';c.style.bottom='auto';
-    }else{c.style.top='auto';c.style.bottom='20px';c.style.left=Math.max(16,(vw-w)/2)+'px'}
+    const c=$('#coach'),spot=$('#spot');const f=st.f?$(st.f):null;
+    const vw=innerWidth,vh=innerHeight,w=Math.min(400,vw-24);
+    if(f){
+      f.classList.add('coach-focus');
+      const r=f.getBoundingClientRect(),pad=6;
+      const top=Math.max(4,r.top-pad),left=Math.max(4,r.left-pad),bottom=Math.min(vh-4,r.bottom+pad),right=Math.min(vw-4,r.right+pad);
+      spot.hidden=false;Object.assign(spot.style,{top:top+'px',left:left+'px',width:Math.max(0,right-left)+'px',height:Math.max(0,bottom-top)+'px'});
+      const h=c.offsetHeight||180;
+      let y=r.bottom+18;if(y+h>vh-12)y=r.top-h-18;if(y<12)y=Math.max(12,vh-h-12);
+      let x=Math.min(Math.max(12,r.left+r.width/2-w/2),vw-w-12);
+      c.style.top=y+'px';c.style.left=x+'px';c.style.bottom='auto';
+    }else{spot.hidden=true;c.style.top='auto';c.style.bottom='24px';c.style.left=Math.max(12,(vw-w)/2)+'px'}
   },
-  next(){this.i++;if(this.i>=this.steps.length){this.stop();return}const st=this.steps[this.i];if(st.f){const f=$(st.f);if(f&&f.getBoundingClientRect().top<0||f&&f.getBoundingClientRect().bottom>innerHeight)f.scrollIntoView({block:'center',behavior:reduced()?'auto':'smooth'});}this.show()},
+  scrollTo(){const st=this.steps[this.i];if(!st||!st.f)return;const f=$(st.f);if(!f)return;const r=f.getBoundingClientRect();if(r.top<70||r.bottom>innerHeight-220)f.scrollIntoView({block:'center',behavior:'auto'})},
+  next(){this.i++;if(this.i>=this.steps.length){this.stop();return}this.scrollTo();this.show()},
   emit(ev,data){if(!this.on)return;const st=this.steps[this.i];if(st&&st.wait===ev&&(!st.ok||st.ok(data)))setTimeout(()=>this.next(),st.delay||250)}
 };
 $('#coach').addEventListener('click',e=>{const b=e.target.closest('[data-c]');if(!b)return;if(b.dataset.c==='quit')coach.stop();else coach.next()});
 addEventListener('resize',()=>coach.place());addEventListener('scroll',()=>coach.place(),{passive:true});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&coach.on&&$('#ov').hidden)coach.stop()});
 function startTutorial(){
   BU=null;
   startBattle({mode:'tutorial',ctrl:['human','ai'],diff:[null,'easy'],first:0,names:['You','Goblin raiders'],
     armies:[[{id:'red-h-0',row:'front'},{id:'green-h-0',row:'back'},{id:'white-h-1',row:'back'}],[{id:'green-m-0',row:'front'},{id:'green-m-0',row:'front'},{id:'red-m-2',row:'back'}]]});
   coach.start([
-    {t:'Welcome to Dice Battles. Your army is along the bottom and the enemy is along the top. Knock out every enemy die to win.',f:'#board'},
-    {t:'Each army stands in two ranks. The <b>front rank</b> fights hand to hand. The <b>back rank</b> holds archers, casters and healers. When a front rank is wiped out, its back rank steps up.',f:'#sideA'},
-    {t:'It is your turn. Click <b>Grukk Emberfist</b>, your Orc Warrior, to give him orders.',f:'[data-uid="0-0"]',wait:'select',ok:d=>d.u.uid==='0-0'},
-    {t:'Every die gets one action a turn. The sword number is how many attack dice it rolls; the shield number is how many defence dice it rolls. Choose <b>Attack</b>.',f:'#orders',wait:'pending',ok:d=>d.kind==='attack'},
-    {t:'The glowing goblins are the targets you can reach. Melee dice can only hit the enemy front rank. The number above each one is your average damage. Click a goblin.',f:'#sideB',wait:'resolved'},
-    {t:'You rolled attack dice and the goblin rolled defence dice. Damage is your total minus theirs. Grukk is <b>Red</b> and goblins here are <b>Green</b>. Red beats Green, so you rolled one extra die.',f:'#tray'},
-    {t:'Now <b>Thalion Greenleaf</b>, your Ranger. Ranged dice reach either rank. Select him and use <b>Aimed Shot</b> on the Fire Imp at the back.',f:'[data-uid="0-1"]',wait:'resolved',ok:d=>d.u.uid==='0-1'},
-    {t:'Abilities need time to recharge. ★ means ready. ⟳2 means ready in 2 of your turns.',f:'[data-uid="0-1"]'},
-    {t:'Last, <b>High Priest Anselm</b>. He can <b>Mend</b> an ally or attack. When all your dice have acted, the turn ends by itself. You can also press End turn.',f:'[data-uid="0-2"]',wait:'turnEnd'},
-    {t:'The goblins move now. Their rolls appear in the dice tray and every action goes into the battle log.',f:'#logbox',wait:'turnStart',ok:d=>d.side===0,delay:500},
-    {t:'Every colour has a power and beats one other colour. Click any die, yours or theirs, to read it. Finish this fight to earn 100 coins, then open packs and build your own army.',last:true}
-  ]);
+    {title:'Welcome',t:'Your army is along the bottom and the enemy is along the top. Knock out every enemy die to win. Hover over any die to read about it.',f:'#board'},
+    {title:'Two ranks',t:'Each army stands in two ranks. The <b>front rank</b> fights hand to hand. The <b>back rank</b> holds archers, casters and healers. When a front rank is wiped out, its back rank steps up.',f:'#sideA'},
+    {title:'Pick a die',t:'It is your turn. Click <b>Grukk Emberfist</b>, your Orc Warrior, to give him orders.',f:'[data-uid="0-0"]',wait:'select',ok:d=>d.u.uid==='0-0'},
+    {title:'Choose an action',t:'Every die gets one action a turn. The sword number is how many attack dice it rolls; the shield number is how many defence dice it rolls. Choose <b>Attack</b>.',f:'#orders',wait:'pending',ok:d=>d.kind==='attack'},
+    {title:'Pick a target',t:'The glowing goblins are the targets you can reach. Melee dice can only hit the enemy front rank. The number above each one is your average damage. Click a goblin.',f:'#sideB',wait:'resolved'},
+    {title:'The dice tray',t:'You rolled attack dice and the goblin rolled defence dice. Damage is your total minus theirs. Grukk is <b>Red</b> and goblins here are <b>Green</b>. Red beats Green, so you rolled one extra die.',f:'#tray'},
+    {title:'Ranged attacks',t:'Now <b>Thalion Greenleaf</b>, your Ranger. Ranged dice reach either rank. Select him and use <b>Aimed Shot</b> on the Fire Imp at the back.',f:'[data-uid="0-1"]',wait:'resolved',ok:d=>d.u.uid==='0-1'},
+    {title:'Recharging',t:'Abilities need time to recharge. ★ means ready. ⟳2 means ready in 2 of your turns.',f:'[data-uid="0-1"]'},
+    {title:'Healing',t:'Last, <b>High Priest Anselm</b>. He can <b>Mend</b> an ally or attack. When all your dice have acted, the turn ends by itself. You can also press End turn.',f:'[data-uid="0-2"]',wait:'turnEnd'},
+    {title:'Their turn',t:'The goblins move now. Their rolls appear in the dice tray and every action goes into the battle log.',f:'#logbox',wait:'turnStart',ok:d=>d.side===0,delay:500},
+    {title:'Over to you',t:'Every colour has a power and beats one other colour. Finish this fight to earn 100 gold and claim a goblin for your portfolio. Then visit the shop and build your own army.',last:true}
+  ],'Walkthrough');
 }
 
 // ================= How to play =================
@@ -1391,7 +1729,7 @@ function renderHowto(){
   $('#howto').innerHTML=`
   <div><p class="eyebrow">Rules</p><h2>How to play</h2></div>
   <section><h3>Goal</h3><p>Knock out every die in the enemy army. Nobody dies. Beaten dice are just out of the fight. If round 30 ends with both sides standing, the side with the most strength left wins.</p></section>
-  <section><h3>Your army</h3><ul><li>Pick up to 6 dice within the points limit (${S.budget} points; change it in Settings).</li><li>Place them in two ranks of 3. Melee dice fight from the <b>front rank</b>. Ranged dice can act from either rank.</li><li>Melee dice in the back rank wait as reserves. When a front rank is wiped out, the whole back rank steps up.</li><li>Against the computer you build from the dice you own. Two-player and AI vs AI games can use all 400.</li></ul></section>
+  <section><h3>Your army</h3><ul><li>Pick up to 6 dice within the points limit (${S.budget} points; change it in Settings).</li><li>Place them in two ranks of 3. Melee dice fight from the <b>front rank</b>. Ranged dice can act from either rank.</li><li>Melee dice in the back rank wait as reserves. When a front rank is wiped out, the whole back rank steps up.</li><li>You build armies from your portfolio, the dice you own. In two-player games both armies come from your portfolio. AI vs AI games can use all 400 dice.</li></ul></section>
   <section><h3>A turn</h3><ul><li>Initiative dice decide who goes first. To even things out, the first side only gets half its actions (rounded up) on the opening turn.</li><li>On your turn each of your dice takes one action: <b>Attack</b> or its <b>ability</b>. Pick a die, pick an action, pick a glowing target.</li><li>The turn ends when all your dice have acted, or when you press End turn.</li><li>Melee attacks can only target the enemy front rank. Ranged attacks can target anyone. A Golem with Taunt in the front rank must be hit first by basic attacks.</li></ul></section>
   <section><h3>Dice</h3><p>The attacker rolls its attack dice (${IC_ATK}) and the defender rolls its defence dice (${IC_DEF}). Damage is the attack total minus the defence total. If it is 0 or less, the attack is blocked.</p><div class="demo-dice">${[5,3,6].map((v,k)=>dieHTML(v,k<2?'red':'red')).join('')}<b style="margin:0 6px">14</b> vs <b style="margin:0 6px">4</b>${dieHTML(4,'green','def')}<span class="muted" style="margin-left:6px">Red beats Green, so Red rolled 3 dice instead of 2. One 6 adds 1 for Blaze: 14 + 1 − 4 = 11 damage.</span></div></section>
   <section><h3>Colours</h3><p>Every die has a colour. A die rolls <b>1 extra attack die</b> against the colour it beats. Area attacks deal 2 extra damage to that colour instead.</p>
@@ -1404,14 +1742,14 @@ function renderHowto(){
   <section><h3>Commons</h3><p>Each colour has 30 commons: 5 jobs for each of the 6 races, like the Red <b>Street Fighter Orc</b>. They are cheap, keep their race perk and colour power, and fill out an army.</p>
   ${tbl(['Job','Health','Attack','Defence','Reach','Special','Cost'],JOBS.map((j,k)=>[`<b>${COLORS.map(c=>JOBN[c.id][k]).slice(0,3).join(', ')}…</b>`,j.hp,j.atk,j.def,j.ranged?'Ranged':'Melee',j.ab?`<b>${ABIL[j.ab].n}</b>`:'—',j.cost]))}</section>
   <section><h3>Effects</h3><ul><li><b>Poison</b>: loses 2 health at the start of each of its turns, for 3 turns.</li><li><b>Stuck / Frozen</b>: loses its next action.</li><li><b>Hex</b>: rolls 1 fewer attack die on its next 2 turns.</li><li><b>Chill</b>: rolls 1 fewer attack die on its next attack.</li><li><b>Guard</b>: rolls 1 extra defence die until the guarding side's next turn.</li></ul></section>
-  <section><h3>Collecting</h3><ul><li>Start by choosing a colour. You get 13 dice in it and 200 coins.</li><li>Beat the computer for coins: 40 on Easy, 70 on Normal, 110 on Hard, 15 for a loss. The walkthrough pays 100 once.</li><li>Mixed packs cost 100 and colour packs cost 150. You can field as many copies of a die as you own.</li><li>Rarity: commons have no mark, monsters a blue dot, heroes a violet diamond, dragons a gold star.</li></ul></section>
+  <section><h3>Collecting</h3><ul><li>Start by choosing a home realm. You get 13 dice from it and 200 gold.</li><li>Beat the computer for gold: 40 on Easy, 70 on Normal, 110 on Hard, 15 for a loss. Two-player games pay 20. The walkthrough pays 100 once.</li><li>After a win, claim one die from the army you beat. Dragons can only be claimed on Hard.</li><li>Spend gold in the shop: single dice from the market (30 to 450 gold), mixed packs (100) and colour packs (150). Sell spare copies for gold.</li><li>You can field as many copies of a die as you own.</li><li>Every die has a guide page in your portfolio with what it does, its history and its battle record.</li><li>Rarity: commons have no mark, monsters a blue dot, heroes a violet diamond, dragons a gold star.</li></ul></section>
   <section><h3>Keys</h3>${tbl(['Key','Action'],[['A','Attack with the selected die'],['S','Use its ability'],['Tab','Next ready die'],['E','End turn'],['Esc','Cancel or close']])}</section>`;
 }
 
 // ================= Settings modal =================
 function segHTML(key,opts){return `<div class="seg" data-set="${key}">${opts.map(([v,l])=>`<button data-v="${v}" class="${String(S[key])===String(v)?'on':''}">${l}</button>`).join('')}</div>`}
 function openSettings(){
-  openModal(`<div class="modal-head"><h3>Settings</h3><button class="btn small" onclick="closeModal()">Done</button></div>
+  openModal(`<div class="modal-head"><h3>Settings</h3><button class="btn small" data-close>Done</button></div>
   <div class="setgrid">
    <div class="setrow"><div class="lbl"><b>Theme</b><span>Light, dark, or follow your device</span></div>${segHTML('theme',[['system','Auto'],['light','Light'],['dark','Dark']])}</div>
    <div class="setrow"><div class="lbl"><b>Army points</b><span>Points limit for every army</span></div>${segHTML('budget',[[20,'20'],[30,'30'],[45,'45']])}</div>
@@ -1421,8 +1759,8 @@ function openSettings(){
    <div class="setrow"><div class="lbl"><b>Sound</b><span>Dice, hits and fanfare</span></div>${segHTML('sound',[[true,'On'],[false,'Off']])}</div>
    <div class="setrow"><div class="lbl"><b>Motion</b><span>Animations and shakes</span></div>${segHTML('motion',[['system','Auto'],['full','Full'],['reduce','Reduced']])}</div>
    <div class="setrow"><div class="lbl"><b>Text size</b></div>${segHTML('text',[['normal','Normal'],['large','Large']])}</div>
-   <div class="setrow"><div class="lbl"><b>All dice unlocked</b><span>Build vs-computer armies from all 400 dice</span></div>${segHTML('sandbox',[[false,'Off'],[true,'On']])}</div>
-   <div class="setrow"><div class="lbl"><b>Reset collection</b><span>Remove all dice and coins and start over</span></div><span id="resetBox"><button class="btn small" id="resetBtn">Reset</button></span></div>
+   <div class="setrow"><div class="lbl"><b>Show me how</b><span>Replay the builder tour next time you build</span></div><button class="btn small" id="tourAgain">Replay tour</button></div>
+   <div class="setrow"><div class="lbl"><b>Reset portfolio</b><span>Remove all dice, gold and records and start over</span></div><span id="resetBox"><button class="btn small" id="resetBtn">Reset</button></span></div>
   </div>`);
   $('#ovBox').onclick=e=>{
     const b=e.target.closest('.seg[data-set] button');
@@ -1430,7 +1768,8 @@ function openSettings(){
       if(screen==='build'&&BU)renderBuilder();if(screen==='howto')renderHowto();if(screen==='battle'&&B)paint();return}
     if(e.target.id==='resetBtn'){$('#resetBox').innerHTML='<button class="btn small" id="resetYes" style="border-color:var(--hp);color:var(--hp)">Yes, reset</button> <button class="btn small" id="resetNo">Keep</button>'}
     if(e.target.id==='resetNo'){$('#resetBox').innerHTML='<button class="btn small" id="resetBtn">Reset</button>'}
-    if(e.target.id==='resetYes'){P={coins:0,col:{},started:false,tutDone:false,saved:[]};saveP();store.set('lastArmy',null);applySettings();closeModal();toast('Collection reset.');if(screen==='collection')renderCollection();if(screen==='shop')renderShop()}
+    if(e.target.id==='tourAgain'){P.tourBuild=false;saveP();toast('The builder tour will play next time you build an army.')}
+    if(e.target.id==='resetYes'){P=NEW_P();saveP();store.set('lastArmy',null);applySettings();closeModal();toast('Portfolio reset.');refreshScreen()}
   };
 }
 $('#openSettings').onclick=openSettings;

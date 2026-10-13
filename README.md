@@ -36,9 +36,21 @@ Your collection, coins, saved armies and settings are kept in the browser.
   poison, stuns, hexes and guards.
 - **Modes.** Battle the computer (Easy, Normal, Hard), two players on one
   device, or watch AI vs AI with pause and speed controls.
-- **Collecting.** Pick a starter colour, win coins against the computer and
-  open mixed or colour packs.
-- **Walkthrough.** A guided first battle that teaches the rules.
+- **Collecting.** You build every army from your own portfolio. Pick a home
+  realm to start with 13 dice and 200 gold, then earn the rest:
+  - Gold for every battle against the computer (40, 70 or 110 for a win by
+    difficulty, 15 for a loss), 20 for a two-player game, 100 for finishing
+    the walkthrough.
+  - Spoils of war: after a win, claim one die from the army you beat.
+  - A market of single dice that restocks after every battle, plus mixed and
+    colour packs. Sell spare copies back for gold.
+- **Portfolio.** A dice album grouped by realm with set progress, a guide
+  page for every die (what it does, a short history, a line of fluff and its
+  battle record), your saved armies with win–loss records, and a realms guide
+  to the eight colours and the story of the Great Die.
+- **Easy to learn.** Hover any die for its details (tap ⓘ on touch screens).
+  The walkthrough and a builder tour spotlight each part of the screen. While
+  you build, your army panel and Start button follow you down the list.
 - **Settings.** Light, dark or automatic theme, army points, dice and
   computer speed, damage hints, sound, motion, text size and an
   "all dice unlocked" switch.
