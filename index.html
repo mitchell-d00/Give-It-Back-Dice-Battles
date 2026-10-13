@@ -189,7 +189,7 @@ blockquote.fluff{margin:0;padding:.6rem .9rem;border-left:4px solid var(--accent
 .cost{font-variant-numeric:tabular-nums;font-weight:800;display:inline-flex;align-items:center;gap:4px;font-size:.88rem}
 .statline{font-family:var(--mono);font-size:.76rem;color:var(--muted)}
 .rar{font-size:.66rem;text-transform:uppercase;letter-spacing:.1em;font-weight:800}
-.rar.common{color:var(--muted)} .rar.rare{color:var(--you)} .rar.epic{color:#9b59d0} .rar.legendary{color:var(--gold)}
+.rar.common{color:var(--muted)} .rar.secret{color:var(--ink);background:var(--well);padding:0 .35rem;border-radius:4px} .rar.rare{color:var(--you)} .rar.epic{color:#9b59d0} .rar.legendary{color:var(--gold)}
 .build-foot{display:flex;gap:8px;justify-content:space-between;flex-wrap:wrap;align-items:center;margin-top:14px}
 .warn{color:var(--hp);font-weight:600;font-size:.9rem}
 
@@ -222,6 +222,7 @@ blockquote.fluff{margin:0;padding:.6rem .9rem;border-left:4px solid var(--accent
 .u-st{display:flex;gap:3px;flex-wrap:wrap;justify-content:center;min-height:0}
 .st{font-size:.62rem;font-weight:800;text-transform:uppercase;letter-spacing:.05em;padding:0 .3rem;border-radius:4px;background:var(--well);color:var(--ink)}
 .st.bad{background:var(--hp);color:#fff}
+.st.taunt{background:var(--accent);color:var(--on-accent)}
 .st.good{background:var(--heal);color:#fff}
 .unit.ready{box-shadow:0 0 0 2px var(--you)}
 .unit.s1.ready{box-shadow:0 0 0 2px var(--foe)}
@@ -319,6 +320,28 @@ blockquote.fluff{margin:0;padding:.6rem .9rem;border-left:4px solid var(--accent
 .rcard .front{transform:rotateY(180deg);background:var(--page)}
 .rcard .front .tile{width:60px;height:60px}
 .rcard .new{font-size:.66rem;font-weight:900;letter-spacing:.1em;color:var(--on-accent);background:var(--accent);border-radius:5px;padding:0 .35rem}
+.pips{display:flex;gap:4px}
+.pips i{flex:1;height:10px;border-radius:3px;background:var(--well);border:1px solid var(--line)}
+.pips i.on{background:var(--accent);border-color:var(--accent)}
+.pips i.evo{outline:2px solid var(--gold);outline-offset:1px}
+.chapter{padding:.6rem .8rem;border-radius:10px;background:var(--well);display:grid;gap:4px}
+.chapter h4{margin:0;font-family:var(--display);font-size:.92rem}
+.chapter.locked{opacity:.65;border:1px dashed var(--line);background:transparent}
+.myth{font-style:italic}
+.timeline{list-style:none;margin:10px 0 0;padding:0;display:grid;gap:12px}
+.timeline li{display:grid;grid-template-columns:30px minmax(0,1fr);gap:10px;align-items:start}
+.timeline p{max-width:72ch;margin-top:2px}
+.tl-n{width:28px;height:28px;border-radius:50%;display:grid;place-items:center;background:var(--accent);color:var(--on-accent);font-weight:800;font-size:.85rem}
+.ccard.secret .nm{letter-spacing:.2em}
+.dock{display:none}
+@media (max-width:900px){
+  .dock{display:flex;align-items:center;gap:6px;position:fixed;left:0;right:0;bottom:0;z-index:40;background:var(--panel);border-top:2px solid var(--accent);padding:10px 12px calc(10px + env(safe-area-inset-bottom,0px));box-shadow:0 -8px 20px -14px rgba(0,0,0,.6)}
+  .dock[hidden]{display:none}
+  .dock-msg{display:grid;margin-right:auto;min-width:0;font-size:.88rem;line-height:1.2}
+  .dock-msg b{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .dock-msg small{color:var(--muted);font-size:.74rem}
+  #scr-battle{padding-bottom:76px}
+}
 .spoils{display:grid;gap:8px;padding:12px;border-radius:12px;background:var(--well)}
 .spoil-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:8px}
 .spoil{display:flex;flex-direction:column;align-items:center;gap:4px;padding:10px 6px;border:1px solid var(--line);border-radius:10px;background:var(--panel);text-align:center}
@@ -405,7 +428,7 @@ html[data-motion="reduce"] *{animation:none!important;transition:none!important}
       <div>
         <p class="eyebrow">Collect · Build · Roll</p>
         <h1>Dice Battles</h1>
-        <p class="lede">400 dice in eight colours. Heroes, monsters and street-corner commons. Pick six, line them up in two ranks and roll for it.</p>
+        <p class="lede">400 dice in eight colours. Heroes, monsters and street-corner commons. Pick six, line them up in two ranks and roll for it. Level your favourites until they evolve into legends.</p>
       </div>
       <div class="hero-dice" id="heroDice"></div>
     </div>
@@ -432,8 +455,8 @@ html[data-motion="reduce"] *{animation:none!important;transition:none!important}
       </div>
     </div>
     <div class="wheel panel">
-      <h3>Colour edges</h3>
-      <p class="muted">A die attacking the colour it beats rolls one extra attack die.</p>
+      <h3>Colour advantage</h3>
+      <p class="muted">Each colour has the advantage over one other colour: it rolls one extra attack die against it. An advantage is an edge, not a sure win. Blue has the advantage over Red, but a well-built Red army can still beat it.</p>
       <div class="wheel-row" id="wheelRow"></div>
     </div>
   </section>
@@ -496,6 +519,7 @@ html[data-motion="reduce"] *{animation:none!important;transition:none!important}
         <div style="display:flex;gap:6px;flex-wrap:wrap" id="leaveBox"><button class="btn small" id="leaveBtn">Leave battle</button></div>
       </aside>
     </div>
+    <div class="dock" id="dock" hidden></div>
   </section>
 
   <!-- PORTFOLIO -->
@@ -507,7 +531,7 @@ html[data-motion="reduce"] *{animation:none!important;transition:none!important}
     <div id="pAlbum">
       <div class="filters" id="cColors" style="margin-bottom:8px"></div>
       <div class="filters" style="margin-bottom:14px">
-        <select id="cType" aria-label="Type"><option value="all">All types</option><option value="hero">Heroes</option><option value="mon">Monsters</option><option value="common">Commons</option></select>
+        <select id="cType" aria-label="Type"><option value="all">All types</option><option value="hero">Heroes</option><option value="mon">Monsters</option><option value="common">Commons</option><option value="merc">Mercenaries</option></select>
         <select id="cOwned" aria-label="Show"><option value="all">Owned and missing</option><option value="owned">Owned only</option><option value="missing">Missing only</option></select>
         <span class="muted" style="font-size:.82rem">Click any die for its guide page: what it does, its history and its battle record.</span>
       </div>
@@ -683,8 +707,8 @@ for(const c of COLORS){
   }));
 }
 DICE.forEach(d=>DIE[d.id]=d);
-const TYPE_ORDER={hero:0,mon:1,common:2};
-const typeName=t=>({hero:'Hero',mon:'Monster',common:'Common'})[t];
+const TYPE_ORDER={merc:-1,hero:0,mon:1,common:2};
+const typeName=t=>({hero:'Hero',mon:'Monster',common:'Common',merc:'Mercenary'})[t];
 
 // ================= Art =================
 const MARK={
@@ -723,10 +747,11 @@ const MG=[
 ];
 function tileSVG(d){
   const c=COL[d.color], i=c.ink, b=c.hex;
-  let g = d.type==='mon' ? MG[d.arch](i,b) : figure(d.race, d.type==='hero'?d.cls:JOBS[d.job].mark, i, b);
+  let g = d.arch!=null ? MG[d.arch](i,b) : figure(d.race, d.job!=null?JOBS[d.job].mark:d.cls, i, b);
   let mark='';
   if(d.rarity==='legendary') mark=`<path d="M52 6 l2.4 5 5.4 .6 -4 3.7 1.1 5.3 -4.9 -2.7 -4.9 2.7 1.1 -5.3 -4 -3.7 5.4 -.6Z" fill="#f5c542" stroke="#5a4310" stroke-width="1.2"/>`;
   else if(d.rarity==='epic') mark=`<path d="M53 6 l5 5 -5 5 -5 -5Z" fill="#c9a6f0" stroke="#3b2160" stroke-width="1.2"/>`;
+  else if(d.rarity==='secret') mark=`<path d="M53 3.5 l2.2 5.3 5.3 2.2 -5.3 2.2 -2.2 5.3 -2.2 -5.3 -5.3 -2.2 5.3 -2.2Z" fill="#eef1f5" stroke="#23262c" stroke-width="1.2"/>`;
   else if(d.rarity==='rare') mark=`<circle cx="53" cy="11" r="3.6" fill="#9cc3ff" stroke="#173c70" stroke-width="1.2"/>`;
   return `<svg class="tile" viewBox="0 0 64 64" aria-hidden="true"><rect x="2" y="2" width="60" height="60" rx="13" fill="${b}" stroke="${d.color==='white'?'#bdb3a0':d.color==='black'?'#77708a':'rgba(0,0,0,.28)'}" stroke-width="2"/><rect x="5" y="5" width="54" height="54" rx="10" fill="none" stroke="${i}" stroke-opacity=".18" stroke-width="1.5"/>${g}${mark}</svg>`;
 }
@@ -744,7 +769,7 @@ function setDie(el,v){el.dataset.v=v;[...el.children].forEach((p,k)=>p.classList
 // ================= Settings & profile =================
 const DEF_SET={theme:'system',budget:30,dice:'normal',ai:'normal',sound:true,motion:'system',text:'normal',hints:true,sandbox:false};
 let S=Object.assign({},DEF_SET,store.get('settings',{}));
-const NEW_P=()=>({coins:0,col:{},started:false,tutDone:false,saved:[],stats:{},record:{w:0,l:0,d:0},armyRec:{},market:null,tourBuild:false});
+const NEW_P=()=>({coins:0,col:{},started:false,tutDone:false,saved:[],stats:{},record:{w:0,l:0,d:0},armyRec:{},market:null,tourBuild:false,lv:{},hardWins:0,streak:0,bestStreak:0});
 let P=Object.assign(NEW_P(),store.get('profile',{}));
 const saveS=()=>store.set('settings',S), saveP=()=>store.set('profile',P);
 function applySettings(){
@@ -783,6 +808,7 @@ function go(name){
   if(name!=='battle') coach.stop();
   hideTip();
   $('#bMini').hidden=name!=='build';
+  if(name!=='battle')$('#dock').hidden=true;
   window.scrollTo(0,0);
 }
 document.addEventListener('click',e=>{
@@ -798,7 +824,7 @@ $('#ov').addEventListener('click',e=>{if(e.target.id==='ov'&&!$('#ov').dataset.l
 // ================= Menu =================
 function renderMenu(){
   $('#heroDice').innerHTML=['red-m-9','blue-h-0','green-m-1','yellow-h-1','brown-m-6','white-h-0','black-c-4','purple-m-9'].map(id=>tileSVG(DIE[id]).replace('<svg ',`<svg data-tip="${id}" `)).join('');
-  $('#wheelRow').innerHTML=COLORS.map(c=>`<span class="beat" data-tip="${c.id}-c-0">${tileSVG(DIE[c.id+'-c-0'])}<b>${c.name}</b> beats <span class="sw" style="background:${COL[c.beats].hex}"></span>${COL[c.beats].name}</span>`).join('');
+  $('#wheelRow').innerHTML=COLORS.map(c=>`<span class="beat" data-tip="${c.id}-c-0">${tileSVG(DIE[c.id+'-c-0'])}<b>${c.name}</b> › <span class="sw" style="background:${COL[c.beats].hex}"></span>${COL[c.beats].name}</span>`).join('');
 }
 
 // ================= Lore =================
@@ -843,6 +869,7 @@ const COMMON_FLUFF=['"First real fight? Course not."','"I\'m only here for the p
 function hashStr(s){let h=2166136261;for(let i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619)}return h>>>0}
 const capFirst=s=>s.charAt(0).toUpperCase()+s.slice(1);
 function lore(d){
+  if(d.type==='merc'){const m=MERCS[d.merc];return {history:m.bio,fluff:`“${m.quote}”`}}
   const R=REALM[d.color], h=hashStr(d.id), foeColor=COL[d.color].beats;
   const foeList=MONSTERS[foeColor].filter(m=>m[0]!==11);
   const foe=foeList[h%foeList.length][1];
@@ -861,6 +888,159 @@ function lore(d){
   return {history:`Every town in ${R.name} has a ${job}. This one ${fill(JOB_LORE[d.job])}. ${RACE_LORE[d.race]}`,fluff:COMMON_FLUFF[h%COMMON_FLUFF.length]};
 }
 
+// ================= Grey mercenaries (secret) =================
+const GREY={id:'grey',name:'Grey',title:'Free Companies',hex:'#767a83',ink:'#ffffff',beats:null,pn:'Sellsword',pt:'No colour has an advantage over it, and it has none over any colour.'};
+COL.grey=GREY;
+const MERCS=[
+ {name:'Vesper Greycloak',race:0,cls:1,atk:1,cost:1,unlock:'w3',quote:'Half up front. Half when you are still alive.',bio:'Vesper Greycloak has worked for six of the eight realms and been banned from four. Nobody has ever seen the colour of the cloak in daylight.'},
+ {name:'Old Iron Hask',race:1,cls:0,hp:8,cost:1,unlock:'hard1',quote:'I have outlived four employers. Do try to keep up.',bio:'Old Iron Hask fought in the last of the Dice Wars and refused to sign the Treaty of the Table on principle. He has forgotten which principle, but he still refuses.'},
+ {name:'Sable Nine-Lives',race:4,cls:1,hp:4,atk:1,cost:1,unlock:'kinds50',quote:'That was life number six. Or seven. Who counts?',bio:'Sable Nine-Lives has been knocked out more times than any fighter on record, and has never once lost a wager on getting back up.'},
+ {name:'Corvo the Coin',race:0,cls:4,atk:1,cost:1,unlock:'lv4',quote:'Heads, I win. Tails, you lose.',bio:'Corvo the Coin decides every job with a flip. He has never told anyone what happens if it lands on its edge.'},
+ {name:'Mother Morrow',race:3,cls:3,hp:6,atk:1,cost:1,unlock:'w10',quote:'Sit. Bleed quietly. I will get to you.',bio:'Mother Morrow ran the field hospital at the Treaty of the Table and has patched up every famous fighter since. She keeps their teeth in a jar.'},
+ {name:'The Lanternless Knight',race:5,cls:5,hp:8,def:1,cost:2,unlock:'streak5',quote:'I lost my light long ago. I kept the sword.',bio:'The Lanternless Knight was once champion of the Dawn Cloisters. Something happened in the Shadowmarch that nobody discusses, and now the knight fights for whoever asks politely.'},
+ {name:'Ash-Eyed Ilka',race:2,cls:2,hp:4,atk:1,cost:1,unlock:'realm25',quote:'I have seen how this ends. You will not like it.',bio:'Ash-Eyed Ilka looked through one of Prismgate\'s thousand lenses and saw how everything ends. She left the Arcane Spires the next morning and has charged double ever since.'},
+ {name:'Brannigan Two-Axes',race:3,cls:0,hp:6,atk:1,cost:2,unlock:'lv7',quote:'One axe is for you. The other is for your friend.',bio:'Brannigan Two-Axes was thrown out of the Ember Reach for being too loud, which is very hard to do.'},
+ {name:'Whisper',race:2,cls:4,atk:2,cost:2,unlock:'w25',quote:'...',bio:'No contract with Whisper has ever been signed. Whisper simply appears, and the job is done.'},
+ {name:'The Grey Wyrm',arch:11,hp:10,def:1,cost:2,unlock:'lv10',quote:'Every realm once paid me. Every realm will again.',bio:'The Grey Wyrm is the only dragon that ever signed with a Free Company. It is paid in shards of the Great Die, and it is very nearly rich enough.'}
+];
+MERCS.forEach((m,i)=>{
+  let d;
+  if(m.arch!=null){const A=ARCH[m.arch];d={id:`grey-x-${i}`,color:'grey',type:'merc',rarity:'secret',name:m.name,arch:m.arch,sub:'Mercenary dragon',hp:A.hp+(m.hp||0),atk:A.atk+(m.atk||0),def:A.def+(m.def||0),ranged:A.ranged,ab:A.ab||null,pas:A.pas||null,cost:A.cost+(m.cost||0)}}
+  else{const C=CLS[m.cls],R=RAC[m.race];d={id:`grey-x-${i}`,color:'grey',type:'merc',rarity:'secret',name:m.name,race:m.race,cls:m.cls,sub:`Mercenary ${R.name} ${C.name}`,hp:C.hp+R.hp+(m.hp||0),atk:C.atk+(m.atk||0),def:C.def+(m.def||0),ranged:C.ranged,ab:C.ab,perk:R.perk,cost:C.cost+R.cost+(m.cost||0)}}
+  d.merc=i;DICE.push(d);DIE[d.id]=d;
+});
+const AIPOOL=id=>DIE[id].color==='grey'?0:9;
+const ownedKinds=()=>DICE.filter(d=>owned(d.id)).length;
+const maxLv=()=>Math.max(1,...Object.values(P.lv||{}));
+const UNLOCKS={
+ w3:['Win 3 battles against the computer',()=>P.record.w>=3],
+ hard1:['Win a battle on Hard',()=>(P.hardWins||0)>=1],
+ kinds50:['Collect 50 different dice',()=>ownedKinds()>=50],
+ lv4:['Evolve any die to level 4',()=>maxLv()>=4],
+ w10:['Win 10 battles against the computer',()=>P.record.w>=10],
+ streak5:['Win 5 battles in a row',()=>(P.bestStreak||0)>=5],
+ realm25:['Collect 25 dice from a single realm',()=>COLORS.some(c=>DICE.filter(d=>d.color===c.id&&owned(d.id)).length>=25)],
+ lv7:['Evolve any die to level 7',()=>maxLv()>=7],
+ w25:['Win 25 battles against the computer',()=>P.record.w>=25],
+ lv10:['Evolve any die all the way to level 10',()=>maxLv()>=10]
+};
+const mercHint=d=>UNLOCKS[MERCS[d.merc].unlock][0];
+function checkMercs(){
+  if(!P.started)return;
+  const got=[];
+  MERCS.forEach((m,i)=>{const id=`grey-x-${i}`;if(!owned(id)&&UNLOCKS[m.unlock][1]()){addDie(id);got.push(id)}});
+  if(got.length){saveP();queueReveal(got)}
+}
+function queueReveal(ids){
+  if(!$('#ov').hidden){setTimeout(()=>queueReveal(ids),600);return}
+  const id=ids.shift(),d=DIE[id];
+  openModal(`<div style="text-align:center;display:grid;gap:10px;justify-items:center"><p class="eyebrow">A secret mercenary joins you</p>${tileSVG(d)}<h2>${esc(d.name)}</h2><p class="muted">${esc(d.sub)} · Free Companies</p><blockquote class="fluff" style="text-align:left">“${esc(MERCS[d.merc].quote)}”</blockquote><p style="max-width:52ch">${esc(MERCS[d.merc].bio)}</p><p class="muted" style="font-size:.84rem">Earned for: ${esc(mercHint(d))}.</p><button class="btn primary" data-close>Welcome aboard</button></div>`);
+  Snd.win();
+  if(ids.length){const close=$('#ovBox [data-close]');close.onclick=()=>{closeModal();queueReveal(ids)}}
+  refreshScreen();
+}
+
+// ================= Levels and evolution =================
+const LV_COST=[0,0,20,40,70,110,160,220,300,400,520];
+const RAR_MULT={common:1,rare:1.5,epic:2,legendary:3,secret:2.5};
+const STAGE=['','Veteran','Elite','Legend'];
+const lvOf=id=>(P.lv&&P.lv[id])||1;
+const stageOf=lv=>lv>=10?3:lv>=7?2:lv>=4?1:0;
+const upCost=(d,lv)=>Math.round(LV_COST[lv+1]*RAR_MULT[d.rarity]/5)*5;
+const lvHp=(d,lv)=>(lv-1)*Math.max(1,Math.round(d.hp*0.06));
+function eff(d,lv){lv=lv||1;return{hp:d.hp+lvHp(d,lv),atk:d.atk+(lv>=10?1:0),def:d.def,atkFlat:lv>=4?1:0,defFlat:lv>=7?1:0}}
+const EPI=[['Unbroken','Ironhide','Shieldwall'],['Unseen','Quick','Silent'],['Wise','Stormcaller','Spellwright'],['Blessed','Kind','Lightbearer'],['Keen','Farshot','Pathfinder'],['Steadfast','Oathbound','True']];
+const TITLE2=['Champion','Shadow','Archmage','Saint','Warden','Knight-Commander'];
+const LEGEND={red:'Ember Lord',blue:'Tidecaller',green:'Wildheart',brown:'Mountain King',yellow:'Stormborn',white:'Dawnbringer',black:'Nightlord',purple:'Spellsovereign',grey:'Unbought'};
+function firstName(d){
+  if(d.name.startsWith('The '))return d.name;
+  return d.name.replace(/^(Sir|Captain|Brother|Mother|Grandmother|High Priest|Saint|Archmage|Oracle|Keeper|Abbot|Thane|Old Iron)\s+/,'').split(' ')[0];
+}
+function dname(d,lv){
+  const s=stageOf(lv||1);if(!s)return d.name;
+  const R=REALM[d.color],h=hashStr(d.id);
+  if(d.arch!=null){
+    const the=d.name.startsWith('The ');
+    if(d.arch===11)return s===1?(the?`${d.name}, Elder`:`Elder ${d.name}`):s===2?(the?`${d.name}, Ancient`:`Ancient ${d.name}`):`${d.name}, Last of the Great Wyrms`;
+    return s===1?`Elder ${d.name}`:s===2?`Dread ${d.name}`:`${d.name}, Terror of ${R.name}`;
+  }
+  if(d.type==='common')return s===1?`Veteran ${d.name}`:s===2?`Champion ${d.name}`:`Legendary ${d.name}`;
+  const f=firstName(d),the=f.startsWith('The ');
+  if(s===1)return the?`${f}, ${EPI[d.cls][h%3]}`:`${f} the ${EPI[d.cls][h%3]}`;
+  if(s===2)return `${f}, ${TITLE2[d.cls]} of ${R.city}`;
+  return the?`${f}, ${LEGEND[d.color]}`:`${f} the ${LEGEND[d.color]}`;
+}
+const CH_HERO=[
+ ['{first} came home from the border with a new scar and a new name: {n1}. The taverns of {city} were telling the story before {first} had finished telling it.','After a season of hard fights, the people of {city} stopped calling {first} a newcomer. They started saying {n1} instead, and the name stuck.','A {foe} had haunted the roads around {city} for years. Then it met {first}, and it haunted nothing ever again. From that day {first} was {n1}.'],
+ ['{n2} now leads a company of their own. Recruits travel from every corner of {realm} hoping to be chosen, and most are sent home with a bruise and a kind word.','The rulers of {city} offered {first} a title, a hall and a pension. {first} took the title, gave the hall to the orphans of {city} and spent the pension on better dice.','Word reached the Arcane Spires that {first} had won forty duels in a row. The wizards checked the dice for enchantments, found none, and wrote {n2} into their records.'],
+ ['Songs about {n3} are sung in all eight realms, and even the Free Companies raise a cup to the name. Some say {first} has held a shard of the Great Die. {first} only smiles.','When {n3} walks into a hall, the dice on every table go quiet. Children in {city} play at being {first}, and the old folk swear they knew {first} when.','Legend says {n3} once rolled a lost shard of the Great Die and saw every possible future at once. Asked about it, {first} says only: "I liked this one best."']
+];
+const CH_MON=[
+ ['The {n0} has grown old and cunning. Hunters in {realm} now leave offerings at its lair instead of traps.','Survivors of its attacks began calling it the {n1}. The name was meant as a warning.'],
+ ['The {n2} rules the wild places around {city}. Other monsters keep their distance, and travellers take the long road round.','Three armies were sent to drive off the {n2}. It kept their banners as trophies.'],
+ ['{n3} is the story parents in {realm} tell to bring children home before dark. The story is true.','Scholars in the Arcane Spires believe {n3} was touched by a shard of the Great Die, which is why it never stays down.']
+];
+const CH_COM=[
+ ['After enough fights, this {job} earned the right to be called a veteran, and the right to complain about the new recruits.'],
+ ['Now a champion, this {job} trains newcomers in {city} and drinks for free in every tavern in {realm}.'],
+ ['Nobody expected a humble {job} to become a legend. That is exactly why the story is so popular in {realm}.']
+];
+function chapters(d){
+  const R=REALM[d.color],h=hashStr(d.id+'ch');
+  const foeC=COL[d.color].beats,foeL=foeC?MONSTERS[foeC].filter(m=>m[0]!==11):[[0,'bandit gang']];
+  const vars={first:firstName(d),city:R.city,realm:R.name,foe:foeL[h%foeL.length][1],job:d.type==='common'?JOBN[d.color][d.job]:'',n0:d.name,n1:dname(d,4),n2:dname(d,7),n3:dname(d,10)};
+  const fill=t=>t.replace(/\{(\w+)\}/g,(_,k)=>vars[k]);
+  const set=d.type==='common'?CH_COM:d.arch!=null?CH_MON:CH_HERO;
+  return set.map((opts,k)=>capFirst(fill(opts[(h>>>(k*3))%opts.length]).replace(/\b([Tt])he The /g,'$1he ').replace(/\bthe The /g,'the ')));
+}
+function evoTile(svg,lv){
+  // frame and level badge on top of a tile
+  const s=stageOf(lv);if(lv<=1)return svg;
+  const frame=s===3?'<rect x="1" y="1" width="62" height="62" rx="14" fill="none" stroke="#f5c542" stroke-width="3"/><rect x="5.5" y="5.5" width="53" height="53" rx="10" fill="none" stroke="#fff3c4" stroke-width="1.4" stroke-opacity=".9"/>':s===2?'<rect x="1" y="1" width="62" height="62" rx="14" fill="none" stroke="#e8c35a" stroke-width="3"/>':s===1?'<rect x="1" y="1" width="62" height="62" rx="14" fill="none" stroke="#cfd6de" stroke-width="3"/>':'';
+  const badge=`<circle cx="11.5" cy="52.5" r="8" fill="#1b1f27" stroke="${s>=2?'#f5c542':'#ffffff'}" stroke-width="1.4"/><text x="11.5" y="56" font-size="${lv>=10?8:9.5}" font-weight="800" text-anchor="middle" fill="#ffffff" font-family="system-ui,sans-serif">${lv}</text>`;
+  return svg.replace('</svg>',frame+badge+'</svg>');
+}
+const tileLv=(d,lv)=>evoTile(tileSVG(d),lv||1);
+function upgradeDie(id){
+  const d=DIE[id],lv=lvOf(id);if(!owned(id)||lv>=10)return;
+  const cost=upCost(d,lv);if(P.coins<cost){toast(`You need ${cost-P.coins} more gold.`);return}
+  P.coins-=cost;P.lv[id]=lv+1;saveP();applySettings();
+  const nl=lv+1,s=stageOf(nl);
+  if(s>stageOf(lv)){
+    Snd.win();
+    openModal(`<div style="text-align:center;display:grid;gap:10px;justify-items:center"><p class="eyebrow">Evolution · ${STAGE[s]}</p>${tileLv(d,nl)}<h2>${esc(dname(d,lv))} becomes<br>${esc(dname(d,nl))}</h2><p class="muted">${s===1?'+1 to every attack roll.':s===2?'+1 to every defence roll.':'+1 attack die.'} New chapter unlocked.</p><p style="max-width:56ch;text-align:left">${esc(chapters(d)[s-1])}</p><button class="btn primary" id="evoOk">Read the full page</button></div>`);
+    $('#evoOk').onclick=()=>showDie(id);
+  }else{Snd.heal();toast(`${dname(d,nl)} is now level ${nl}.`);showDie(id)}
+  checkMercs();refreshScreen();
+}
+
+// ================= World history =================
+const HISTORY=[
+ ['The Table','Before there were realms there was only the Table, a flat and endless plain where the first people gambled for everything they had. The Great Die belonged to no one, and everyone wanted it.'],
+ ['The Throw','Someone threw the Great Die. Every realm claims it was a stranger from somewhere else. It struck the top of the world and burst into eight coloured shards.'],
+ ['The Eight Shards','Where each shard landed, a realm grew around it: fire in the Ember Reach, sea in the Tidewater Isles, forest in the Wildwood, stone in the Stonehold Deeps, storm on the Steppes, light at the Dawn Cloisters, dusk in the Shadowmarch and magic in the Arcane Spires.'],
+ ['The Dice Wars','For three hundred years the realms fought real wars over the shards. Nobody won. Every realm lost something it still talks about.'],
+ ['The Treaty of the Table','Exhausted, the eight rulers met at the old Table and swore that every quarrel would be settled with dice. Fighters would be knocked out, never killed. That is why nobody dies in a dice battle, and why every hero carries a die.'],
+ ['The Free Companies','Not everyone signed. Grey sellswords who owe nothing to any colour still wander between the realms, fighting for whoever pays. They choose employers carefully, and they only come to those who have proved themselves.'],
+ ['Today','The shards have never been put back together. Every realm believes the Great Die will be whole again one day, and every realm means to be holding it when that happens. Somebody, somewhere, wants it back.']
+];
+const MYTH={
+ red:'Smiths say the Red shard still burns under Cindermarch and that every forge in the Reach is lit from it. On the coldest night of the year they leave one hearth unlit, to remind it who is in charge.',
+ blue:'Islanders believe the Blue shard sank to the bottom of the sea and that the tides are its heartbeat. Captains drop one die overboard at the start of every voyage, for luck and for rent.',
+ green:'The Elder Grove grew around the Green shard in a single night. Its oldest tree has eight rings where there should be eight hundred, and nobody can explain it.',
+ brown:'Dwarven records say the Brown shard lies exactly one mile beneath Anvilhall. They have been digging toward it for eleven centuries and are, they insist, almost there.',
+ yellow:'The Yellow shard is said to ride the storm clouds, never touching the ground. When lightning strikes the same place twice, steppe riders gather there and wait for a third.',
+ white:'The monks of Lumen Abbey keep the White shard on an altar no one may look at directly. Pilgrims are told it glows. The monks will not say whether it is still there.',
+ black:'Nobody in the Shadowmarch admits to knowing where the Black shard is. That is how you can tell they all know.',
+ purple:'The wizards of Prismgate cut the Purple shard into a thousand lenses to study it. Each lens shows a slightly different future, which explains most of their arguments.',
+ grey:'The Companies say there is a ninth shard, small and grey, and that their founder carried it in a boot. They say a great many things after midnight.'
+};
+REALM.grey={name:'the Free Companies',city:'the Crossroads Inn',history:'The Free Companies are sellswords who never signed the Treaty of the Table. Their dice are cut from the dull grey stone found where the Great Die first struck. Grey dice favour no colour and fear none.',twist:'hired out of the Crossroads Inn'};
+function advText(c){
+  if(!c.beats)return 'No colour has an advantage over it, and it has none.';
+  return `Has the advantage over ${COL[c.beats].name}. ${beatenBy(c.id).name} has the advantage over it.`;
+}
+
 // ================= Dice info =================
 function abilityLine(d){
   const out=[];
@@ -870,26 +1050,30 @@ function abilityLine(d){
   return out;
 }
 function statLine(d){return `HP ${d.hp} · ATK ${d.atk} · DEF ${d.def} · ${d.ranged?'Ranged':'Melee'}`}
-const RAR_PRICE={common:30,rare:90,epic:160,legendary:450}, RAR_SELL={common:8,rare:25,epic:45,legendary:120};
-function statChips(d,u){
-  return `<span class="tchip">HP ${u?`${u.hp}/${u.maxHp}`:d.hp}</span><span class="chip a" title="Attack dice">${IC_ATK}${u?atkCount(u,0):d.atk}</span><span class="chip d" title="Defence dice">${IC_DEF}${u?defCount(u):d.def}</span><span class="tchip">${d.ranged?'Ranged':'Melee'}</span><span class="tchip">${d.cost} pts</span>`;
+const RAR_PRICE={common:30,rare:90,epic:160,legendary:450}, RAR_SELL={common:8,rare:25,epic:45,legendary:120,secret:0};
+function statChips(d,u,lv){
+  const E=eff(d,u?u.lv:lv||1);
+  const fl=(E.atkFlat?'<span class="tchip">+1 attack roll</span>':'')+(E.defFlat?'<span class="tchip">+1 defence roll</span>':'');
+  return `<span class="tchip">HP ${u?`${u.hp}/${u.maxHp}`:E.hp}</span><span class="chip a" title="Attack dice">${IC_ATK}${u?atkCount(u,0):E.atk}</span><span class="chip d" title="Defence dice">${IC_DEF}${u?defCount(u):E.def}</span><span class="tchip">${d.ranged?'Ranged':'Melee'}</span><span class="tchip">${d.cost} pts</span>${fl}`;
 }
+const secretLocked=d=>d.type==='merc'&&!owned(d.id);
 function dieInfo(d,u){
-  const c=COL[d.color];
-  return `<div class="info"><div class="info-head">${tileSVG(d)}<div><b>${esc(d.name)}</b><div class="muted" style="font-size:.78rem">${c.name} ${typeName(d.type)} · ${esc(d.sub)} · <span class="rar ${d.rarity}">${d.rarity}</span></div></div></div>
-  <div class="tip-stats">${statChips(d,u)}</div>
+  const c=COL[d.color],lv=u?u.lv:lvOf(d.id);
+  return `<div class="info"><div class="info-head">${tileLv(d,lv)}<div><b>${esc(u?u.name:dname(d,lv))}</b>${lv>1?` <span class="tchip">Lv ${lv}</span>`:''}<div class="muted" style="font-size:.78rem">${c.name} ${typeName(d.type)} · ${esc(d.sub)} · <span class="rar ${d.rarity}">${d.rarity}</span></div></div></div>
+  <div class="tip-stats">${statChips(d,u,lv)}</div>
   ${abilityLine(d).map(l=>`<div>${l}</div>`).join('')}
-  <div><b>${c.pn}</b>: ${c.pt} <span class="muted">Beats ${COL[c.beats].name}, weak to ${beatenBy(c.id).name}.</span></div>
+  <div><b>${c.pn}</b>: ${c.pt} <span class="muted">${advText(c)}</span></div>
   <button class="btn small" data-info="${d.id}">Read its guide page</button></div>`;
 }
 function tipHTML(d,u){
-  const c=COL[d.color], L=lore(d);
+  const c=COL[d.color], L=lore(d), lv=u?u.lv:lvOf(d.id);
+  if(!u&&secretLocked(d))return `<div class="tip-head">${secretTile()}<div><b>Secret mercenary</b><div class="muted">Grey · Free Companies</div></div></div><div class="tip-fluff">A grey sellsword who has not chosen you yet. Rumour says: ${esc(mercHint(d).toLowerCase())}.</div>`;
   let st='';
   if(u){const s=[];if(u.guard)s.push('Guarded');if(u.poison)s.push('Poisoned');if(u.stun)s.push('Stuck');if(u.hex||u.hexNow)s.push('Hexed');if(u.chill)s.push('Chilled');if(u.ab)s.push(u.cd>0?`${ABIL[u.ab].n} ready in ${u.cd}`:`${ABIL[u.ab].n} ready`);if(s.length)st=`<div class="tip-status">${s.join(' · ')}</div>`}
-  return `<div class="tip-head">${tileSVG(d)}<div><b>${esc(d.name)}</b><div class="muted">${c.name} ${typeName(d.type)} · ${esc(d.sub)}</div><span class="rar ${d.rarity}">${d.rarity}</span></div></div>
-  <div class="tip-stats">${statChips(d,u)}</div>${st}
+  return `<div class="tip-head">${tileLv(d,lv)}<div><b>${esc(u?u.name:dname(d,lv))}</b><div class="muted">${c.name} ${typeName(d.type)} · ${esc(d.sub)}</div><span class="rar ${d.rarity}">${d.rarity}</span>${lv>1?` <span class="tchip">Lv ${lv}${stageOf(lv)?' · '+STAGE[stageOf(lv)]:''}</span>`:''}</div></div>
+  <div class="tip-stats">${statChips(d,u,lv)}</div>${st}
   ${abilityLine(d).map(l=>`<div>${l}</div>`).join('')}
-  <div><b>${c.pn}</b>: ${c.pt} <span class="muted">Beats ${COL[c.beats].name}.</span></div>
+  <div><b>${c.pn}</b>: ${c.pt} <span class="muted">${advText(c)}</span></div>
   <div class="tip-fluff">${esc(L.fluff)}</div>
   ${u?'':`<div class="tip-own">${owned(d.id)?`In your portfolio: ${owned(d.id)}`:'Not in your portfolio yet'}</div>`}`;
 }
@@ -927,21 +1111,36 @@ const infoBtn=d=>`<button class="ibtn" data-info="${d.id}" aria-label="About ${e
 document.addEventListener('click',e=>{const b=e.target.closest('[data-info]');if(!b)return;e.stopPropagation();hideTip();showDie(b.dataset.info)},true);
 
 // --- guide page for one die
+function secretTile(){return `<svg class="tile" viewBox="0 0 64 64" aria-hidden="true"><rect x="2" y="2" width="60" height="60" rx="13" fill="#3a3d44" stroke="#767a83" stroke-width="2" stroke-dasharray="4 3"/><text x="32" y="43" text-anchor="middle" font-size="30" font-weight="800" fill="#c9ccd2" font-family="Georgia,serif">?</text></svg>`}
 function showDie(id){
-  const d=DIE[id], own=owned(id), L=lore(d), c=COL[d.color], st=P.stats[id];
+  const d=DIE[id], own=owned(id), c=COL[d.color];
+  if(secretLocked(d)){
+    openModal(`<div class="modal-head"><div><p class="eyebrow">Grey · the Free Companies</p><h2>Secret mercenary</h2></div><button class="btn small" data-close>Close</button></div>
+    <div class="dpage"><div class="dpage-art">${secretTile()}<span class="rar secret">secret</span></div><div class="dpage-body"><p>${esc(REALM.grey.history)}</p><blockquote class="fluff">Rumour at the Crossroads Inn: this one comes to those who ${esc(mercHint(d).replace(/^\w/,x=>x.toLowerCase()))}.</blockquote><p class="muted">Mercenaries cannot be bought, won as spoils or found in packs.</p></div></div>`,true);
+    return;
+  }
+  const lv=lvOf(id), L=lore(d), st=P.stats[id], stg=stageOf(lv), ch=chapters(d);
   const rec=st?`<div class="recgrid"><div><b>${st[0]}</b><span>battles</span></div><div><b>${st[1]}</b><span>wins</span></div><div><b>${st[2]}</b><span>knockouts</span></div><div><b>${st[3]}</b><span>damage</span></div></div>`:'<p class="muted">Not fielded yet. Its record starts the first time it fights for you.</p>';
-  openModal(`<div class="modal-head"><div><p class="eyebrow">${c.name} · ${esc(REALM[d.color].name)}</p><h2>${esc(d.name)}</h2></div><button class="btn small" data-close>Close</button></div>
+  const pips=Array.from({length:10},(_,k)=>`<i class="${k<lv?'on':''} ${[3,6,9].includes(k)?'evo':''}" title="Level ${k+1}${[3,6,9].includes(k)?' · '+STAGE[stageOf(k+1)]:''}"></i>`).join('');
+  const cost=lv<10?upCost(d,lv):0, nextStage=stageOf(lv+1)>stg;
+  const nextTxt=lv>=10?'Fully evolved. This die is a Legend.':nextStage?`Level ${lv+1} evolves it into <b>${esc(dname(d,lv+1))}</b> (${stageOf(lv+1)===1?'+1 to every attack roll':stageOf(lv+1)===2?'+1 to every defence roll':'+1 attack die'}) and unlocks a new chapter.`:`Level ${lv+1}: +${lvHp(d,lv+1)-lvHp(d,lv)} health.${stg<3?` Evolves at level ${[4,7,10][stg]}.`:''}`;
+  const chap=[0,1,2].map(k=>stg>k?`<section class="chapter"><h4>${STAGE[k+1]} · ${esc(dname(d,[4,7,10][k]))}</h4><p>${esc(ch[k])}</p></section>`:`<section class="chapter locked"><h4>${STAGE[k+1]} chapter</h4><p>Reach level ${[4,7,10][k]} to unlock this part of the story.</p></section>`).join('');
+  openModal(`<div class="modal-head"><div><p class="eyebrow">${c.name} · ${esc(REALM[d.color].name)}</p><h2>${esc(dname(d,lv))}</h2>${stg?`<p class="muted" style="font-size:.84rem">Evolved from ${esc(d.name)}</p>`:''}</div><button class="btn small" data-close>Close</button></div>
   <div class="dpage">
-    <div class="dpage-art">${tileSVG(d)}<span class="rar ${d.rarity}">${d.rarity} ${typeName(d.type).toLowerCase()}</span><span class="muted" style="font-size:.82rem">${esc(d.sub)}</span><span class="ownline">${own?`You own ${own}`:'Not owned yet'}</span></div>
+    <div class="dpage-art">${tileLv(d,lv)}<span class="rar ${d.rarity}">${d.rarity} ${typeName(d.type).toLowerCase()}</span><span class="muted" style="font-size:.82rem">${esc(d.sub)}</span><span class="ownline">${own?`You own ${own}`:'Not owned yet'}</span></div>
     <div class="dpage-body">
-      <section><h3>What it does</h3><div class="tip-stats">${statChips(d)}</div>${abilityLine(d).map(l=>`<p>${l}</p>`).join('')}<p><b>${c.pn}</b> (${c.name} power): ${c.pt} Beats ${COL[c.beats].name}; weak to ${beatenBy(c.id).name}.</p></section>
+      <section><h3>Level ${lv} of 10${stg?` · ${STAGE[stg]}`:''}</h3><div class="pips">${pips}</div><p>${nextTxt}</p>
+        ${lv<10?(own?`<div><button class="btn small ${P.coins>=cost?'primary':''}" id="upBtn" ${P.coins>=cost?'':'disabled'}>Upgrade to level ${lv+1} · ${cost} gold</button>${P.coins<cost?` <span class="muted" style="font-size:.82rem">You have ${P.coins} gold.</span>`:''}</div>`:'<p class="muted" style="font-size:.84rem">Own this die to level it up.</p>'):''}</section>
+      <section><h3>What it does</h3><div class="tip-stats">${statChips(d,null,lv)}</div>${abilityLine(d).map(l=>`<p>${l}</p>`).join('')}<p><b>${c.pn}</b> (${c.name} power): ${c.pt} ${advText(c)}</p></section>
       <section><h3>History</h3><p>${esc(L.history)}</p></section>
       <blockquote class="fluff">${esc(L.fluff)}</blockquote>
+      ${chap}
       <section><h3>Service record</h3>${rec}</section>
     </div>
   </div>
-  <div class="dpage-foot">${own>1?`<button class="btn small" id="sellOne">Sell one spare for ${RAR_SELL[d.rarity]} gold</button>`:''}${!own?`<span class="muted">Get it from packs, the market, or by beating an army that fields it.</span>`:''}</div>`,true);
-  if($('#sellOne'))$('#sellOne').onclick=()=>{if(owned(id)<2)return;P.col[id]--;P.coins+=RAR_SELL[d.rarity];saveP();applySettings();toast(`Sold a spare ${d.name} for ${RAR_SELL[d.rarity]} gold.`);showDie(id);refreshScreen()};
+  <div class="dpage-foot">${own>1?`<button class="btn small" id="sellOne">Sell one spare for ${RAR_SELL[d.rarity]||40} gold</button>`:''}${!own?`<span class="muted">Get it from packs, the market, or by beating an army that fields it.</span>`:''}</div>`,true);
+  if($('#upBtn'))$('#upBtn').onclick=()=>upgradeDie(id);
+  if($('#sellOne'))$('#sellOne').onclick=()=>{if(owned(id)<2)return;P.col[id]--;P.coins+=RAR_SELL[d.rarity]||40;saveP();applySettings();toast(`Sold a spare ${d.name} for ${RAR_SELL[d.rarity]||40} gold.`);showDie(id);refreshScreen()};
 }
 function refreshScreen(){if(screen==='collection')renderCollection();if(screen==='shop')renderShop();if(screen==='build'&&BU)renderBuilder()}
 
@@ -953,7 +1152,8 @@ const pFilter={color:'all'};
 function renderCollection(){
   const ownU=DICE.filter(d=>owned(d.id)).length, tot=sum(Object.values(P.col));
   const R=P.record;
-  $('#colSummary').innerHTML=`<b>${ownU}</b> of 400 different dice · ${tot} dice in all · record <b>${R.w}</b>–<b>${R.l}</b>${R.d?`–${R.d}`:''}`;
+  const mercN=MERCS.filter((m,i)=>owned('grey-x-'+i)).length;
+  $('#colSummary').innerHTML=`<b>${ownU-mercN}</b> of 400 different dice${mercN?` · <b>${mercN}</b> of 10 mercenaries`:''} · ${tot} dice in all · record <b>${R.w}</b>–<b>${R.l}</b>${R.d?`–${R.d}`:''}`;
   $$('#pTabs button').forEach(b=>b.classList.toggle('on',b.dataset.pt===pTab));
   $('#pAlbum').hidden=pTab!=='album';$('#pArmies').hidden=pTab!=='armies';$('#pRealms').hidden=pTab!=='realms';
   if(pTab==='album')renderAlbum();else if(pTab==='armies')renderArmies();else renderRealms();
@@ -961,16 +1161,16 @@ function renderCollection(){
 }
 $('#pTabs').addEventListener('click',e=>{const b=e.target.closest('[data-pt]');if(b){pTab=b.dataset.pt;renderCollection()}});
 function renderAlbum(){
-  $('#cColors').innerHTML=`<button class="cchip ${pFilter.color==='all'?'on':''}" data-pc2="all">All realms</button>`+COLORS.map(c=>`<button class="cchip ${pFilter.color===c.id?'on':''}" data-pc2="${c.id}"><span class="sw" style="background:${c.hex}"></span>${c.name}</button>`).join('');
+  $('#cColors').innerHTML=`<button class="cchip ${pFilter.color==='all'?'on':''}" data-pc2="all">All realms</button>`+[...COLORS,GREY].map(c=>`<button class="cchip ${pFilter.color===c.id?'on':''}" data-pc2="${c.id}"><span class="sw" style="background:${c.hex}"></span>${c.name}</button>`).join('');
   const t=$('#cType').value, o=$('#cOwned').value;
   let h='';
-  for(const c of COLORS){
+  for(const c of [...COLORS,GREY]){
     if(pFilter.color!=='all'&&pFilter.color!==c.id)continue;
-    const all=DICE.filter(d=>d.color===c.id), n=all.filter(d=>owned(d.id)).length;
+    const all=DICE.filter(d=>d.color===c.id), n=all.filter(d=>owned(d.id)).length, tot=all.length;
     const list=all.filter(d=>(t==='all'||d.type===t)&&(o==='all'||(o==='owned'?owned(d.id):!owned(d.id))));
     if(!list.length)continue;
-    h+=`<section class="realm-sec"><div class="realm-head" style="--rc:${c.hex}"><span class="sw big" style="background:${c.hex}"></span><div><h3>${c.name} · ${esc(REALM[c.id].name)}</h3><span class="muted">${n} of 50 collected${n===50?' · complete set':''}</span></div><div class="meter" style="flex:1;max-width:220px"><i style="width:${n*2}%;background:${c.hex}"></i></div></div>
-    <div class="cgrid">${list.map(d=>{const k=owned(d.id);return `<button class="ccard ${k?'':'locked'}" data-die="${d.id}" data-tip="${d.id}" aria-label="${esc(d.name)}${k?'':' (not owned)'}">${k>1?`<span class="cnt">×${k}</span>`:''}${tileSVG(d)}<span class="nm">${esc(d.name)}</span><span class="rar ${d.rarity}">${typeName(d.type)}</span></button>`}).join('')}</div></section>`;
+    h+=`<section class="realm-sec"><div class="realm-head" style="--rc:${c.hex}"><span class="sw big" style="background:${c.hex}"></span><div><h3>${c.name} · ${esc(REALM[c.id].name)}${c.id==='grey'?' <span class="rar secret">secret</span>':''}</h3><span class="muted">${n} of ${tot} collected${n===tot?' · complete set':''}</span></div><div class="meter" style="flex:1;max-width:220px"><i style="width:${n/tot*100}%;background:${c.hex}"></i></div></div>
+    <div class="cgrid">${list.map(d=>{const k=owned(d.id),lv=lvOf(d.id);if(secretLocked(d))return `<button class="ccard locked secret" data-die="${d.id}" data-tip="${d.id}" aria-label="Secret mercenary">${secretTile()}<span class="nm">??? </span><span class="rar secret">secret</span></button>`;return `<button class="ccard ${k?'':'locked'}" data-die="${d.id}" data-tip="${d.id}" aria-label="${esc(d.name)}${k?'':' (not owned)'}">${k>1?`<span class="cnt">×${k}</span>`:''}${k?tileLv(d,lv):tileSVG(d)}<span class="nm">${esc(k?dname(d,lv):d.name)}</span><span class="rar ${d.rarity}">${typeName(d.type)}${lv>1?' · Lv '+lv:''}</span></button>`}).join('')}</div></section>`;
   }
   $('#cGrid').innerHTML=h||'<p class="muted">No dice match these filters.</p>';
 }
@@ -1002,13 +1202,18 @@ $('#pArmies').addEventListener('click',e=>{
   if(dd){hideTip();showDie(dd.dataset.die)}
 });
 function renderRealms(){
+  const mercN=MERCS.filter((m,i)=>owned('grey-x-'+i)).length;
   $('#pRealms').innerHTML=`<div class="panel" style="padding:16px;margin-bottom:12px"><p class="eyebrow">The Great Die</p><p style="max-width:70ch;margin-top:6px">${esc(WORLD_INTRO)}</p></div>
+  <div class="panel history" style="padding:16px;margin-bottom:12px"><h3>A short history of the realms</h3><ol class="timeline">${HISTORY.map(([t,x],k)=>`<li><span class="tl-n">${k+1}</span><div><b>${esc(t)}</b><p>${esc(x)}</p></div></li>`).join('')}</ol></div>
   <div class="realms">${COLORS.map(c=>{const R=REALM[c.id],n=DICE.filter(d=>d.color===c.id&&owned(d.id)).length;
     return `<div class="realm panel" style="--rc:${c.hex}"><div class="realm-top">${tileSVG(DIE[c.id+'-m-9'])}<div><p class="eyebrow">${c.name} · ${c.title}</p><h3>${esc(capFirst(R.name))}</h3><span class="muted" style="font-size:.82rem">Capital: ${esc(R.city)} · ${n}/50 collected</span></div></div>
     <p>${esc(R.history)}</p>
+    <p class="myth"><b>Myth.</b> ${esc(MYTH[c.id])}</p>
     <p><b>${c.pn}</b>: ${c.pt}</p>
-    <p class="muted" style="font-size:.86rem">Beats ${COL[c.beats].name} · weak to ${beatenBy(c.id).name} · Legendary: ${esc(DIE[c.id+'-m-9'].name)}</p>
-    <div class="army-tiles">${[0,1,2].map(k=>{const d=DIE[`${c.id}-h-${k}`];return `<span class="atile" data-tip="${d.id}" data-die="${d.id}">${tileSVG(d)}</span>`}).join('')}</div></div>`}).join('')}</div>`;
+    <p class="muted" style="font-size:.86rem">${advText(c)} Legendary: ${esc(DIE[c.id+'-m-9'].name)}</p>
+    <div class="army-tiles">${[0,1,2].map(k=>{const d=DIE[`${c.id}-h-${k}`];return `<span class="atile" data-tip="${d.id}" data-die="${d.id}">${tileSVG(d)}</span>`}).join('')}</div></div>`}).join('')}
+    <div class="realm panel" style="--rc:${GREY.hex}"><div class="realm-top">${secretTile()}<div><p class="eyebrow">Grey · Free Companies</p><h3>The Free Companies</h3><span class="muted" style="font-size:.82rem">Base: ${esc(REALM.grey.city)} · ${mercN}/10 mercenaries</span></div></div>
+    <p>${esc(REALM.grey.history)}</p><p class="myth"><b>Myth.</b> ${esc(MYTH.grey)}</p><p><b>${GREY.pn}</b>: ${GREY.pt}</p><p class="muted" style="font-size:.86rem">Ten mercenaries ride with the Companies. None can be bought. Each one joins a commander who earns it.</p></div></div>`;
 }
 $('#pRealms').addEventListener('click',e=>{const dd=e.target.closest('[data-die]');if(dd){hideTip();showDie(dd.dataset.die)}});
 
@@ -1027,7 +1232,7 @@ function starterPick(after){
   };
 }
 function rollPack(color){
-  const pool=color?DICE.filter(d=>d.color===color):DICE;
+  const pool=color?DICE.filter(d=>d.color===color):DICE.filter(d=>d.color!=='grey');
   const com=pool.filter(d=>d.type==='common'), rare=pool.filter(d=>d.type!=='common'&&d.rarity!=='legendary'), leg=pool.filter(d=>d.rarity==='legendary');
   const out=[];const nC=color?2:3,nR=color?2:1;
   for(let k=0;k<nC;k++)out.push(pick(com).id);
@@ -1053,7 +1258,8 @@ function showPack(ids,title,done){
 // ================= Shop & market =================
 let packColor='red';
 function rollMarket(){
-  const com=DICE.filter(d=>d.type==='common'),rare=DICE.filter(d=>d.type!=='common'&&d.rarity!=='legendary'),leg=DICE.filter(d=>d.rarity==='legendary');
+  const pub=DICE.filter(d=>d.color!=='grey');
+  const com=pub.filter(d=>d.type==='common'),rare=pub.filter(d=>d.type!=='common'&&d.rarity!=='legendary'),leg=pub.filter(d=>d.rarity==='legendary');
   const ids=new Set();
   while(ids.size<3)ids.add(pick(com).id);
   while(ids.size<5)ids.add(pick(rare).id);
@@ -1080,9 +1286,9 @@ function renderShop(){
 $('#packColors').addEventListener('click',e=>{const b=e.target.closest('[data-pc]');if(b){packColor=b.dataset.pc;renderShop()}});
 $('#buyMixed').onclick=()=>buy(null,100);
 $('#buyColor').onclick=()=>buy(packColor,150);
-function buy(color,price){if(P.coins<price)return;P.coins-=price;const ids=rollPack(color);ids.forEach(id=>addDie(id));saveP();applySettings();showPack(ids,color?`${COL[color].name} pack`:'Mixed pack',renderShop)}
+function buy(color,price){if(P.coins<price)return;P.coins-=price;const ids=rollPack(color);ids.forEach(id=>addDie(id));saveP();applySettings();showPack(ids,color?`${COL[color].name} pack`:'Mixed pack',()=>{renderShop();checkMercs()})}
 $('#market').addEventListener('click',e=>{const b=e.target.closest('[data-buy]');if(!b)return;const m=P.market[+b.dataset.buy],d=DIE[m.id],price=RAR_PRICE[d.rarity];
-  if(m.sold||P.coins<price)return;P.coins-=price;addDie(d.id);m.sold=true;saveP();applySettings();Snd.win();toast(`${d.name} joins your portfolio.`);renderShop()});
+  if(m.sold||P.coins<price)return;P.coins-=price;addDie(d.id);m.sold=true;saveP();applySettings();Snd.win();toast(`${d.name} joins your portfolio.`);renderShop();checkMercs()});
 $('#refreshMarket').onclick=()=>{if(P.coins<20)return;P.coins-=20;P.market=rollMarket();saveP();applySettings();renderShop()};
 $('#spareBox').addEventListener('click',e=>{
   if(e.target.id==='sellSpares'){$('#spareBox').innerHTML='<button class="btn small" id="sellYes" style="border-color:var(--hp);color:var(--hp)">Yes, sell them</button> <button class="btn small" id="sellNo">Keep them</button>';return}
@@ -1135,8 +1341,8 @@ function startMode(mode,preArmy){
     const lastA=store.get('lastArmy',null);
     const okLast=lastA&&lastA.every(s=>DIE[s.id])&&validFor(lastA,0)===''?lastA:null;
     if(preArmy&&validFor(preArmy,0)==='')BU.armies[0]=preArmy;
-    else BU.armies[0]=mode==='aivai'?randomArmy(S.budget,()=>9):(okLast||randomArmy(S.budget,poolCount(0)));
-    BU.armies[1]=mode==='pvp'?randomArmy(S.budget,poolCount(1)):randomArmy(S.budget,()=>9);
+    else BU.armies[0]=mode==='aivai'?randomArmy(S.budget,AIPOOL):(okLast||randomArmy(S.budget,poolCount(0)));
+    BU.armies[1]=mode==='pvp'?randomArmy(S.budget,poolCount(1)):randomArmy(S.budget,AIPOOL);
     go('build');renderBuilder();
     if(!P.tourBuild&&BU.ctrl[0]==='human'){P.tourBuild=true;saveP();setTimeout(startBuilderTour,300)}
   };
@@ -1144,7 +1350,7 @@ function startMode(mode,preArmy){
   begin();
 }
 function usesCollection(side){return !!BU&&((BU.mode==='cpu'&&side===0)||BU.mode==='pvp')}
-function poolCount(side){return id=>usesCollection(side)?owned(id):99}
+function poolCount(side){return id=>usesCollection(side)?owned(id):AIPOOL(id)}
 function validFor(army,side){
   if(!army.length) return 'Add at least one die.';
   if(armyCost(army)>S.budget) return `This army costs ${armyCost(army)} points. The limit is ${S.budget}.`;
@@ -1172,8 +1378,8 @@ function renderBuilder(){
     let h='';
     for(let k=0;k<3;k++){const x=inRow[k];
       if(!x){h+=`<div class="slot">Empty</div>`;continue;}
-      const d=DIE[x.s.id];
-      h+=`<div class="slot filled" data-tip="${d.id}">${tileSVG(d)}<span class="nm">${esc(d.name)}</span><span class="cost">${d.cost} pts</span><span class="row-btns"><button data-mv="${x.k}" ${other>=3?'disabled':''} aria-label="Move ${esc(d.name)} to the ${row==='front'?'back':'front'} rank">${row==='front'?'↓ Back':'↑ Front'}</button><button data-rm="${x.k}" aria-label="Remove ${esc(d.name)}">✕</button></span></div>`;
+      const d=DIE[x.s.id],lv=usesCollection(side)?lvOf(d.id):1;
+      h+=`<div class="slot filled" data-tip="${d.id}">${tileLv(d,lv)}<span class="nm">${esc(dname(d,lv))}</span><span class="cost">${d.cost} pts</span><span class="row-btns"><button data-mv="${x.k}" ${other>=3?'disabled':''} aria-label="Move ${esc(d.name)} to the ${row==='front'?'back':'front'} rank">${row==='front'?'↓ Back':'↑ Front'}</button><button data-rm="${x.k}" aria-label="Remove ${esc(d.name)}">✕</button></span></div>`;
     }
     el.innerHTML=h;
   });
@@ -1190,8 +1396,8 @@ function renderBuilder(){
     const avail=pc(d.id)-(used[d.id]||0);
     const can=army.length<6&&d.cost<=left&&avail>0;
     const why=army.length>=6?'Army full':avail<=0?'All in use':d.cost>left?'Too costly':'';
-    const al=abilityLine(d);
-    return `<div class="drow" data-tip="${d.id}">${tileSVG(d)}<div style="min-width:0"><div class="nm">${esc(d.name)} ${infoBtn(d)}</div><div class="sub">${COL[d.color].name} ${typeName(d.type)} · ${esc(d.sub)} · <span class="rar ${d.rarity}">${d.rarity}</span></div><div class="statline">${statLine(d)}</div>${al[0]?`<div class="ab">${al[0]}</div>`:''}</div>
+    const al=abilityLine(d),lv=usesCollection(side)?lvOf(d.id):1,E=eff(d,lv);
+    return `<div class="drow" data-tip="${d.id}">${tileLv(d,lv)}<div style="min-width:0"><div class="nm">${esc(dname(d,lv))} ${infoBtn(d)}</div><div class="sub">${COL[d.color].name} ${typeName(d.type)} · ${esc(d.sub)} · <span class="rar ${d.rarity}">${d.rarity}</span>${lv>1?` · <b>Lv ${lv}</b>`:''}</div><div class="statline">HP ${E.hp} · ATK ${E.atk}${E.atkFlat?'+1':''} · DEF ${E.def}${E.defFlat?'+1':''} · ${d.ranged?'Ranged':'Melee'}</div>${al[0]?`<div class="ab">${al[0]}</div>`:''}</div>
     <div class="side"><span class="cost">${d.cost} pts</span>${usesCollection(side)?`<span class="muted" style="font-size:.72rem">${avail} of ${owned(d.id)} free</span>`:''}<button class="btn small ${can?'primary':''}" data-add="${d.id}" ${can?'':'disabled'} title="${why}">${can?'Add':why}</button></div></div>`;
   }).join('')||`<p class="muted">No dice match. ${usesCollection(side)?'Visit the shop or win battles to collect more.':''}</p>`;
   const w=validFor(army,side);$('#bWarn').textContent=army.length?w:'';
@@ -1200,7 +1406,7 @@ function renderBuilder(){
   $('#bBack').textContent=side===0?'Back to menu':'Back';
   $('#bRandom').textContent=BU.ctrl[side]==='ai'?'Reroll':'Random';
   // floating summary bar (narrow screens)
-  $('#bMini').innerHTML=`<div class="mini-tiles">${[0,1,2,3,4,5].map(i=>army[i]?`<span>${tileSVG(DIE[army[i].id])}</span>`:'<span class="empty"></span>').join('')}</div><div class="mini-cost"><b>${cost}</b>/${S.budget} pts</div><button class="btn primary small" id="bNext2" ${w?'disabled':''}>${side===0?'Next':'Start battle'}</button>`;
+  $('#bMini').innerHTML=`<div class="mini-tiles">${[0,1,2,3,4,5].map(i=>army[i]?`<span>${tileLv(DIE[army[i].id],usesCollection(side)?lvOf(army[i].id):1)}</span>`:'<span class="empty"></span>').join('')}</div><div class="mini-cost"><b>${cost}</b>/${S.budget} pts</div><button class="btn primary small" id="bNext2" ${w?'disabled':''}>${side===0?'Next':'Start battle'}</button>`;
 }
 $('#bMini').addEventListener('click',e=>{if(e.target.id==='bNext2')$('#bNext').click();else if(e.target.closest('.mini-tiles'))$('#rosterPanel').scrollIntoView({behavior:reduced()?'auto':'smooth',block:'start'})});
 $('#bColors').addEventListener('click',e=>{const b=e.target.closest('[data-fc]');if(b){BU.filter.color=b.dataset.fc;renderBuilder()}});
@@ -1248,7 +1454,7 @@ const holdMs=()=>SPD.hold[S.dice]/spMul();
 const aiMs=()=>SPD.ai[S.ai]/spMul();
 async function pause(ms){const t=B.token;await sleep(ms);while(B.paused&&t===B.token)await sleep(120);if(t!==B.token)throw ABORT;}
 
-function makeUnit(spec,side,i){const d=DIE[spec.id];return{uid:side+'-'+i,id:d.id,d,side,name:d.name,color:d.color,row:spec.row||'front',hp:d.hp,maxHp:d.hp,atk:d.atk,def:d.def,ranged:d.ranged,ab:d.ab||null,pas:d.pas||null,perk:d.perk||null,cost:d.cost,cd:0,acted:false,poison:0,stun:0,hex:0,hexNow:false,chill:false,guard:false,guardBy:-1,luckUsed:false,reUsed:false,dmg:0,kos:0,stunnedNow:false}}
+function makeUnit(spec,side,i){const d=DIE[spec.id],lv=spec.lv||1,E=eff(d,lv);return{uid:side+'-'+i,id:d.id,d,side,lv,atkFlat:E.atkFlat,defFlat:E.defFlat,name:dname(d,lv),color:d.color,row:spec.row||'front',hp:E.hp,maxHp:E.hp,atk:E.atk,def:d.def,ranged:d.ranged,ab:d.ab||null,pas:d.pas||null,perk:d.perk||null,cost:d.cost,cd:0,acted:false,poison:0,stun:0,hex:0,hexNow:false,chill:false,guard:false,guardBy:-1,luckUsed:false,reUsed:false,dmg:0,kos:0,stunnedNow:false}}
 const foes=s=>B.units.filter(x=>x.side!==s&&x.hp>0);
 const friends=s=>B.units.filter(x=>x.side===s&&x.hp>0);
 const canReach=u=>u.ranged||u.row==='front';
@@ -1262,14 +1468,16 @@ function computeHit(att,tgt,o={},fixedA){
   const notes=[];const ed=!fixedA&&edge(att,tgt);
   let a=fixedA?fixedA.slice():rollN(atkCount(att,(o.extra||0)+(ed?1:0)));
   if(!fixedA&&att.color==='yellow'&&a.includes(1)){a=a.map(x=>x===1?r6():x);notes.push('Spark rerolled 1s')}
-  if(ed)notes.unshift(`${COL[att.color].name} beats ${COL[tgt.color].name}: +1 die`);
+  if(ed)notes.unshift(`${COL[att.color].name} advantage over ${COL[tgt.color].name}: +1 die`);
   let aSum=sum(a);
   const sixes=a.filter(x=>x===6).length;
   if(att.perk==='keen'&&sixes){aSum+=2*sixes;notes.push(`Keen +${2*sixes}`)}
   if(att.color==='red'&&sixes){aSum+=sixes;notes.push(`Blaze +${sixes}`)}
+  if(att.atkFlat){aSum+=att.atkFlat;notes.push('Veteran +1')}
   const d=o.ignoreDef?[]:rollN(defCount(tgt));
   let dSum=sum(d);
   if(!o.ignoreDef&&tgt.perk==='stout'){dSum+=1;notes.push('Stout +1')}
+  if(!o.ignoreDef&&tgt.defFlat){dSum+=tgt.defFlat;notes.push('Elite +1')}
   if(att.color==='purple'&&dSum>0){dSum-=1;notes.push('Pierce −1')}
   let dmg=Math.max(0,aSum-dSum);
   if(dmg>0&&att.perk==='fury'&&att.hp*2<=att.maxHp){dmg+=2;notes.push('Fury +2')}
@@ -1281,7 +1489,7 @@ function computeHit(att,tgt,o={},fixedA){
 function areaHit(att,t,total,kind){
   const notes=[];let dmg,d=[];
   if(kind==='blast')dmg=Math.ceil(total/2);
-  else{d=rollN(defCount(t));let ds=sum(d)+(t.perk==='stout'?1:0);if(att.color==='purple'&&ds>0)ds--;dmg=Math.max(0,total-ds)}
+  else{d=rollN(defCount(t));let ds=sum(d)+(t.perk==='stout'?1:0)+(t.defFlat||0);if(att.color==='purple'&&ds>0)ds--;dmg=Math.max(0,total-ds)}
   if(edge(att,t)){dmg+=2;notes.push('edge +2')}
   if(dmg>=3&&t.color==='brown')dmg--;
   if(t.perk==='nimble'&&r6()===6&&dmg>0){dmg=0;notes.push('dodged')}
@@ -1500,21 +1708,47 @@ async function humanDo(u,kind,t){
     else{if(B.mode!=='tutorial')autoSelect();else B.sel=null;paint()}
   }catch(e){swallow(e)}
 }
+function whyNot(sel,kind,t){
+  if(!sel)return 'Pick one of your dice first.';
+  if(kind==='ability'){const A=ABIL[sel.ab];if(sel.cd>0)return `${A.n} is recharging (${sel.cd} more ${sel.cd>1?'turns':'turn'}).`;if(A.t==='ally')return `${A.n} targets your own dice, not the enemy.`;return 'Pick one of the glowing dice.'}
+  if(!canReach(sel))return `${sel.name} is a melee die in your back rank. It can only attack once your front rank falls.`;
+  if(!sel.ranged&&t.row!=='front')return `${sel.name} fights hand to hand, so it can only hit the enemy front rank. ${t.name} is in the back rank.`;
+  const tz=foes(sel.side).filter(e=>e.row==='front'&&e.pas==='taunt');
+  if(tz.length&&!tz.includes(t))return `${tz[0].name} has Taunt: basic attacks must hit it first. Abilities such as Backstab, Sneak or Aimed Shot can reach past it.`;
+  return 'That die is not a legal target.';
+}
 $('#board').addEventListener('click',e=>{
   const c=e.target.closest('.unit');if(!c||!B)return;
   const u=B.units.find(x=>x.uid===c.dataset.uid);if(!u)return;
   if(isHumanTurn()&&B.pending&&B.tg.includes(u)){humanDo(B.sel,B.pending,u);return}
-  if(isHumanTurn()&&u.side===B.turn&&canAct(u)){selectUnit(u);Snd.click();paint();return}
+  if(isHumanTurn()&&u.side===B.turn&&canAct(u)&&!(B.pending&&B.sel&&ABIL[B.sel.ab]&&ABIL[B.sel.ab].t==='ally')){selectUnit(u);Snd.click();paint();return}
+  if(isHumanTurn()&&u.side!==B.turn&&B.sel&&B.sel.side===B.turn){
+    if(B.pending){toast(whyNot(B.sel,B.pending,u));return}
+    // quick attack: with a die selected, tap an enemy to attack it
+    if(canAct(B.sel)&&basicT(B.sel).includes(u)){coach.emit('pending',{kind:'attack'});humanDo(B.sel,'attack',u);return}
+    if(canAct(B.sel)){toast(whyNot(B.sel,'attack',u))}
+  }
   B.inspect=u;if(isHumanTurn()&&B.pending){B.pending=null;B.tg=[];B.hints={}}paint();
 });
-$('#orders').addEventListener('click',e=>{
+function onOrder(e){
   const b=e.target.closest('[data-o]');if(!b||b.disabled)return;
   const o=b.dataset.o;
   if(o==='end'){if(isHumanTurn())endTurn();return}
   if(!isHumanTurn())return;
   if(o==='cancel'){B.pending=null;B.tg=[];B.hints={};paint();return}
   if(o==='attack'||o==='ability'){if(B.pending===o){B.pending=null;B.tg=[];B.hints={};paint()}else setPending(o)}
-});
+}
+$('#orders').addEventListener('click',onOrder);
+$('#dock').addEventListener('click',onOrder);
+function renderDock(){
+  const d=$('#dock');
+  if(!B||B.over||screen!=='battle'||!isHumanTurn()){d.hidden=true;return}
+  d.hidden=false;const u=B.sel;
+  if(B.pending){d.innerHTML=`<span class="dock-msg"><b>Tap a glowing target</b><small>${B.pending==='attack'?'Attack':esc(ABIL[u.ab].n)} with ${esc(u.name)}</small></span><button class="btn small" data-o="cancel">Cancel</button>`;return}
+  if(!u||u.side!==B.turn||!canAct(u)){d.innerHTML=`<span class="dock-msg"><b>Tap one of your dice</b><small>${friends(B.turn).filter(canAct).length} ready</small></span><button class="btn small" data-o="end">End turn</button>`;return}
+  const bt=basicT(u),at=abilT(u),A=u.ab&&ABIL[u.ab];
+  d.innerHTML=`<span class="dock-msg"><b>${esc(u.name)}</b><small>Tap an enemy to attack it</small></span><button class="btn small primary" data-o="attack" ${bt.length?'':'disabled'}>Attack</button>${A?`<button class="btn small" data-o="ability" ${at.length?'':'disabled'}>${A.n}${u.cd?` · ${u.cd}`:''}</button>`:''}<button class="btn small" data-o="end">End</button>`;
+}
 document.addEventListener('keydown',e=>{
   if(e.target.matches('input,select,textarea'))return;
   if(e.key==='Escape'){if(!$('#ov').hidden&&!$('#ov').dataset.lock){closeModal();return}if(B&&B.pending){B.pending=null;B.tg=[];B.hints={};paint()}return}
@@ -1533,6 +1767,9 @@ function startBattle(cfg){
   B={mode:cfg.mode,ctrl:cfg.ctrl,diff:cfg.diff||[null,null],armies:cfg.armies.map(a=>a.map(s=>({...s}))),names,
      units:[],turn:0,turnNo:0,used:0,limit:99,round:0,first:0,over:false,token:Math.random(),sel:null,tg:[],pending:null,hints:{},inspect:null,busy:false,ending:false,
      floats:[],log:[],stats:[{dmg:0,heal:0,kos:0},{dmg:0,heal:0,kos:0}],paused:false,speed:1,watch:cfg.ctrl[0]==='ai'&&cfg.ctrl[1]==='ai'};
+  const coll=s=>(cfg.mode==='cpu'&&s===0)||cfg.mode==='pvp';
+  const aiLv=df=>df==='hard'?3+Math.floor(Math.random()*4):df==='normal'?1+Math.floor(Math.random()*3):1;
+  B.armies.forEach((a,s)=>a.forEach(sp=>{if(!sp.lv)sp.lv=cfg.mode==='tutorial'?1:coll(s)?lvOf(sp.id):aiLv(B.diff[s])}));
   B.armies.forEach((a,s)=>assignRowsKeep(a).forEach((spec,i)=>B.units.push(makeUnit(spec,s,i))));
   advance();
   $('#log').innerHTML='';
@@ -1572,7 +1809,7 @@ function endBattle(w){
   for(const u of B.units){ if(!tracked.includes(u.side))continue; const st=P.stats[u.id]||[0,0,0,0]; st[0]++; if(winner===u.side)st[1]++; st[2]+=u.kos; st[3]+=u.dmg; P.stats[u.id]=st; }
   if(B.mode==='cpu'){
     reward=winner===0?{easy:40,normal:70,hard:110}[B.diff[1]]:15;P.coins+=reward;
-    if(winner===0)P.record.w++;else if(winner===1)P.record.l++;else P.record.d++;
+    if(winner===0){P.record.w++;P.streak=(P.streak||0)+1;P.bestStreak=Math.max(P.bestStreak||0,P.streak);if(B.diff[1]==='hard')P.hardWins=(P.hardWins||0)+1}else{if(winner===1)P.record.l++;else P.record.d++;P.streak=0}
     const sig=armySig(B.armies[0]);const ar=P.armyRec[sig]||{w:0,l:0};if(winner===0)ar.w++;else if(winner===1)ar.l++;P.armyRec[sig]=ar;
     if(winner===0){const ids=[...new Set(B.armies[1].map(s=>s.id))].filter(id=>DIE[id].rarity!=='legendary'||B.diff[1]==='hard');spoils=shuffle(ids.sort((a,b)=>(owned(a)?1:0)-(owned(b)?1:0)).slice(0,5)).slice(0,3)}
   }
@@ -1580,6 +1817,7 @@ function endBattle(w){
   if(B.mode==='tutorial'&&!P.tutDone&&winner===0){P.tutDone=true;reward=100;P.coins+=100;spoils=['green-m-0','red-m-2']}
   if(B.mode!=='aivai')P.market=null;
   saveP();applySettings();
+  setTimeout(checkMercs,reduced()?400:1200);
   const humanWon=(B.ctrl[0]==='human'&&B.ctrl[1]==='ai')?winner===0:null;
   if(humanWon===false)Snd.lose();else Snd.win();
   const mvp=B.units.slice().sort((a,b)=>(b.dmg+b.kos*6)-(a.dmg+a.kos*6))[0];
@@ -1601,7 +1839,7 @@ function endBattle(w){
       <button class="btn primary" id="rAgain">${B.mode==='tutorial'?'Play the walkthrough again':'Rematch'}</button>
     </div>`);
     const done=()=>{delete $('#ov').dataset.lock;closeModal()};
-    $$('[data-spoil]').forEach(b=>b.onclick=()=>{const id=b.dataset.spoil;addDie(id);saveP();Snd.win();hideTip();$('#spoils').innerHTML=`<div class="info-head">${tileSVG(DIE[id])}<div><b>${esc(DIE[id].name)}</b> joins your portfolio.<div class="muted" style="font-size:.8rem">Read its guide page any time from the Portfolio.</div></div></div>`});
+    $$('[data-spoil]').forEach(b=>b.onclick=()=>{const id=b.dataset.spoil;addDie(id);saveP();setTimeout(checkMercs,300);Snd.win();hideTip();$('#spoils').innerHTML=`<div class="info-head">${tileSVG(DIE[id])}<div><b>${esc(DIE[id].name)}</b> joins your portfolio.<div class="muted" style="font-size:.8rem">Read its guide page any time from the Portfolio.</div></div></div>`});
     $('#rMenu').onclick=()=>{done();go('menu')};
     if($('#rEdit'))$('#rEdit').onclick=()=>{done();if(BU){BU.step=0;go('build');renderBuilder()}else go('menu')};
     $('#rAgain').onclick=()=>{done();if(B.mode==='tutorial')startTutorial();else startBattle({mode:B.mode,ctrl:B.ctrl,diff:B.diff,armies:B.armies,names:B.names})};
@@ -1632,15 +1870,16 @@ function unitCard(u){
   if(u.chill)st.push('<span class="st bad">Chill</span>');
   if(u.stunnedNow&&u.side===B.turn)st.push('<span class="st">Skipped</span>');
   if(!canReach(u)&&!(u.ab&&ABIL[u.ab].t!=='enemy'))st.push('<span class="st">Reserve</span>');
+  if(u.pas==='taunt'&&u.row==='front')st.push('<span class="st taunt">Taunt</span>');
   const cd=u.ab?(u.cd>0?`<span class="chip cd" title="${ABIL[u.ab].n} ready in ${u.cd}">⟳${u.cd}</span>`:`<span class="chip ok" title="${ABIL[u.ab].n} ready">★</span>`):'';
   const hint=B.hints[u.uid]?`<span class="hint">${B.hints[u.uid]}</span>`:'';
-  return `<button class="${cls.join(' ')}" data-uid="${u.uid}" aria-label="${esc(u.name)}, ${u.hp} of ${u.maxHp} health">${hint}${tileSVG(u.d)}<span class="u-name">${esc(u.name)}</span><span class="hpbar"><i class="${pct<=35?'low':''}" style="width:${pct}%"></i></span><span class="u-line"><span>${u.hp}/${u.maxHp}</span><span class="chip a" title="Attack dice">${IC_ATK}${atkCount(u,0)}</span><span class="chip d" title="Defence dice">${IC_DEF}${defCount(u)}</span>${cd}</span><span class="u-st">${st.join('')}</span></button>`;
+  return `<button class="${cls.join(' ')}" data-uid="${u.uid}" aria-label="${esc(u.name)}, ${u.hp} of ${u.maxHp} health">${hint}${tileLv(u.d,u.lv)}<span class="u-name">${esc(u.name)}</span><span class="hpbar"><i class="${pct<=35?'low':''}" style="width:${pct}%"></i></span><span class="u-line"><span>${u.hp}/${u.maxHp}</span><span class="chip a" title="Attack dice">${IC_ATK}${atkCount(u,0)}</span><span class="chip d" title="Defence dice">${IC_DEF}${defCount(u)}</span>${cd}</span><span class="u-st">${st.join('')}</span></button>`;
 }
 function renderHalf(side){
   const el=side?$('#sideB'):$('#sideA');
   const alive=friends(side), out=B.units.filter(u=>u.side===side&&u.hp<=0);
   const rank=row=>{const us=alive.filter(u=>u.row===row);return `<div class="rank-tag">${row} rank</div><div class="rank">${us.map(unitCard).join('')}</div>`};
-  const head=`<div class="half-head"><span class="dot"></span>${esc(B.names[side])}${B.ctrl[side]==='ai'?` <span class="muted" style="font-weight:500">· ${B.diff[side]} AI</span>`:''}<span class="out">${out.length?'Out: '+out.map(u=>tileSVG(u.d)).join(''):''}</span></div>`;
+  const head=`<div class="half-head"><span class="dot"></span>${esc(B.names[side])}${B.ctrl[side]==='ai'?` <span class="muted" style="font-weight:500">· ${B.diff[side]} AI</span>`:''}<span class="out">${out.length?'Out: '+out.map(u=>tileLv(u.d,u.lv)).join(''):''}</span></div>`;
   el.innerHTML=side?head+rank('back')+rank('front'):rank('front')+rank('back')+head;
 }
 function renderTurnBox(){
@@ -1659,15 +1898,16 @@ function renderOrders(){
     o.innerHTML=`<p>${ready?`Pick one of your dice to give it orders. <b>${ready}</b> ready.`:'All your dice have acted.'}</p>${B.inspect?dieInfo(B.inspect.d,B.inspect):''}${end}`;return;
   }
   const bt=basicT(u),at=abilT(u),A=u.ab&&ABIL[u.ab];
-  const atkTxt=!canReach(u)?'Melee dice in the back rank cannot reach.':`Roll ${atkCount(u,0)} ${atkCount(u,0)>1?'dice':'die'} at ${u.ranged?'any enemy':'an enemy in the front rank'}.`;
+  const tz=foes(u.side).filter(e=>e.row==='front'&&e.pas==='taunt');
+  const atkTxt=!canReach(u)?'Melee dice in the back rank cannot reach.':`Roll ${atkCount(u,0)} ${atkCount(u,0)>1?'dice':'die'} at ${u.ranged?'any enemy':'an enemy in the front rank'}.${tz.length?` <b>${esc(tz[0].name)} has Taunt</b>, so basic attacks must hit it first.`:''}`;
   const abTxt=!A?'':u.cd>0?`Ready in ${u.cd} ${u.cd>1?'turns':'turn'}. ${A.x}`:A.x;
-  o.innerHTML=`<div class="info-head">${tileSVG(u.d)}<div><b>${esc(u.name)}</b><div class="muted" style="font-size:.78rem">${u.hp}/${u.maxHp} health · ${COL[u.color].name} ${typeName(u.d.type)}</div></div></div>
+  o.innerHTML=`<div class="info-head">${tileLv(u.d,u.lv)}<div><b>${esc(u.name)}</b><div class="muted" style="font-size:.78rem">${u.hp}/${u.maxHp} health · ${COL[u.color].name} ${typeName(u.d.type)}</div></div></div>
    <button class="act ${B.pending==='attack'?'on':''}" data-o="attack" ${bt.length?'':'disabled'}><kbd>A</kbd><b>Attack</b><span>${atkTxt}</span></button>
    ${A?`<button class="act ${B.pending==='ability'?'on':''}" data-o="ability" ${at.length?'':'disabled'}><kbd>S</kbd><b>${A.n}</b><span>${abTxt}</span></button>`:''}
    ${B.pending?`<p><b>Choose a target.</b> <span class="muted">Glowing dice can be picked.${S.hints&&Object.keys(B.hints).length?' Numbers show average damage.':''}</span></p><button class="btn small" data-o="cancel">Cancel (Esc)</button>`:''}
    ${end}`;
 }
-function renderBattle(){if(!B)return;renderHalf(1);renderHalf(0);renderTurnBox();renderOrders();coach.place()}
+function renderBattle(){if(!B)return;renderHalf(1);renderHalf(0);renderTurnBox();renderOrders();renderDock();coach.place()}
 
 // ================= Tutorial / coach =================
 const coach={on:false,i:0,steps:[],name:'Walkthrough',
@@ -1714,12 +1954,12 @@ function startTutorial(){
     {title:'Pick a die',t:'It is your turn. Click <b>Grukk Emberfist</b>, your Orc Warrior, to give him orders.',f:'[data-uid="0-0"]',wait:'select',ok:d=>d.u.uid==='0-0'},
     {title:'Choose an action',t:'Every die gets one action a turn. The sword number is how many attack dice it rolls; the shield number is how many defence dice it rolls. Choose <b>Attack</b>.',f:'#orders',wait:'pending',ok:d=>d.kind==='attack'},
     {title:'Pick a target',t:'The glowing goblins are the targets you can reach. Melee dice can only hit the enemy front rank. The number above each one is your average damage. Click a goblin.',f:'#sideB',wait:'resolved'},
-    {title:'The dice tray',t:'You rolled attack dice and the goblin rolled defence dice. Damage is your total minus theirs. Grukk is <b>Red</b> and goblins here are <b>Green</b>. Red beats Green, so you rolled one extra die.',f:'#tray'},
+    {title:'The dice tray',t:'You rolled attack dice and the goblin rolled defence dice. Damage is your total minus theirs. Grukk is <b>Red</b> and goblins here are <b>Green</b>. Red has the advantage over Green, so you rolled one extra die. An advantage helps, but it never guarantees a win.',f:'#tray'},
     {title:'Ranged attacks',t:'Now <b>Thalion Greenleaf</b>, your Ranger. Ranged dice reach either rank. Select him and use <b>Aimed Shot</b> on the Fire Imp at the back.',f:'[data-uid="0-1"]',wait:'resolved',ok:d=>d.u.uid==='0-1'},
     {title:'Recharging',t:'Abilities need time to recharge. ★ means ready. ⟳2 means ready in 2 of your turns.',f:'[data-uid="0-1"]'},
     {title:'Healing',t:'Last, <b>High Priest Anselm</b>. He can <b>Mend</b> an ally or attack. When all your dice have acted, the turn ends by itself. You can also press End turn.',f:'[data-uid="0-2"]',wait:'turnEnd'},
     {title:'Their turn',t:'The goblins move now. Their rolls appear in the dice tray and every action goes into the battle log.',f:'#logbox',wait:'turnStart',ok:d=>d.side===0,delay:500},
-    {title:'Over to you',t:'Every colour has a power and beats one other colour. Finish this fight to earn 100 gold and claim a goblin for your portfolio. Then visit the shop and build your own army.',last:true}
+    {title:'Over to you',t:'Every colour has a power and has the advantage over one other colour. Finish this fight to earn 100 gold and claim a goblin for your portfolio. Then visit the shop and build your own army.',last:true}
   ],'Walkthrough');
 }
 
@@ -1731,9 +1971,11 @@ function renderHowto(){
   <section><h3>Goal</h3><p>Knock out every die in the enemy army. Nobody dies. Beaten dice are just out of the fight. If round 30 ends with both sides standing, the side with the most strength left wins.</p></section>
   <section><h3>Your army</h3><ul><li>Pick up to 6 dice within the points limit (${S.budget} points; change it in Settings).</li><li>Place them in two ranks of 3. Melee dice fight from the <b>front rank</b>. Ranged dice can act from either rank.</li><li>Melee dice in the back rank wait as reserves. When a front rank is wiped out, the whole back rank steps up.</li><li>You build armies from your portfolio, the dice you own. In two-player games both armies come from your portfolio. AI vs AI games can use all 400 dice.</li></ul></section>
   <section><h3>A turn</h3><ul><li>Initiative dice decide who goes first. To even things out, the first side only gets half its actions (rounded up) on the opening turn.</li><li>On your turn each of your dice takes one action: <b>Attack</b> or its <b>ability</b>. Pick a die, pick an action, pick a glowing target.</li><li>The turn ends when all your dice have acted, or when you press End turn.</li><li>Melee attacks can only target the enemy front rank. Ranged attacks can target anyone. A Golem with Taunt in the front rank must be hit first by basic attacks.</li></ul></section>
-  <section><h3>Dice</h3><p>The attacker rolls its attack dice (${IC_ATK}) and the defender rolls its defence dice (${IC_DEF}). Damage is the attack total minus the defence total. If it is 0 or less, the attack is blocked.</p><div class="demo-dice">${[5,3,6].map((v,k)=>dieHTML(v,k<2?'red':'red')).join('')}<b style="margin:0 6px">14</b> vs <b style="margin:0 6px">4</b>${dieHTML(4,'green','def')}<span class="muted" style="margin-left:6px">Red beats Green, so Red rolled 3 dice instead of 2. One 6 adds 1 for Blaze: 14 + 1 − 4 = 11 damage.</span></div></section>
-  <section><h3>Colours</h3><p>Every die has a colour. A die rolls <b>1 extra attack die</b> against the colour it beats. Area attacks deal 2 extra damage to that colour instead.</p>
-  ${tbl(['Colour','Power','Beats','Weak to'],COLORS.map(c=>[`<span class="sw" style="background:${c.hex};vertical-align:-2px"></span> <b>${c.name}</b> · ${c.title}`,`<b>${c.pn}</b>: ${c.pt}`,COL[c.beats].name,beatenBy(c.id).name]))}</section>
+  <section><h3>Dice</h3><p>The attacker rolls its attack dice (${IC_ATK}) and the defender rolls its defence dice (${IC_DEF}). Damage is the attack total minus the defence total. If it is 0 or less, the attack is blocked.</p><div class="demo-dice">${[5,3,6].map((v,k)=>dieHTML(v,k<2?'red':'red')).join('')}<b style="margin:0 6px">14</b> vs <b style="margin:0 6px">4</b>${dieHTML(4,'green','def')}<span class="muted" style="margin-left:6px">Red has the advantage over Green, so Red rolled 3 dice instead of 2. One 6 adds 1 for Blaze: 14 + 1 − 4 = 11 damage.</span></div></section>
+  <section><h3>Colours</h3><p>Every die has a colour. Each colour has the <b>advantage</b> over one other colour: it rolls <b>1 extra attack die</b> against it, and area attacks deal 2 extra damage to it. An advantage is an edge, not a sure win. Blue has the advantage over Red, but Red can still win with good dice and good rolls.</p>
+  ${tbl(['Colour','Power','Advantage over','At a disadvantage to'],COLORS.map(c=>[`<span class="sw" style="background:${c.hex};vertical-align:-2px"></span> <b>${c.name}</b> · ${c.title}`,`<b>${c.pn}</b>: ${c.pt}`,COL[c.beats].name,beatenBy(c.id).name]))}</section>
+  <section><h3>Levels and evolution</h3><ul><li>Spend gold on a die's guide page in your portfolio to level it up, from 1 to 10. Every level adds health.</li><li>At level 4 it <b>evolves</b> into a Veteran with a new name and +1 to every attack roll. At level 7 it becomes Elite with +1 to every defence roll. At level 10 it becomes a Legend with an extra attack die.</li><li>Each evolution unlocks a new chapter of the die's story.</li><li>Levels apply to every copy you own. Computer armies are level 1 on Easy, up to 3 on Normal and 3 to 6 on Hard.</li></ul></section>
+  <section><h3>Rumours</h3><p>Tavern talk mentions grey sellswords from the Free Companies who never signed the Treaty of the Table. They cannot be bought in any shop. They are said to seek out commanders who prove themselves.</p></section>
   <section><h3>Heroes: race and class</h3><p>Each colour has 10 named heroes. A hero combines a race perk with a class and its ability.</p>
   ${tbl(['Race','Health','Perk','Extra cost'],RAC.map(r=>[`<b>${r.name}</b>`,(r.hp>=0?'+':'')+r.hp,`<b>${PERK[r.perk][0]}</b>: ${PERK[r.perk][1]}`,'+'+r.cost]))}
   ${tbl(['Class','Health','Attack','Defence','Reach','Ability','Base cost'],CLS.map(c=>[`<b>${c.name}</b>`,c.hp,c.atk,c.def,c.ranged?'Ranged':'Melee',`<b>${ABIL[c.ab].n}</b> (${ABIL[c.ab].cd}): ${ABIL[c.ab].x}`,c.cost]))}</section>
