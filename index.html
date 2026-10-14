@@ -94,6 +94,8 @@ header.top{display:flex;align-items:center;gap:10px 16px;padding-block:12px;flex
 .meter.over i{background:var(--hp)}
 .build-grid{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(320px,1fr);gap:14px;align-items:start}
 .roster{padding:14px;display:grid;gap:12px;position:sticky;top:calc(env(safe-area-inset-top,0px) + 10px);max-height:calc(100vh - 20px - env(safe-area-inset-top,0px));overflow:auto;box-shadow:var(--shadow)}
+.powerline{font-size:.8rem;color:var(--muted);margin:6px 0 0}
+.powerline b{color:var(--ink);font-variant-numeric:tabular-nums}
 .roster-actions{display:flex;gap:8px;position:sticky;bottom:-14px;background:var(--panel);padding-block:10px 4px;margin-bottom:-4px;border-top:1px solid var(--line)}
 .roster-actions .btn{flex:1}
 .roster-actions .btn.primary{flex:2;font-size:1rem;padding:.7rem .9rem}
@@ -479,7 +481,7 @@ html[data-motion="reduce"] *{animation:none!important;transition:none!important}
         <div class="dlist" id="bList"></div>
       </div>
       <aside class="roster panel" id="rosterPanel" aria-label="Your army">
-        <div class="budget"><div style="display:flex;justify-content:space-between;align-items:baseline;gap:8px"><span><span class="num" id="bCost">0</span> <span class="muted">/ <span id="bBudget">30</span> points</span></span><span class="muted"><b id="bCount">0</b>/6 dice</span></div><div class="meter" id="bMeter"><i></i></div></div>
+        <div class="budget"><div style="display:flex;justify-content:space-between;align-items:baseline;gap:8px"><span><span class="num" id="bCost">0</span> <span class="muted">/ <span id="bBudget">30</span> points</span></span><span class="muted"><b id="bCount">0</b>/6 dice</span></div><div class="meter" id="bMeter"><i></i></div><p class="powerline" id="bPower"></p></div>
         <div class="tools">
           <select id="presetSel" aria-label="Load an army" style="flex:1 1 150px"></select>
           <button class="btn small" id="bRandom">Random</button>
@@ -1041,6 +1043,134 @@ function advText(c){
   return `Has the advantage over ${COL[c.beats].name}. ${beatenBy(c.id).name} has the advantage over it.`;
 }
 
+// ================= Army strength and computer generals =================
+// Strength is a rough rating of how much a die contributes to a fight: its offence times its staying power.
+const AB_VAL={cleave:4,backstab:3,blast:5,mend:5,aimed:3,guard:3,sneak:2,bite:3,smash:4,engulf:3,hex:3,gaze:4,breath:7};
+const PAS_VAL={reassemble:4,pack:2,regen:5,drain:3,taunt:3};
+const PERK_VAL={lucky:1,stout:2,keen:1.5,fury:1.5,nimble:1.5,stone:.5};
+function rating(d,lv){
+  const E=eff(d,lv||1);
+  const off=E.atk*3.5+E.atkFlat+(d.ranged?1:0)+(AB_VAL[d.ab]||0)*.5+(PERK_VAL[d.perk]||0)*.5;
+  const def=E.hp*(1+.3*(E.def+E.defFlat))+(PAS_VAL[d.pas]||0)*2;
+  return Math.sqrt(off*def)*1.6;
+}
+// Point cost is the designed value of a die; levels multiply it by how much they improve the die.
+// Combat value: simulate the die attacking a standard defender (1 defence die) and being attacked by a standard
+// attacker (2 attack dice), then combine damage dealt per turn with how many turns it survives.
+const VAL_CACHE={};
+function strength(d,lv){
+  lv=lv||1;
+  // levels scale every die by the same factor, so comparisons between armies of equal level stay like-for-like
+  if(lv>1)return strength(d,1)*(1+.035*(lv-1)+(lv>=4?.05:0)+(lv>=7?.05:0)+(lv>=10?.1:0));
+  const key=d.id+':1';if(VAL_CACHE[key])return VAL_CACHE[key];
+  let seed=hashStr(key)||1;const rnd=()=>{seed=(seed*1103515245+12345)&0x7fffffff;return 1+seed%6};
+  const E=eff(d,lv),N=900;let dealt=0,taken=0;
+  for(let i=0;i<N;i++){
+    let a=[];for(let k=0;k<E.atk;k++)a.push(rnd());
+    if(d.color==='yellow')a=a.map(x=>x===1?rnd():x);
+    const six=a.filter(x=>x===6).length;let A=sum(a)+E.atkFlat+(d.perk==='keen'?2*six:0)+(d.color==='red'?six:0);
+    let Dd=rnd();if(d.color==='purple')Dd=Math.max(0,Dd-1);
+    dealt+=Math.max(0,A-Dd);
+    const A2=rnd()+rnd();let D2=E.defFlat+(d.perk==='stout'?1:0);for(let k=0;k<E.def;k++)D2+=rnd();
+    let t=Math.max(0,A2-D2);if(t>=3&&d.color==='brown')t--;if(d.perk==='nimble'&&rnd()===6)t=0;taken+=t;
+  }
+  dealt/=N;taken=Math.max(.35,taken/N);
+  let hp=E.hp;
+  if(d.pas==='regen')hp*=1.5;if(d.color==='green')hp*=1.12;if(d.pas==='reassemble')hp+=5;
+  if(d.pas==='drain'||d.color==='black')hp*=1.12;if(d.ranged)hp*=1.2;if(d.pas==='taunt')hp*=1.1;
+  if(d.color==='white')hp*=1.05;if(d.perk==='fury')dealt*=1.12;
+  let off=dealt*(1+(AB_VAL[d.ab]||0)*.04);
+  if(d.ab==='blast'||d.ab==='breath')off*=1.35;if(d.ab==='mend')off+=1.8;if(d.ab==='guard')off+=.6;
+  if(d.pas==='pack')off*=1.15;if(d.color==='blue')off*=1.06;
+  return VAL_CACHE[key]=Math.sqrt(off*hp/taken)*6;
+}
+const armyPower=(a,lvf)=>Math.round(sum(a.map(s=>strength(DIE[s.id],lvf?lvf(s):(s.lv||1)))));
+const DIFF_FACTOR={easy:.85,normal:1,hard:1.08}, DIFF_QUALITY={easy:.3,normal:.65,hard:.95};
+// Build a sensible army that spends its points: three front-liners, ranged support, a healer when possible,
+// and on harder settings colours that have the advantage over the enemy.
+function smartArmy(o){
+  const q=o.quality, enemy=(o.enemy||[]).map(s=>DIE[s.id].color);
+  const pool=DICE.filter(d=>d.color!=='grey'&&d.cost<=o.budget&&(!o.pool||o.pool(d.id)>0));
+  let best=null,bestScore=-1;
+  const attempts=q>.8?14:q>.5?8:3;
+  for(let t=0;t<attempts;t++){
+    const army=[],used={};let left=o.budget;
+    while(army.length<6){
+      const fronts=army.filter(s=>!DIE[s.id].ranged).length, backs=army.length-fronts, healers=army.filter(s=>DIE[s.id].ab==='mend').length;
+      const tanks=army.filter(s=>{const d=DIE[s.id];return !d.ranged&&(d.def>=1||d.pas==='taunt')}).length;
+      const slots=6-army.length, T=left/slots, reserve=2*(slots-1);
+      const cands=pool.filter(d=>d.cost<=left-reserve&&(used[d.id]||0)<(o.pool?o.pool(d.id):2));
+      if(!cands.length)break;
+      let bestC=null,bs=-1;
+      for(const d of cands){
+        let sc=strength(d,o.baseLv||1)/Math.pow(d.cost,.55)*(slots===1?1:1-Math.min(1,Math.max(0,T-d.cost)/Math.max(2,T))*.5);
+        if(!d.ranged&&fronts<3)sc*=1.3;
+        if(!d.ranged&&!tanks&&(d.def>=1||d.pas==='taunt'))sc*=1.25;
+        if(d.ranged&&backs<2&&fronts>=2)sc*=1.3;
+        if(d.ab==='mend')sc*=healers?.45:1.2;
+        if(d.atk<2&&d.ab!=='mend')sc*=.85;
+        if(!d.ranged&&fronts>=3)sc*=.5;
+        if(d.ranged&&backs>=3)sc*=.5;
+        if(q>.5&&enemy.length){
+          const adv=enemy.filter(c=>COL[d.color].beats===c).length, dis=enemy.filter(c=>COL[c]&&COL[c].beats===d.color).length;
+          sc*=1+(adv-dis)*.12*q;
+        }
+        sc*=Math.pow(.75,used[d.id]||0);
+        sc*=1+(Math.random()-.5)*1.2*(1-q)+(Math.random()-.5)*.3;
+        if(sc>bs){bs=sc;bestC=d}
+      }
+      army.push({id:bestC.id});used[bestC.id]=(used[bestC.id]||0)+1;left-=bestC.cost;
+    }
+    const comp=army.filter(s=>!DIE[s.id].ranged).length;
+    const sc=armyPower(army.map(s=>({...s,lv:o.baseLv||1})))*(comp>=2&&comp<=4?1.04:.97);
+    if(sc>bestScore){bestScore=sc;best=army}
+  }
+  return assignRows(best||[]);
+}
+// Raise or lower levels until the army's strength is close to the target.
+function tuneLevels(army,target){
+  let p=armyPower(army),g=0;
+  while(p<target*.98&&g++<90){const s=army.filter(x=>x.lv<10).sort((a,b)=>a.lv-b.lv||rating(DIE[b.id],b.lv)-rating(DIE[a.id],a.lv))[0];if(!s)break;s.lv++;p=armyPower(army)}
+  while(p>target*1.04&&g++<180){const s=army.filter(x=>x.lv>1).sort((a,b)=>b.lv-a.lv)[0];if(!s)break;s.lv--;p=armyPower(army)}
+  return army;
+}
+// The computer's army for a battle against a player. It fields dice at the player's average level and
+// hits its target strength by choosing how many points to spend, which keeps the comparison like-for-like.
+function computerArmy(playerArmy,diff,playerLv){
+  playerLv=playerLv||(s=>lvOf(s.id));
+  diff=diff||'normal';
+  const mine=playerArmy.map(s=>({...s,lv:playerLv(s)}));
+  const target=Math.max(20,armyPower(mine))*DIFF_FACTOR[diff];
+  const avg=mine.length?sum(mine.map(s=>s.lv))/mine.length:1;
+  const baseLv=Math.max(1,Math.min(10,Math.round(avg)));
+  let best=null,bestGap=Infinity;
+  for(let budget=S.budget;budget>=8;budget--){
+    for(let k=0;k<2;k++){
+      const a=smartArmy({budget,quality:DIFF_QUALITY[diff],enemy:playerArmy,baseLv});a.forEach(s=>s.lv=baseLv);
+      const p=armyPower(a),gap=Math.abs(p-target)+(p>target*1.05?target*.05:0);
+      if(gap<bestGap){bestGap=gap;best=a}
+    }
+    if(best&&armyPower(best)<=target*1.05&&armyPower(best)>=target*.95)break;
+  }
+  if(armyPower(best)<target*.95)tuneLevels(best,target); // only when the player out-levels a full army
+  return best;
+}
+// Two computer generals at the same level: the stronger army is trimmed to match the weaker one.
+function aiPair(diffA,diffB){
+  const a=smartArmy({budget:S.budget,quality:DIFF_QUALITY[diffA],baseLv:2});a.forEach(s=>s.lv=2);
+  const target=armyPower(a);let best=null,gap=Infinity;
+  for(let budget=S.budget;budget>=8;budget--){
+    const b=smartArmy({budget,quality:DIFF_QUALITY[diffB],enemy:a,baseLv:2});b.forEach(s=>s.lv=2);
+    const g=Math.abs(armyPower(b)-target);if(g<gap){gap=g;best=b}
+    if(g<=target*.03)break;
+  }
+  return [a,best];
+}
+function matchLabel(mine,theirs){
+  const r=theirs/Math.max(1,mine);
+  return r<.92?'You have the edge':r<=1.08?'An even match':r<=1.2?'A tough fight':'A very tough fight';
+}
+
 // ================= Dice info =================
 function abilityLine(d){
   const out=[];
@@ -1220,16 +1350,32 @@ $('#pRealms').addEventListener('click',e=>{const dd=e.target.closest('[data-die]
 function starterPick(after){
   if(P.started) return after&&after();
   $('#ov').dataset.lock='1';
-  openModal(`<div><p class="eyebrow">New portfolio</p><h2>Choose your home realm</h2><p class="muted" style="margin-top:6px">You start with 10 commons, 2 heroes and 1 monster from that realm, plus 200 gold. Earn more by winning battles, buying from the market and opening packs.</p></div>
+  openModal(`<div><p class="eyebrow">New portfolio</p><h2>Choose your home realm</h2><p class="muted" style="margin-top:6px">You start with 10 dice from that realm and a <b>Traitor Pack</b> of 5 deserters from other realms, plus 200 gold. Earn more by winning battles, buying from the market and opening packs.</p></div>
    <div class="starter">${COLORS.map(c=>`<button data-starter="${c.id}" data-tip="${c.id}-h-0">${tileSVG(DIE[c.id+'-h-0'])}<b>${c.name} · ${esc(capFirst(REALM[c.id].name))}</b><small>${c.pn}: ${c.pt}</small></button>`).join('')}</div>`,true);
   $('#ovBox').onclick=e=>{const b=e.target.closest('[data-starter]');if(!b)return;const c=b.dataset.starter;
-    const commons=shuffle(DICE.filter(d=>d.color===c&&d.type==='common')).slice(0,10);
-    const heroes=shuffle(DICE.filter(d=>d.color===c&&d.type==='hero')).slice(0,2);
+    // home realm: 7 commons, 2 heroes, 1 monster
+    const commons=shuffle(DICE.filter(d=>d.color===c&&d.type==='common')).slice(0,7);
+    const heroes=shuffle(DICE.filter(d=>d.color===c&&d.type==='hero'&&d.cost<=6)).slice(0,2);
     const mon=shuffle(DICE.filter(d=>d.color===c&&d.type==='mon'&&d.rarity!=='legendary'&&d.cost<=5))[0];
-    [...commons,...heroes,mon].forEach(d=>addDie(d.id));
+    const home=[...commons,...heroes,mon];
+    const traitor=traitorPack(c);
+    [...home,...traitor].forEach(d=>addDie(d.id));
     P.coins+=200;P.started=true;saveP();applySettings();delete $('#ov').dataset.lock;$('#ovBox').onclick=null;
-    showPack([...commons,...heroes,mon].map(d=>d.id),'Your starter dice',()=>{if(after)after();else refreshScreen()});
+    showPack(home.map(d=>d.id),`Your ${COL[c].name} starter dice`,()=>{
+      showPack(traitor.map(d=>d.id),'Traitor Pack',()=>{if(after)after();else refreshScreen()},`Five deserters from other realms have heard of you and want to switch sides. One of them comes from ${COL[beatenBy(beatenBy(c).id).id].name}, which has the advantage over ${beatenBy(c).name}, the colour you are weakest against.`);
+    });
   };
+}
+// Five dice from five different realms. Always includes one from the colour that counters your weakness.
+// Kept modest for balance: four commons and one monster that costs 4 points or less.
+function traitorPack(home){
+  const nemesis=beatenBy(home).id, ally=beatenBy(nemesis).id;
+  const others=shuffle(COLORS.map(c=>c.id).filter(x=>x!==home&&x!==ally)).slice(0,4);
+  const colors=[ally,...others];
+  return colors.map((col,k)=>{
+    const pool=k===0?DICE.filter(d=>d.color===col&&d.type==='mon'&&d.rarity!=='legendary'&&d.cost<=4):DICE.filter(d=>d.color===col&&d.type==='common'&&d.cost<=3);
+    return pick(pool);
+  });
 }
 function rollPack(color){
   const pool=color?DICE.filter(d=>d.color===color):DICE.filter(d=>d.color!=='grey');
@@ -1241,11 +1387,11 @@ function rollPack(color){
   out.push((x<(color?.125:.1)?pick(leg):x<.45?pick(rare):pick(com)).id);
   return out;
 }
-function showPack(ids,title,done){
+function showPack(ids,title,done,sub){
   const firstSeen=new Set();const tally={};
   ids.forEach(id=>{tally[id]=(tally[id]||0)+1});
   ids.forEach(id=>{if((P.col[id]||0)-tally[id]===0)firstSeen.add(id)});
-  openModal(`<div class="modal-head"><h3>${esc(title)}</h3><span class="muted">Tap a card to reveal it</span></div>
+  openModal(`<div class="modal-head"><h3>${esc(title)}</h3><span class="muted">Tap a card to reveal it</span></div>${sub?`<p class="muted" style="margin-top:-6px">${esc(sub)}</p>`:''}
    <div class="reveal">${ids.map((id,k)=>{const d=DIE[id];return `<div class="rcard" data-k="${k}" data-tip="${id}"><div class="inner"><div class="face back"></div><div class="face front">${tileSVG(d)}<b style="font-size:.84rem;line-height:1.15">${esc(d.name)}</b><span class="rar ${d.rarity}">${COL[d.color].name} ${typeName(d.type)}</span>${firstSeen.has(id)?'<span class="new">NEW</span>':''}</div></div></div>`}).join('')}</div>
    <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn" id="revealAll">Reveal all</button><button class="btn primary" id="packDone">Done</button></div>`,true);
   const cards=$$('.rcard',$('#ovBox'));
@@ -1336,13 +1482,16 @@ function startMode(mode,preArmy){
   if(mode==='tutorial'){startTutorial();return;}
   const diff=mode==='cpu'?[null,$('#cpuDiff').value]:mode==='aivai'?[$('#aiDiffA').value,$('#aiDiffB').value]:[null,null];
   const ctrl=mode==='cpu'?['human','ai']:mode==='pvp'?['human','human']:['ai','ai'];
-  BU={mode,diff,ctrl,step:0,armies:[[],[]],names:['',''],filter:{color:'all'}};
+  BU={mode,diff,ctrl,step:0,armies:[[],[]],names:['',''],filter:{color:'all'},aiEdited:false};
   const begin=()=>{
     const lastA=store.get('lastArmy',null);
     const okLast=lastA&&lastA.every(s=>DIE[s.id])&&validFor(lastA,0)===''?lastA:null;
     if(preArmy&&validFor(preArmy,0)==='')BU.armies[0]=preArmy;
     else BU.armies[0]=mode==='aivai'?randomArmy(S.budget,AIPOOL):(okLast||randomArmy(S.budget,poolCount(0)));
-    BU.armies[1]=mode==='pvp'?randomArmy(S.budget,poolCount(1)):randomArmy(S.budget,AIPOOL);
+    if(mode==='pvp')BU.armies[1]=randomArmy(S.budget,poolCount(1));
+    else if(mode==='aivai')BU.armies=aiPair(diff[0],diff[1]);
+    else BU.armies[1]=computerArmy(BU.armies[0],diff[1]);
+    BU.aiEdited=false;
     go('build');renderBuilder();
     if(!P.tourBuild&&BU.ctrl[0]==='human'){P.tourBuild=true;saveP();setTimeout(startBuilderTour,300)}
   };
@@ -1378,7 +1527,7 @@ function renderBuilder(){
     let h='';
     for(let k=0;k<3;k++){const x=inRow[k];
       if(!x){h+=`<div class="slot">Empty</div>`;continue;}
-      const d=DIE[x.s.id],lv=usesCollection(side)?lvOf(d.id):1;
+      const d=DIE[x.s.id],lv=x.s.lv||(usesCollection(side)?lvOf(d.id):1);
       h+=`<div class="slot filled" data-tip="${d.id}">${tileLv(d,lv)}<span class="nm">${esc(dname(d,lv))}</span><span class="cost">${d.cost} pts</span><span class="row-btns"><button data-mv="${x.k}" ${other>=3?'disabled':''} aria-label="Move ${esc(d.name)} to the ${row==='front'?'back':'front'} rank">${row==='front'?'↓ Back':'↑ Front'}</button><button data-rm="${x.k}" aria-label="Remove ${esc(d.name)}">✕</button></span></div>`;
     }
     el.innerHTML=h;
@@ -1400,13 +1549,20 @@ function renderBuilder(){
     return `<div class="drow" data-tip="${d.id}">${tileLv(d,lv)}<div style="min-width:0"><div class="nm">${esc(dname(d,lv))} ${infoBtn(d)}</div><div class="sub">${COL[d.color].name} ${typeName(d.type)} · ${esc(d.sub)} · <span class="rar ${d.rarity}">${d.rarity}</span>${lv>1?` · <b>Lv ${lv}</b>`:''}</div><div class="statline">HP ${E.hp} · ATK ${E.atk}${E.atkFlat?'+1':''} · DEF ${E.def}${E.defFlat?'+1':''} · ${d.ranged?'Ranged':'Melee'}</div>${al[0]?`<div class="ab">${al[0]}</div>`:''}</div>
     <div class="side"><span class="cost">${d.cost} pts</span>${usesCollection(side)?`<span class="muted" style="font-size:.72rem">${avail} of ${owned(d.id)} free</span>`:''}<button class="btn small ${can?'primary':''}" data-add="${d.id}" ${can?'':'disabled'} title="${why}">${can?'Add':why}</button></div></div>`;
   }).join('')||`<p class="muted">No dice match. ${usesCollection(side)?'Visit the shop or win battles to collect more.':''}</p>`;
+  const lvf=k=>sp=>sp.lv||(usesCollection(k)?lvOf(sp.id):1);
+  const p0=armyPower(BU.armies[0],lvf(0)),p1=armyPower(BU.armies[1],lvf(1));
+  let pl='';
+  if(BU.mode==='cpu')pl=side===0?`Army strength <b>${p0}</b>. On ${BU.diff[1]}, the computer builds an army of about <b>${Math.round(p0*DIFF_FACTOR[BU.diff[1]])}</b> to face it.`:`Computer strength <b>${p1}</b> against your <b>${p0}</b> · ${matchLabel(p0,p1)}.${BU.aiEdited?' You changed this army, so it no longer rescales.':''}`;
+  else if(BU.mode==='aivai')pl=`Blue strength <b>${p0}</b> · Red strength <b>${p1}</b>`;
+  else pl=`Player 1 strength <b>${p0}</b> · Player 2 strength <b>${p1}</b>`;
+  $('#bPower').innerHTML=pl;
   const w=validFor(army,side);$('#bWarn').textContent=army.length?w:'';
   const nextTxt=side===0?'Next: '+sideLabel(BU.mode,1)+'’s army':'Start battle';
   $('#bNext').disabled=!!w;$('#bNext').textContent=nextTxt;
   $('#bBack').textContent=side===0?'Back to menu':'Back';
   $('#bRandom').textContent=BU.ctrl[side]==='ai'?'Reroll':'Random';
   // floating summary bar (narrow screens)
-  $('#bMini').innerHTML=`<div class="mini-tiles">${[0,1,2,3,4,5].map(i=>army[i]?`<span>${tileLv(DIE[army[i].id],usesCollection(side)?lvOf(army[i].id):1)}</span>`:'<span class="empty"></span>').join('')}</div><div class="mini-cost"><b>${cost}</b>/${S.budget} pts</div><button class="btn primary small" id="bNext2" ${w?'disabled':''}>${side===0?'Next':'Start battle'}</button>`;
+  $('#bMini').innerHTML=`<div class="mini-tiles">${[0,1,2,3,4,5].map(i=>army[i]?`<span>${tileLv(DIE[army[i].id],army[i].lv||(usesCollection(side)?lvOf(army[i].id):1))}</span>`:'<span class="empty"></span>').join('')}</div><div class="mini-cost"><b>${cost}</b>/${S.budget} pts</div><button class="btn primary small" id="bNext2" ${w?'disabled':''}>${side===0?'Next':'Start battle'}</button>`;
 }
 $('#bMini').addEventListener('click',e=>{if(e.target.id==='bNext2')$('#bNext').click();else if(e.target.closest('.mini-tiles'))$('#rosterPanel').scrollIntoView({behavior:reduced()?'auto':'smooth',block:'start'})});
 $('#bColors').addEventListener('click',e=>{const b=e.target.closest('[data-fc]');if(b){BU.filter.color=b.dataset.fc;renderBuilder()}});
@@ -1415,13 +1571,22 @@ $('#bSearch').oninput=()=>renderBuilder();
 $('#bList').addEventListener('click',e=>{const b=e.target.closest('[data-add]');if(!b||b.disabled)return;const d=DIE[b.dataset.add];const a=BU.armies[BU.step];
   const f=a.filter(s=>s.row==='front').length,bk=a.filter(s=>s.row==='back').length;
   let row=d.ranged?(bk<3?'back':'front'):(f<3?'front':'back');
-  a.push({id:d.id,row});Snd.click();renderBuilder();toast(`${d.name} added to the ${row} rank.`)});
+  const spec={id:d.id,row};
+  if(BU.ctrl[BU.step]==='ai'){BU.aiEdited=true;const lvs=a.map(x=>x.lv||1);spec.lv=lvs.length?Math.round(sum(lvs)/lvs.length):1}
+  a.push(spec);Snd.click();renderBuilder();toast(`${d.name} added to the ${row} rank.`)});
 ['#slotsFront','#slotsBack'].forEach(s=>$(s).addEventListener('click',e=>{const a=BU.armies[BU.step];
   const m=e.target.closest('[data-mv]'),r=e.target.closest('[data-rm]');
+  if(BU.ctrl[BU.step]==='ai'&&(m||r))BU.aiEdited=true;
   if(m){const u=a[+m.dataset.mv];u.row=u.row==='front'?'back':'front';renderBuilder()}
   if(r){hideTip();a.splice(+r.dataset.rm,1);renderBuilder()}}));
-$('#bRandom').onclick=()=>{BU.armies[BU.step]=randomArmy(S.budget,poolCount(BU.step));renderBuilder()};
-$('#bClear').onclick=()=>{BU.armies[BU.step]=[];renderBuilder()};
+$('#bRandom').onclick=()=>{
+  const st=BU.step;
+  if(BU.ctrl[st]==='ai'){
+    if(BU.mode==='cpu'){BU.armies[1]=computerArmy(BU.armies[0],BU.diff[1]);BU.aiEdited=false}
+    else{const o=BU.armies[1-st];const a=smartArmy({budget:S.budget,quality:DIFF_QUALITY[BU.diff[st]],enemy:o,baseLv:2});a.forEach(x=>x.lv=2);tuneLevels(a,armyPower(o));BU.armies[st]=a}
+  }else BU.armies[st]=randomArmy(S.budget,poolCount(st));
+  renderBuilder()};
+$('#bClear').onclick=()=>{if(BU.ctrl[BU.step]==='ai')BU.aiEdited=true;BU.armies[BU.step]=[];renderBuilder()};
 $('#presetSel').onchange=e=>{const v=e.target.value;if(!v)return;
   const src=v[0]==='p'?PRESETS[+v.slice(1)].units.map(u=>({id:u[0],row:u[1]})):P.saved[+v.slice(1)].units.map(u=>({id:u.id,row:u.row}));
   BU.armies[BU.step]=src;renderBuilder();const w=validFor(src,BU.step);if(w)toast(w)};
@@ -1430,7 +1595,7 @@ $('#bSave').onclick=()=>{const a=BU.armies[BU.step];if(!a.length){toast('Add som
   $('#saveName').focus();$('#saveName').select();
   $('#saveGo').onclick=()=>{const n=$('#saveName').value.trim()||'Army';P.saved.unshift({name:n,units:a.map(s=>({id:s.id,row:s.row}))});P.saved=P.saved.slice(0,12);saveP();closeModal();toast(`Saved “${n}” to your portfolio.`);renderBuilder()}};
 $('#bBack').onclick=()=>{if(BU.step===0)go('menu');else{BU.step=0;renderBuilder();window.scrollTo(0,0)}};
-$('#bNext').onclick=()=>{if($('#bNext').disabled)return;if(BU.step===0){if(BU.mode==='cpu')store.set('lastArmy',BU.armies[0]);BU.step=1;renderBuilder();window.scrollTo(0,0)}else startBattle({mode:BU.mode,ctrl:BU.ctrl,diff:BU.diff,armies:BU.armies})};
+$('#bNext').onclick=()=>{if($('#bNext').disabled)return;if(BU.step===0){if(BU.mode==='cpu'){store.set('lastArmy',BU.armies[0]);if(!BU.aiEdited)BU.armies[1]=computerArmy(BU.armies[0],BU.diff[1])}BU.step=1;renderBuilder();window.scrollTo(0,0)}else startBattle({mode:BU.mode,ctrl:BU.ctrl,diff:BU.diff,armies:BU.armies})};
 $('#bTour').onclick=()=>startBuilderTour();
 function startBuilderTour(){
   if(screen!=='build')return;
@@ -1974,7 +2139,8 @@ function renderHowto(){
   <section><h3>Dice</h3><p>The attacker rolls its attack dice (${IC_ATK}) and the defender rolls its defence dice (${IC_DEF}). Damage is the attack total minus the defence total. If it is 0 or less, the attack is blocked.</p><div class="demo-dice">${[5,3,6].map((v,k)=>dieHTML(v,k<2?'red':'red')).join('')}<b style="margin:0 6px">14</b> vs <b style="margin:0 6px">4</b>${dieHTML(4,'green','def')}<span class="muted" style="margin-left:6px">Red has the advantage over Green, so Red rolled 3 dice instead of 2. One 6 adds 1 for Blaze: 14 + 1 − 4 = 11 damage.</span></div></section>
   <section><h3>Colours</h3><p>Every die has a colour. Each colour has the <b>advantage</b> over one other colour: it rolls <b>1 extra attack die</b> against it, and area attacks deal 2 extra damage to it. An advantage is an edge, not a sure win. Blue has the advantage over Red, but Red can still win with good dice and good rolls.</p>
   ${tbl(['Colour','Power','Advantage over','At a disadvantage to'],COLORS.map(c=>[`<span class="sw" style="background:${c.hex};vertical-align:-2px"></span> <b>${c.name}</b> · ${c.title}`,`<b>${c.pn}</b>: ${c.pt}`,COL[c.beats].name,beatenBy(c.id).name]))}</section>
-  <section><h3>Levels and evolution</h3><ul><li>Spend gold on a die's guide page in your portfolio to level it up, from 1 to 10. Every level adds health.</li><li>At level 4 it <b>evolves</b> into a Veteran with a new name and +1 to every attack roll. At level 7 it becomes Elite with +1 to every defence roll. At level 10 it becomes a Legend with an extra attack die.</li><li>Each evolution unlocks a new chapter of the die's story.</li><li>Levels apply to every copy you own. Computer armies are level 1 on Easy, up to 3 on Normal and 3 to 6 on Hard.</li></ul></section>
+  <section><h3>Levels and evolution</h3><ul><li>Spend gold on a die's guide page in your portfolio to level it up, from 1 to 10. Every level adds health.</li><li>At level 4 it <b>evolves</b> into a Veteran with a new name and +1 to every attack roll. At level 7 it becomes Elite with +1 to every defence roll. At level 10 it becomes a Legend with an extra attack die.</li><li>Each evolution unlocks a new chapter of the die's story.</li><li>Levels apply to every copy you own.</li></ul></section>
+  <section><h3>Computer armies</h3><ul><li>The computer builds its army after seeing yours: front-line fighters, ranged support, a healer when it can, and on harder settings colours with the advantage over yours.</li><li>It scales to your army's strength. On Easy it aims for about 85% of your strength, on Normal about the same, and on Hard a little more. Its dice are always at your army's average level, so as your dice level up, so do its dice.</li><li>The builder shows both armies' strength before the battle. If you edit the computer's army yourself, it stops rescaling.</li><li>In AI vs AI games both armies are the same level and the second army is built to match the first one's strength, so fights stay close.</li></ul></section>
   <section><h3>Rumours</h3><p>Tavern talk mentions grey sellswords from the Free Companies who never signed the Treaty of the Table. They cannot be bought in any shop. They are said to seek out commanders who prove themselves.</p></section>
   <section><h3>Heroes: race and class</h3><p>Each colour has 10 named heroes. A hero combines a race perk with a class and its ability.</p>
   ${tbl(['Race','Health','Perk','Extra cost'],RAC.map(r=>[`<b>${r.name}</b>`,(r.hp>=0?'+':'')+r.hp,`<b>${PERK[r.perk][0]}</b>: ${PERK[r.perk][1]}`,'+'+r.cost]))}
@@ -1984,7 +2150,7 @@ function renderHowto(){
   <section><h3>Commons</h3><p>Each colour has 30 commons: 5 jobs for each of the 6 races, like the Red <b>Street Fighter Orc</b>. They are cheap, keep their race perk and colour power, and fill out an army.</p>
   ${tbl(['Job','Health','Attack','Defence','Reach','Special','Cost'],JOBS.map((j,k)=>[`<b>${COLORS.map(c=>JOBN[c.id][k]).slice(0,3).join(', ')}…</b>`,j.hp,j.atk,j.def,j.ranged?'Ranged':'Melee',j.ab?`<b>${ABIL[j.ab].n}</b>`:'—',j.cost]))}</section>
   <section><h3>Effects</h3><ul><li><b>Poison</b>: loses 2 health at the start of each of its turns, for 3 turns.</li><li><b>Stuck / Frozen</b>: loses its next action.</li><li><b>Hex</b>: rolls 1 fewer attack die on its next 2 turns.</li><li><b>Chill</b>: rolls 1 fewer attack die on its next attack.</li><li><b>Guard</b>: rolls 1 extra defence die until the guarding side's next turn.</li></ul></section>
-  <section><h3>Collecting</h3><ul><li>Start by choosing a home realm. You get 13 dice from it and 200 gold.</li><li>Beat the computer for gold: 40 on Easy, 70 on Normal, 110 on Hard, 15 for a loss. Two-player games pay 20. The walkthrough pays 100 once.</li><li>After a win, claim one die from the army you beat. Dragons can only be claimed on Hard.</li><li>Spend gold in the shop: single dice from the market (30 to 450 gold), mixed packs (100) and colour packs (150). Sell spare copies for gold.</li><li>You can field as many copies of a die as you own.</li><li>Every die has a guide page in your portfolio with what it does, its history and its battle record.</li><li>Rarity: commons have no mark, monsters a blue dot, heroes a violet diamond, dragons a gold star.</li></ul></section>
+  <section><h3>Collecting</h3><ul><li>Start by choosing a home realm. You get 10 dice from it, a Traitor Pack of 5 deserters from other realms, and 200 gold. One traitor always comes from the colour that counters your weakness.</li><li>Beat the computer for gold: 40 on Easy, 70 on Normal, 110 on Hard, 15 for a loss. Two-player games pay 20. The walkthrough pays 100 once.</li><li>After a win, claim one die from the army you beat. Dragons can only be claimed on Hard.</li><li>Spend gold in the shop: single dice from the market (30 to 450 gold), mixed packs (100) and colour packs (150). Sell spare copies for gold.</li><li>You can field as many copies of a die as you own.</li><li>Every die has a guide page in your portfolio with what it does, its history and its battle record.</li><li>Rarity: commons have no mark, monsters a blue dot, heroes a violet diamond, dragons a gold star.</li></ul></section>
   <section><h3>Keys</h3>${tbl(['Key','Action'],[['A','Attack with the selected die'],['S','Use its ability'],['Tab','Next ready die'],['E','End turn'],['Esc','Cancel or close']])}</section>`;
 }
 

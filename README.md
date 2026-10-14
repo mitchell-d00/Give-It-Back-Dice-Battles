@@ -33,10 +33,20 @@ Your collection, coins, saved armies and settings are kept in the browser.
 - **Dice combat.** The attacker rolls attack dice, the defender rolls defence
   dice, and the difference is the damage. Front and back ranks, cooldowns,
   poison, stuns, hexes and guards.
+- **Fair computer generals.** The computer builds its army after seeing yours:
+  a front line, ranged support, a healer when it can, and on harder settings
+  colours with the advantage over yours. It scales to your army's strength
+  (about 85% on Easy, equal on Normal, a bit more on Hard) at your dice's
+  average level, and the builder shows both strengths before you fight. In
+  AI vs AI games the two armies are built to match. Strength comes from
+  simulating each die's attacks and defence; in testing, the stronger-rated
+  army won 22 of 24 matchups, and Normal games came out 50/50.
 - **Modes.** Battle the computer (Easy, Normal, Hard), two players on one
   device, or watch AI vs AI with pause and speed controls.
 - **Collecting.** You build every army from your own portfolio. Pick a home
-  realm to start with 13 dice and 200 gold, then earn the rest:
+  realm to start with 10 dice from it, a Traitor Pack of 5 deserters from other
+  realms (one always from the colour that counters your weakness) and 200
+  gold, then earn the rest:
   - Gold for every battle against the computer (40, 70 or 110 for a win by
     difficulty, 15 for a loss), 20 for a two-player game, 100 for finishing
     the walkthrough.
