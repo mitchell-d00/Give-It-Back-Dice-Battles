@@ -2118,7 +2118,7 @@ function endBattle(w){
     ${mvp?`<div class="info-head">${tileSVG(mvp.d)}<div><p class="eyebrow">Best die</p><b>${esc(mvp.name)}</b> <span class="muted">(${esc(B.names[mvp.side])}) · ${mvp.dmg} damage, ${mvp.kos} knockouts</span></div></div>`:''}
     <div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end">
       <button class="btn" id="rMenu">Main menu</button>
-      ${B.mode!=='tutorial'?'<button class="btn" id="rEdit">${B.mode==='cpu'?'Change my army':'Change armies'}</button>':''}
+      ${B.mode!=='tutorial'?`<button class="btn" id="rEdit">${B.mode==='cpu'?'Change my army':'Change armies'}</button>`:''}
       <button class="btn primary" id="rAgain">${B.mode==='tutorial'?'Play the walkthrough again':'Rematch'}</button>
     </div>`);
     const done=()=>{delete $('#ov').dataset.lock;closeModal()};
