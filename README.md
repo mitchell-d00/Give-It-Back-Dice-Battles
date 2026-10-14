@@ -31,7 +31,9 @@ Your collection, coins, saved armies and settings are kept in the browser.
 - **Monsters** come in 12 kinds, from goblins and skeletons to golems,
   gazers and legendary dragons.
 - **Dice combat.** The attacker rolls attack dice, the defender rolls defence
-  dice, and the difference is the damage. Front and back ranks, cooldowns,
+  dice, and the difference is the damage. Melee dice fight from the front
+  rank and ranged dice from either rank; when a front die falls, a melee
+  reserve steps up to take its place. Cooldowns,
   poison, stuns, hexes and guards.
 - **Fair computer generals.** The computer builds its army after seeing yours:
   a front line, ranged support, a healer when it can, and on harder settings
@@ -41,13 +43,25 @@ Your collection, coins, saved armies and settings are kept in the browser.
   AI vs AI games the two armies are built to match. Strength comes from
   simulating each die's attacks and defence; in testing, the stronger-rated
   army won 22 of 24 matchups, and Normal games came out 50/50.
-- **Modes.** Battle the computer (Easy, Normal, Hard), two players on one
-  device, or watch AI vs AI with pause and speed controls.
+- **You are a Dice Lord.** Since the Treaty of the Table, the realms settle
+  every quarrel with dice, and every army belongs to a Dice Lord. You name
+  yours when you start (and can rename it in Settings).
+- **Modes.**
+  - *Face a rival Dice Lord* (minor, landed or great lord: Easy, Normal,
+    Hard). Each rival has a name, a holding and a grudge: a disputed river,
+    an old debt, goats in the orchard. You can study their army before you
+    accept the challenge, but you cannot change it. Rivals have a word for
+    you when the battle ends.
+  - *Practice battle*: build your army and the computer's army yourself,
+    set the practice army's level, and test formations. No gold, spoils or
+    records.
+  - Two players on one device, or watch two rival lords fight AI vs AI with
+    pause and speed controls.
 - **Collecting.** You build every army from your own portfolio. Pick a home
   realm to start with 10 dice from it, a Traitor Pack of 5 deserters from other
   realms (one always from the colour that counters your weakness) and 200
   gold, then earn the rest:
-  - Gold for every battle against the computer (40, 70 or 110 for a win by
+  - Gold for every battle against a rival lord (40, 70 or 110 for a win by
     difficulty, 15 for a loss), 20 for a two-player game, 100 for finishing
     the walkthrough.
   - Spoils of war: after a win, claim one die from the army you beat.
