@@ -47,11 +47,16 @@ Your collection, coins, saved armies and settings are kept in the browser.
   every quarrel with dice, and every army belongs to a Dice Lord. You name
   yours when you start (and can rename it in Settings).
 - **Modes.**
-  - *Face a rival Dice Lord* (minor, landed or great lord: Easy, Normal,
-    Hard). Each rival has a name, a holding and a grudge: a disputed river,
-    an old debt, goats in the orchard. You can study their army before you
-    accept the challenge, but you cannot change it. Rivals have a word for
-    you when the battle ends.
+  - *The Court of Dice Lords*: every new portfolio gets its own court of
+    21 randomly made rival lords in six ranks: Hedge Lords, Banner Lords,
+    Landed Lords, Great Lords, High Lords and the Dice Throne. Each lord has
+    a home realm, a style (Purist, Beastmaster, Champion, Schemer, Alliance
+    or Collector), a grudge, and a strength set by their rank. Beat 2 lords
+    of a rank to open the next. One lord at a time challenges you directly
+    for 50% more gold. Lords you beat come back stronger for rematches. Take
+    the Dice Throne to start a new season with a stronger court. Reset your
+    portfolio and the whole court is different. You can study a lord's army
+    before you accept, but you cannot change it.
   - *Practice battle*: build your army and the computer's army yourself,
     set the practice army's level, and test formations. No gold, spoils or
     records.
@@ -61,8 +66,8 @@ Your collection, coins, saved armies and settings are kept in the browser.
   realm to start with 10 dice from it, a Traitor Pack of 5 deserters from other
   realms (one always from the colour that counters your weakness) and 200
   gold, then earn the rest:
-  - Gold for every battle against a rival lord (40, 70 or 110 for a win by
-    difficulty, 15 for a loss), 20 for a two-player game, 100 for finishing
+  - Gold for every battle against a rival lord (35 for a Hedge Lord up to
+    260 for the Dice Sovereign, 15 for a loss), 20 for a two-player game, 100 for finishing
     the walkthrough.
   - Spoils of war: after a win, claim one die from the army you beat.
   - A market of single dice that restocks after every battle, plus mixed and

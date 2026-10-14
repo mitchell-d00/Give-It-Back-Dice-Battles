@@ -93,6 +93,23 @@ header.top{display:flex;align-items:center;gap:10px 16px;padding-block:12px;flex
 .meter.over i{background:var(--hp)}
 .build-grid{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(320px,1fr);gap:14px;align-items:start}
 .roster{padding:14px;display:grid;gap:12px;position:sticky;top:calc(env(safe-area-inset-top,0px) + 10px);max-height:calc(100vh - 20px - env(safe-area-inset-top,0px));overflow:auto;box-shadow:var(--shadow)}
+.court{display:grid;gap:18px}
+.court-head h2{font-size:1.9rem;margin:2px 0 6px}
+.tier{display:grid;gap:10px}
+.tier-head{display:flex;justify-content:space-between;align-items:baseline;gap:10px;flex-wrap:wrap;border-bottom:1px solid var(--line);padding-bottom:6px}
+.lords{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:12px}
+.lord{padding:14px;display:flex;flex-direction:column;gap:8px}
+.lord.locked{opacity:.55}
+.lord.challenger{border-color:var(--hp);box-shadow:0 0 0 2px var(--hp)}
+.lord-top{display:flex;gap:10px;align-items:center}
+.lord-top svg{width:46px;height:46px;flex:none}
+.lord-style{font-size:.84rem;color:var(--muted)}
+.stylechip{display:inline-block;border:1px solid var(--line);border-radius:999px;padding:0 8px;font-size:.74rem;font-weight:700;color:var(--ink);margin-right:4px}
+.lord-stats{display:flex;gap:10px;flex-wrap:wrap;font-size:.84rem;align-items:center}
+.lord-stats .hard{color:var(--hp);font-weight:700}.lord-stats .easy{color:var(--heal);font-weight:700}
+.lord .btn{margin-top:auto}
+@media (max-width:520px){.challenge{grid-template-columns:1fr}.challenge .ch-art .tile,.challenge .ch-art svg{width:52px;height:52px}}
+.court-msg{font-weight:700;border-left:4px solid var(--gold);padding:6px 10px;background:var(--well);border-radius:6px}
 .challenge{display:grid;grid-template-columns:auto minmax(0,1fr);gap:16px;align-items:center;padding:16px;margin-bottom:14px;border-left:4px solid var(--hp)}
 .challenge .ch-art .tile{width:72px;height:72px}
 .challenge .ch-body{display:grid;gap:6px;min-width:0}
@@ -441,9 +458,9 @@ html[data-motion="reduce"] *{animation:none!important;transition:none!important}
     </div>
     <div class="modes">
       <div class="mode panel">
-        <h3>Face a rival Dice Lord</h3>
-        <p>Rival lords challenge you over land, debts and grudges. You can study their army before you accept, but you cannot change it. Winning pays gold and lets you claim one of their dice.</p>
-        <div class="ctl"><label for="cpuDiff">Rival <select id="cpuDiff"><option value="easy">Minor lord (Easy)</option><option value="normal" selected>Landed lord (Normal)</option><option value="hard">Great lord (Hard)</option></select></label><button class="btn primary" data-play="cpu">Build army</button></div>
+        <h3>The Court of Dice Lords</h3>
+        <p id="courtBlurb">Twenty-one rival lords in six ranks, each with a realm, a style and a grudge. Beat them to climb from Hedge Lord to the Dice Throne. Every new portfolio gets a different court.</p>
+        <div class="ctl"><button class="btn primary" data-play="cpu">Enter the court</button></div>
       </div>
       <div class="mode panel">
         <h3>Practice battle</h3>
@@ -460,7 +477,7 @@ html[data-motion="reduce"] *{animation:none!important;transition:none!important}
         <p>Two computer generals fight it out. Pause, speed up, or read the log.</p>
         <div class="ctl"><label for="aiDiffA">Blue <select id="aiDiffA"><option value="easy">Easy</option><option value="normal">Normal</option><option value="hard" selected>Hard</option></select></label><label for="aiDiffB">Red <select id="aiDiffB"><option value="easy">Easy</option><option value="normal" selected>Normal</option><option value="hard">Hard</option></select></label><button class="btn primary" data-play="aivai">Set up</button></div>
       </div>
-      <div class="mode panel">
+      <div class="mode panel" id="tutCard">
         <h3>Walkthrough</h3>
         <p>A short guided battle that teaches ranks, dice, colours and abilities. Pays 100 gold the first time.</p>
         <div class="ctl"><button class="btn primary" data-play="tutorial">Start walkthrough</button></div>
@@ -472,6 +489,9 @@ html[data-motion="reduce"] *{animation:none!important;transition:none!important}
       <div class="wheel-row" id="wheelRow"></div>
     </div>
   </section>
+
+  <!-- COURT -->
+  <section id="scr-court" class="screen" hidden><div class="court" id="courtBox"></div></section>
 
   <!-- BUILDER -->
   <section id="scr-build" class="screen" hidden>
@@ -820,6 +840,7 @@ function go(name){
   if(name==='collection') renderCollection();
   if(name==='shop') renderShop();
   if(name==='howto') renderHowto();
+  if(name==='court') renderCourt();
   if(name==='menu') renderMenu();
   if(name!=='battle') coach.stop();
   hideTip();
@@ -829,7 +850,9 @@ function go(name){
 }
 document.addEventListener('click',e=>{
   const g=e.target.closest('[data-go]'); if(g){go(g.dataset.go);return;}
-  const p=e.target.closest('[data-play]'); if(p){startMode(p.dataset.play);}
+  const p=e.target.closest('[data-play]'); if(p){if(p.dataset.play==='cpu')openCourt();else startMode(p.dataset.play);return}
+  const l=e.target.closest('[data-lord]'); if(l){startLord(+l.dataset.lord);return}
+  if(e.target.id==='newSeason'){const old=court();P.court=newCourt(old.season+1);saveP();toast(`Season ${P.court.season} begins. A new court has gathered.`);renderCourt();return}
 });
 
 function toast(msg){const t=$('#toast');t.textContent=msg;t.hidden=false;clearTimeout(toast.t);toast.t=setTimeout(()=>t.hidden=true,2400)}
@@ -839,6 +862,8 @@ $('#ov').addEventListener('click',e=>{if(e.target.id==='ov'&&!$('#ov').dataset.l
 
 // ================= Menu =================
 function renderMenu(){
+  $('#tutCard').style.order=P.tutDone?'':'-1';
+  if(P.started&&P.court){const c=P.court,ch=c.lords[c.challenger];$('#courtBlurb').innerHTML=ch?`<b>${esc(lordFull(ch))}</b> has challenged you. ${c.lords.filter(L=>L.w).length} of ${c.lords.length} lords beaten so far.`:`${c.lords.filter(L=>L.w).length} of ${c.lords.length} lords beaten. Season ${c.season}.`}
   $('#heroDice').innerHTML=['red-m-9','blue-h-0','green-m-1','yellow-h-1','brown-m-6','white-h-0','black-c-4','purple-m-9'].map(id=>tileSVG(DIE[id]).replace('<svg ',`<svg data-tip="${id}" `)).join('');
   $('#wheelRow').innerHTML=COLORS.map(c=>`<span class="beat" data-tip="${c.id}-c-0">${tileSVG(DIE[c.id+'-c-0'])}<b>${c.name}</b> › <span class="sw" style="background:${COL[c.beats].hex}"></span>${COL[c.beats].name}</span>`).join('');
 }
@@ -929,8 +954,8 @@ const AIPOOL=id=>DIE[id].color==='grey'?0:9;
 const ownedKinds=()=>DICE.filter(d=>owned(d.id)).length;
 const maxLv=()=>Math.max(1,...Object.values(P.lv||{}));
 const UNLOCKS={
- w3:['Win 3 battles against the computer',()=>P.record.w>=3],
- hard1:['Win a battle on Hard',()=>(P.hardWins||0)>=1],
+ w3:['Win 3 battles against rival lords',()=>P.record.w>=3],
+ hard1:['Defeat a Great Lord',()=>(P.hardWins||0)>=1],
  kinds50:['Collect 50 different dice',()=>ownedKinds()>=50],
  lv4:['Evolve any die to level 4',()=>maxLv()>=4],
  w10:['Win 10 battles against the computer',()=>P.record.w>=10],
@@ -1229,6 +1254,153 @@ function homeRealm(){
   return Object.keys(cnt).sort((a,b)=>cnt[b]-cnt[a])[0]||'red';
 }
 const lordName=()=>P.lordName||`Lord of ${REALM[homeRealm()].name.replace(/^the /,'the ')}`;
+
+// ================= The Court of Dice Lords =================
+// Every new portfolio gets its own court: 21 randomly made rival lords in six ranks. Each lord has a home realm,
+// a style, a grudge and a fixed strength for their rank. Beat lords to unlock the next rank; the player grows by
+// collecting and levelling dice. Reset the portfolio and a completely different court is made.
+const COURT_TIERS=[
+ {name:'Hedge Lords',one:'a Hedge Lord',titles:[['Sir','Dame'],['Hedge Lord','Hedge Lady']],power:80,gold:35,ai:'easy',lv:1,n:4},
+ {name:'Banner Lords',one:'a Banner Lord',titles:[['Baron','Baroness'],['Banneret','Banneret']],power:108,gold:55,ai:'normal',lv:1,n:4},
+ {name:'Landed Lords',one:'a Landed Lord',titles:[['Count','Countess'],['Lord','Lady']],power:152,gold:80,ai:'normal',lv:2,n:4},
+ {name:'Great Lords',one:'a Great Lord',titles:[['Duke','Duchess'],['Margrave','Margravine']],power:204,gold:110,ai:'hard',lv:3,n:4},
+ {name:'High Lords',one:'a High Lord',titles:[['Archduke','Archduchess'],['High Warlord','High Warlord']],power:265,gold:150,ai:'hard',lv:5,n:4},
+ {name:'The Dice Throne',one:'the Dice Sovereign',titles:[['Dice King','Dice Queen']],power:355,gold:260,ai:'hard',lv:7,n:1}
+];
+const COURT_NAMES=[['Aldous','Ysolde'],['Bertram','Maelis'],['Corwin','Odile'],['Dunstan','Rhosyn'],['Edric','Seraphine'],['Fenwick','Talwyn'],['Gareth','Vesna'],['Hollis','Wenna'],['Ingram','Brisa'],['Jory','Cressida'],['Kaspar','Delphine'],['Leofric','Elowyn'],['Matthias','Fiora'],['Norbert','Gwendel'],['Osric','Hesper'],['Percival','Isolde'],['Quill','Juniper'],['Roderick','Katrin'],['Silas','Liesel'],['Tobias','Morwen'],['Ulric','Nerys'],['Viktor','Ottilie'],['Wystan','Perpetua'],['Yorick','Rosalind'],['Alaric','Sabine'],['Bram','Tamsin']];
+const EPITHETS=['the Patient','the Loud','Ironjaw','the Thrifty','Two-Dice','the Unlucky','the Bold','Coldhand','the Gambler','the Pious','Quickfingers','the Grim','the Generous','Stonebrow','the Late','the Lucky','the Careful','Longshadow','the Vain','Goldtooth','the Quiet','Sixes'];
+const STYLES={
+ purist:{name:'Purist',x:'Fields only dice from {their} home realm.',pool:(d,L)=>d.color===L.color},
+ beasts:{name:'Beastmaster',x:'Keeps monsters and the commons who feed them. No heroes.',pool:(d,L)=>L.colors.includes(d.color)&&d.type!=='hero'},
+ champions:{name:'Champion',x:'Trusts heroes and plain folk. Will not field monsters.',pool:(d,L)=>L.colors.includes(d.color)&&d.type!=='mon'},
+ schemer:{name:'Schemer',x:'Studies your army and brings colours with the advantage over it.',pool:(d,L)=>true,counter:true},
+ alliance:{name:'Alliance',x:'Rules two realms and mixes their dice.',pool:(d,L)=>L.colors.includes(d.color)},
+ collector:{name:'Collector',x:'Owns dice from every realm and fields whatever is best.',pool:(d,L)=>true}
+};
+const COURT_WIN=['The table has spoken. Better luck next season.','Tell your bards to start on a sad song.','I will send you a bill for the dice I scuffed.','Do not take it too hard. I rarely lose.','Come back when your dice have grown up.','That was almost a fight.','I will tell the court you were very brave.','My grandmother rolls harder than that.'];
+const COURT_LOSE=['Enjoy it while it lasts. I will be back.','The dice were cold today. That is all.','Fine. Keep your road. For now.','You roll well for someone so badly dressed.','I demand a rematch. Not today. Soon.','Take the die. I never liked it anyway.','The court will hear of this. Unfortunately.','Well played. I hate saying that.'];
+const REVENGE=['wants revenge for the last time you met','has been practising since you beat {them}','says the dice were loaded last time','has hired new dice and wants a rematch'];
+function newCourt(season){
+  season=season||1;
+  const names=shuffle(COURT_NAMES.slice()), eps=shuffle(EPITHETS.slice()), grudges=shuffle(GRUDGES.slice());
+  const held={};
+  const lords=[];let k=0;
+  COURT_TIERS.forEach((T,t)=>{const tc=shuffle(COLORS.map(c=>c.id));for(let i=0;i<T.n;i++){
+    const g=Math.random()<.5?0:1, color=tc[i], styleKeys=Object.keys(STYLES);
+    const style=t===0?pick(['purist','alliance','champions','beasts']):t===5?pick(['collector','schemer']):pick(styleKeys);
+    const ally=pick(COLORS.filter(c=>c.id!==color&&c.beats!==color&&COL[c.id].beats!==color).map(c=>c.id));
+    const hs=(HOLDINGS[color]||[]).filter(h=>!held[h]);const holding=hs.length?pick(hs):pick(HOLDINGS[color]);held[holding]=1;
+    lords.push({id:k,tier:t,g,title:pick(T.titles)[g],first:names[k%names.length][g],epithet:Math.random()<.45?eps[k%eps.length]:'',color,colors:[color,ally],holding,style,
+      grudge:grudges[k%grudges.length],win:pick(COURT_WIN),lose:pick(COURT_LOSE),vary:.94+Math.random()*.12,w:0,l:0});
+    k++;
+  }});
+  return {season,lords,challenger:null,crowned:false};
+}
+function court(){if(!P.court||!P.court.lords)P.court=newCourt(1),saveP();return P.court}
+const lordPr=L=>L.g?{their:'her',theirs:'hers',they:'she',them:'her'}:{their:'his',theirs:'his',they:'he',them:'him'};
+const lordFull=L=>`${L.title} ${L.first}${L.epithet?' '+L.epithet:''} of ${L.holding}`;
+const lordShort=L=>`${L.title} ${L.first}`;
+function lordGrudge(L){const pr=lordPr(L);const g=L.w>0?REVENGE[L.id%REVENGE.length]:L.grudge;return g.replace(/\{(\w+)\}/g,(_,k)=>pr[k])}
+// Strength the lord brings: their rank, a little personal variation, +6% each time you have beaten them (up to 3 times),
+// and +8% per season. Scaled with the army points setting.
+function lordPower(L){
+  const T=COURT_TIERS[L.tier], c=court();
+  return Math.round(T.power*L.vary*(1+.06*Math.min(3,L.w))*(1+.08*Math.min(4,c.season-1))*S.budget/30);
+}
+const lordGold=L=>COURT_TIERS[L.tier].gold+(court().challenger===L.id?Math.round(COURT_TIERS[L.tier].gold*.5):0);
+function tierOpen(t){
+  if(t===0)return true;const c=court();
+  const beaten=c.lords.filter(L=>L.tier===t-1&&L.w>0).length;
+  return beaten>=(t===5?3:2);
+}
+const tierNeed=t=>t===5?3:2;
+function lordRival(L){
+  const pr=lordPr(L);
+  return {title:L.title,first:L.first,pr,diff:COURT_TIERS[L.tier].ai,grudge:lordGrudge(L),win:L.win,lose:L.lose,color:L.color,holding:L.holding,full:lordFull(L),rank:COURT_TIERS[L.tier].one,lordId:L.id,fixed:true,hold:true};
+}
+// The lord's army: built from the dice their style allows, against your army if they are a Schemer,
+// then sized and levelled to hit their strength.
+function lordArmy(L,playerArmy){
+  const st=STYLES[L.style], T=COURT_TIERS[L.tier], target=lordPower(L);
+  const pool=id=>{const d=DIE[id];return d.color!=='grey'&&st.pool(d,L)?2:0};
+  const q=st.counter?.95:({easy:.45,normal:.7,hard:.9})[T.ai];
+  const enemy=st.counter||q>.6?playerArmy:[];
+  const baseLv=Math.min(10,T.lv+Math.min(3,L.w)+Math.min(4,court().season-1));
+  let best=null,bestGap=Infinity;
+  for(let budget=S.budget;budget>=6;budget--){
+    for(let k=0;k<2;k++){
+      const a=smartArmy({budget,quality:q,enemy,baseLv,pool});a.forEach(s=>s.lv=baseLv);
+      if(!a.length)continue;
+      const p=armyPower(a),gap=Math.abs(p-target)+(p>target*1.05?target*.05:0);
+      if(gap<bestGap){bestGap=gap;best=a}
+    }
+    if(best&&armyPower(best)<=target*1.05&&armyPower(best)>=target*.95)break;
+  }
+  if(armyPower(best)<target*.95)tuneLevels(best,target);
+  if(armyPower(best)>target*1.08){best.forEach(s=>s.lv=1);tuneLevels(best,target)}
+  // The weakest lords may bring fewer than 6 dice so they really are as weak as their rank.
+  while(armyPower(best)>target*1.08&&best.length>4){
+    let bi=0,bg=Infinity;best.forEach((_,i)=>{const g=Math.abs(armyPower(best.filter((_,j)=>j!==i))-target);if(g<bg){bg=g;bi=i}});
+    best=assignRows(best.filter((_,j)=>j!==bi));
+  }
+  return best;
+}
+const sigDie=L=>{const ds=DICE.filter(d=>d.color===L.color&&STYLES[L.style].pool(d,L)&&d.rarity!=='legendary'&&d.type!=='common');const s=ds.sort((a,b)=>b.cost-a.cost);return s[L.id%Math.min(4,s.length)]||DIE[L.color+'-h-0']};
+// The strongest army you could field right now, for comparing against lords.
+function bestArmyPower(){
+  if(!P.started)return 0;
+  const a=smartArmy({budget:S.budget,quality:1,pool:id=>owned(id),baseLv:Math.round(avgLv())});
+  return armyPower(a.map(s=>({...s,lv:lvOf(s.id)})));
+}
+function avgLv(){const ids=Object.keys(P.col).filter(id=>P.col[id]>0);return ids.length?sum(ids.map(lvOf))/ids.length:1}
+function pickChallenger(exclude){
+  const c=court();const open=c.lords.filter(L=>tierOpen(L.tier)&&L.id!==exclude);
+  const fresh=open.filter(L=>!L.w);const from=fresh.length&&Math.random()<.7?fresh:open;
+  c.challenger=from.length?pick(from).id:null;
+}
+function renderCourt(){
+  const c=court();if(c.challenger==null){pickChallenger();saveP()}
+  const mine=bestArmyPower(), ch=c.lords[c.challenger];
+  const card=L=>{
+    const open=tierOpen(L.tier), p=lordPower(L), st=STYLES[L.style];
+    const lbl=open?matchLabel(mine,p):'Locked';
+    return `<div class="lord panel ${open?'':'locked'} ${c.challenger===L.id?'challenger':''}">
+      <div class="lord-top">${tileSVG(sigDie(L))}<div><b>${esc(open?lordFull(L):lordShort(L))}</b><div class="muted" style="font-size:.8rem">${esc(COL[L.color].name)} · ${esc(capFirst(REALM[L.color].name))}</div></div></div>
+      ${open?`<p class="lord-style"><span class="stylechip">${esc(st.name)}</span> ${esc(st.x.replace(/\{(\w+)\}/g,(_,k)=>lordPr(L)[k]))}</p>`:''}
+      <div class="lord-stats"><span>Strength <b>${open?p:'?'}</b></span><span class="${open?(p>mine*1.08?'hard':p<mine*.92?'easy':''):''}">${lbl}</span><span><i class="coin"></i> ${open?lordGold(L):'?'}</span></div>
+      ${L.w||L.l?`<div class="muted" style="font-size:.78rem">You have beaten ${lordPr(L).them} ${L.w}× · lost ${L.l}×</div>`:''}
+      ${open?`<button class="btn ${c.challenger===L.id?'primary':''}" data-lord="${L.id}">${L.w?'Rematch':'Challenge'}</button>`:''}
+    </div>`;
+  };
+  $('#courtBox').innerHTML=`
+    <div class="court-head"><div><p class="eyebrow">Season ${c.season}${c.crowned?' · you hold the Dice Throne':''}</p><h2>The Court of Dice Lords</h2>
+    <p class="muted">You are <b>${esc(lordName())}</b>. Your strongest army right now is about <b>${mine}</b> strength. Beat lords to climb the ranks; level up and collect dice to grow strong enough for the next.</p></div></div>
+    ${ch?`<div class="challenge panel"><div class="ch-art">${tileSVG(sigDie(ch))}</div><div class="ch-body"><p class="eyebrow">A challenge has arrived · +50% gold</p><h3>${esc(lordFull(ch))}</h3><p>${esc(lordShort(ch))} ${esc(lordGrudge(ch))}, and has called you to the table to settle it.</p><div><button class="btn primary" data-lord="${ch.id}">Answer the challenge</button></div></div></div>`:''}
+    ${c.crowned?`<div class="panel" style="padding:16px;display:grid;gap:8px"><h3>You hold the Dice Throne</h3><p>Every lord in the realms answers to you now, which means every lord in the realms wants your seat. Start a new season for a new court of stronger rivals. You keep all your dice, gold and levels.</p><div><button class="btn primary" id="newSeason">Begin season ${c.season+1}</button></div></div>`:''}
+    ${COURT_TIERS.map((T,t)=>{const ls=c.lords.filter(L=>L.tier===t), open=tierOpen(t);
+      const beaten=ls.filter(L=>L.w).length;
+      return `<section class="tier"><div class="tier-head"><h3>${esc(T.name)}</h3><span class="muted">${open?`${beaten} of ${ls.length} beaten`:`Beat ${tierNeed(t)} ${COURT_TIERS[t-1].name} to unlock`}</span></div><div class="lords">${ls.map(card).join('')}</div></section>`}).join('')}`;
+}
+let PENDING_LORD=null;
+function openCourt(){
+  if(!P.started){starterPick(()=>{go('court')});return}
+  if(!P.lordName){P.lordName=lordName();saveP()}
+  go('court');
+}
+function startLord(id){PENDING_LORD=id;startMode('cpu')}
+// After a lord battle: record it, pay out, check for newly opened ranks, pick the next challenger.
+function lordResult(winner){
+  const c=court(), L=B.rival?c.lords[B.rival.lordId]:null;if(!L)return {gold:15,msg:''};
+  const before=COURT_TIERS.map((_,t)=>tierOpen(t));
+  let gold=15,msg='';
+  if(winner===0){gold=lordGold(L);L.w++;if(L.tier>=3)P.hardWins=(P.hardWins||0)+1;
+    if(L.tier===5&&!c.crowned){c.crowned=true;msg=`You have taken the Dice Throne. The realms have a new sovereign: ${lordName()}.`}}
+  else if(winner===1)L.l++;
+  const opened=COURT_TIERS.findIndex((_,t)=>tierOpen(t)&&!before[t]);
+  if(opened>0&&!msg)msg=`The ${COURT_TIERS[opened].name} have noticed you. A new rank of the court is open.`;
+  pickChallenger(L.id);
+  return {gold,msg,legend:L.tier>=3};
+}
 
 // ================= Dice info =================
 function abilityLine(d){
@@ -1542,9 +1714,11 @@ let BU=null; // builder state
 function startMode(mode,preArmy){
   coach.stop();hideTip();
   if(mode==='tutorial'){startTutorial();return;}
-  const diff=mode==='cpu'?[null,$('#cpuDiff').value]:mode==='custom'?[null,$('#pracDiff').value]:mode==='aivai'?[$('#aiDiffA').value,$('#aiDiffB').value]:[null,null];
+  const LD=mode==='cpu'?court().lords[PENDING_LORD]:null;
+  if(mode==='cpu'&&!LD){openCourt();return}
+  const diff=mode==='cpu'?[null,COURT_TIERS[LD.tier].ai]:mode==='custom'?[null,$('#pracDiff').value]:mode==='aivai'?[$('#aiDiffA').value,$('#aiDiffB').value]:[null,null];
   const ctrl=(mode==='cpu'||mode==='custom')?['human','ai']:mode==='pvp'?['human','human']:['ai','ai'];
-  BU={mode,diff,ctrl,step:0,armies:[[],[]],names:['',''],filter:{color:'all'},aiEdited:false,rival:mode==='cpu'?makeRival(diff[1]):null,rivals:mode==='aivai'?[makeRival(diff[0]),makeRival(diff[1])]:null};
+  BU={mode,diff,ctrl,step:0,armies:[[],[]],names:['',''],filter:{color:'all'},aiEdited:false,rival:mode==='cpu'?lordRival(LD):null,lord:LD,rivals:mode==='aivai'?[makeRival(diff[0]),makeRival(diff[1])]:null};
   const begin=()=>{
     const lastA=store.get('lastArmy',null);
     const okLast=lastA&&lastA.every(s=>DIE[s.id])&&validFor(lastA,0)===''?lastA:null;
@@ -1553,8 +1727,7 @@ function startMode(mode,preArmy){
     if(mode==='pvp')BU.armies[1]=randomArmy(S.budget,poolCount(1));
     else if(mode==='aivai'){BU.armies=aiPair(diff[0],diff[1]);setRivalRealm(BU.rivals[0],BU.armies[0]);setRivalRealm(BU.rivals[1],BU.armies[1])}
     else if(mode==='custom'){BU.armies[1]=smartArmy({budget:S.budget,quality:.8,enemy:BU.armies[0],baseLv:1});BU.armies[1].forEach(x=>x.lv=1)}
-    else BU.armies[1]=computerArmy(BU.armies[0],diff[1]);
-    if(BU.rival)setRivalRealm(BU.rival,BU.armies[1]);
+    else BU.armies[1]=lordArmy(LD,BU.armies[0]);
     BU.aiEdited=false;
     go('build');renderBuilder();
     if(!P.tourBuild&&BU.ctrl[0]==='human'){P.tourBuild=true;saveP();setTimeout(startBuilderTour,300)}
@@ -1589,8 +1762,8 @@ function renderBuilder(){
   $('#scr-build').classList.toggle('readonly',lk);
   $('#challenge').hidden=!lk;
   if(lk){const r=BU.rival,best=BU.armies[1].slice().sort((a,b)=>DIE[b.id].cost-DIE[a.id].cost)[0];
-    const pay={easy:40,normal:70,hard:110}[BU.diff[1]];
-    $('#challenge').innerHTML=`<div class="ch-art">${best?tileLv(DIE[best.id],best.lv):''}</div><div class="ch-body"><p class="eyebrow">A challenge · ${esc(LORD_RANK[r.diff])} of ${esc(REALM[r.color].name)}</p><h3>${esc(r.full)}</h3><p>${esc(r.full)} ${esc(r.grudge)}, and has called you, ${esc(lordName())}, to the table to settle it.</p><p class="muted" style="font-size:.86rem">If you win: ${pay} gold and your pick of one of ${r.pr.their} dice. If you lose: 15 gold for your trouble.</p></div>`;}
+    const pay=lordGold(BU.lord),st=STYLES[BU.lord.style];
+    $('#challenge').innerHTML=`<div class="ch-art">${best?tileLv(DIE[best.id],best.lv):''}</div><div class="ch-body"><p class="eyebrow">A challenge · ${esc(r.rank)} of ${esc(REALM[r.color].name)} · ${esc(st.name)}</p><h3>${esc(r.full)}</h3><p>${esc(r.full)} ${esc(r.grudge)}, and has called you, ${esc(lordName())}, to the table to settle it.</p><p class="muted" style="font-size:.86rem">If you win: ${pay} gold and your pick of one of ${r.pr.their} dice${BU.lord.tier<3?' (dragons are only won from Great Lords and above)':''}. If you lose: 15 gold for your trouble.</p></div>`;}
   $('#aiLvBox').hidden=!(BU.mode==='custom'&&side===1);
   if(BU.mode==='custom'&&side===1){const l=army.length?army[0].lv||1:+$('#aiLv').value;$('#aiLv').value=l;$('#aiLvNum').textContent=l}
   $('#bHelp').textContent=lk?`This is your rival's army. Hover over (or tap ⓘ on) any die to study it. You cannot change a rival's army, but you can go back and change your own.`:BU.mode==='custom'&&side===1?'Build any army you like from all 400 dice and set its level, then test your formation against it.':BU.ctrl[side]==='ai'?'The computer picked these dice. Reroll them, or change them yourself.':(canHover()?'Hover over a die to read about it. Press Add to put it in your army.':'Tap ⓘ on a die to read about it. Press Add to put it in your army.');
@@ -1632,7 +1805,7 @@ function renderBuilder(){
   const lvf=k=>sp=>sp.lv||(usesCollection(k)?lvOf(sp.id):1);
   const p0=armyPower(BU.armies[0],lvf(0)),p1=armyPower(BU.armies[1],lvf(1));
   let pl='';
-  if(BU.mode==='cpu')pl=side===0?`Army strength <b>${p0}</b>. Your rival, ${esc(LORD_RANK[BU.diff[1]])}, will bring an army of about <b>${Math.round(p0*DIFF_FACTOR[BU.diff[1]])}</b>.`:`Rival strength <b>${p1}</b> against your <b>${p0}</b> · ${matchLabel(p0,p1)}.`;
+  if(BU.mode==='cpu')pl=side===0?`Army strength <b>${p0}</b>. ${esc(lordShort(BU.lord))} will bring an army of about <b>${lordPower(BU.lord)}</b> · ${matchLabel(p0,lordPower(BU.lord))}.`:`Rival strength <b>${p1}</b> against your <b>${p0}</b> · ${matchLabel(p0,p1)}.`;
   else if(BU.mode==='aivai')pl=`${esc(BU.rivals[0].full)}: <b>${p0}</b> · ${esc(BU.rivals[1].full)}: <b>${p1}</b>`;
   else if(BU.mode==='custom')pl=side===0?`Army strength <b>${p0}</b>.`:`Practice army strength <b>${p1}</b> against your <b>${p0}</b> · ${matchLabel(p0,p1)}.`;
   else pl=`Player 1 strength <b>${p0}</b> · Player 2 strength <b>${p1}</b>`;
@@ -1701,7 +1874,7 @@ $('#bSave').onclick=()=>{const a=BU.armies[BU.step];if(!a.length){toast('Add som
   $('#saveName').focus();$('#saveName').select();
   $('#saveGo').onclick=()=>{const n=$('#saveName').value.trim()||'Army';P.saved.unshift({name:n,units:a.map(s=>({id:s.id,row:s.row}))});P.saved=P.saved.slice(0,12);saveP();closeModal();toast(`Saved “${n}” to your portfolio.`);renderBuilder()}};
 $('#bBack').onclick=()=>{if(BU.step===0)go('menu');else{BU.step=0;renderBuilder();window.scrollTo(0,0)}};
-$('#bNext').onclick=()=>{if($('#bNext').disabled)return;if(BU.step===0){if(BU.mode==='cpu'||BU.mode==='custom')store.set('lastArmy',BU.armies[0]);if(BU.mode==='cpu'){BU.armies[1]=computerArmy(BU.armies[0],BU.diff[1]);setRivalRealm(BU.rival,BU.armies[1])}BU.step=1;renderBuilder();window.scrollTo(0,0)}else startBattle({mode:BU.mode,ctrl:BU.ctrl,diff:BU.diff,armies:BU.armies,names:[sideLabel(BU.mode,0),sideLabel(BU.mode,1)],rival:BU.rival})};
+$('#bNext').onclick=()=>{if($('#bNext').disabled)return;if(BU.step===0){if(BU.mode==='cpu'||BU.mode==='custom')store.set('lastArmy',BU.armies[0]);if(BU.mode==='cpu'){BU.armies[1]=lordArmy(BU.lord,BU.armies[0]);BU.rival=lordRival(BU.lord)}BU.step=1;renderBuilder();window.scrollTo(0,0)}else startBattle({mode:BU.mode,ctrl:BU.ctrl,diff:BU.diff,armies:BU.armies,names:[sideLabel(BU.mode,0),sideLabel(BU.mode,1)],rival:BU.rival})};
 $('#bTour').onclick=()=>startBuilderTour();
 $('#aiLv').oninput=()=>{const l=+$('#aiLv').value;$('#aiLvNum').textContent=l;BU.armies[1].forEach(x=>x.lv=l);renderBuilder()};
 function startBuilderTour(){
@@ -1731,7 +1904,7 @@ const foes=s=>B.units.filter(x=>x.side!==s&&x.hp>0);
 const friends=s=>B.units.filter(x=>x.side===s&&x.hp>0);
 const canReach=u=>u.ranged||u.row==='front';
 function basicT(u){if(!canReach(u))return[];const f=foes(u.side);let p=u.ranged?f:f.filter(e=>e.row==='front');const tz=f.filter(e=>e.row==='front'&&e.pas==='taunt');if(tz.length)p=p.filter(e=>tz.includes(e));return p}
-function abilT(u){if(!u.ab||u.cd>0)return[];const a=ABIL[u.ab];if(a.t==='none')return foes(u.side).length?['ALL']:[];if(a.t==='ally')return friends(u.side);if(a.t==='any')return foes(u.side);if(!canReach(u))return[];return u.ranged?foes(u.side):foes(u.side).filter(e=>e.row==='front')}
+function abilT(u){if(!u.ab||u.cd>0)return[];const a=ABIL[u.ab];if(a.t==='none')return foes(u.side).length?['ALL']:[];if(a.t==='ally')return u.ab==='mend'?friends(u.side).filter(f=>f.hp<f.maxHp):friends(u.side);if(a.t==='any')return foes(u.side);if(!canReach(u))return[];return u.ranged?foes(u.side):foes(u.side).filter(e=>e.row==='front')}
 const canAct=u=>u.hp>0&&!u.acted&&(u.side!==B.turn||B.used<B.limit)&&(basicT(u).length>0||abilT(u).length>0);
 const edge=(a,t)=>COL[a.color].beats===t.color;
 const atkCount=(u,extra)=>Math.max(1,u.atk+extra-(u.hexNow?1:0)-(u.chill?1:0));
@@ -2090,10 +2263,11 @@ function endBattle(w){
   const tracked=B.mode==='cpu'?[0]:B.mode==='pvp'?[0,1]:[];
   for(const u of B.units){ if(!tracked.includes(u.side))continue; const st=P.stats[u.id]||[0,0,0,0]; st[0]++; if(winner===u.side)st[1]++; st[2]+=u.kos; st[3]+=u.dmg; P.stats[u.id]=st; }
   if(B.mode==='cpu'){
-    reward=winner===0?{easy:40,normal:70,hard:110}[B.diff[1]]:15;P.coins+=reward;
-    if(winner===0){P.record.w++;P.streak=(P.streak||0)+1;P.bestStreak=Math.max(P.bestStreak||0,P.streak);if(B.diff[1]==='hard')P.hardWins=(P.hardWins||0)+1}else{if(winner===1)P.record.l++;else P.record.d++;P.streak=0}
+    const LR=lordResult(winner);B.courtMsg=LR.msg;
+    reward=LR.gold;P.coins+=reward;
+    if(winner===0){P.record.w++;P.streak=(P.streak||0)+1;P.bestStreak=Math.max(P.bestStreak||0,P.streak)}else{if(winner===1)P.record.l++;else P.record.d++;P.streak=0}
     const sig=armySig(B.armies[0]);const ar=P.armyRec[sig]||{w:0,l:0};if(winner===0)ar.w++;else if(winner===1)ar.l++;P.armyRec[sig]=ar;
-    if(winner===0){const ids=[...new Set(B.armies[1].map(s=>s.id))].filter(id=>DIE[id].rarity!=='legendary'||B.diff[1]==='hard');spoils=shuffle(ids.sort((a,b)=>(owned(a)?1:0)-(owned(b)?1:0)).slice(0,5)).slice(0,3)}
+    if(winner===0){const ids=[...new Set(B.armies[1].map(s=>s.id))].filter(id=>DIE[id].rarity!=='legendary'||(B.rival&&court().lords[B.rival.lordId].tier>=3));spoils=shuffle(ids.sort((a,b)=>(owned(a)?1:0)-(owned(b)?1:0)).slice(0,5)).slice(0,3)}
   }
   if(B.mode==='pvp'){reward=20;P.coins+=reward}
   if(B.mode==='tutorial'&&!P.tutDone&&winner===0){P.tutDone=true;reward=100;P.coins+=100;spoils=['green-m-0','red-m-2']}
@@ -2108,6 +2282,7 @@ function endBattle(w){
   setTimeout(()=>{if(!B||B.token!==tok)return;
     $('#ov').dataset.lock='1';
     openModal(`<div><p class="eyebrow">Round ${B.round}${B.mode==='custom'?' · practice':''}</p><h2>${esc(title)}</h2>${reward?`<p style="margin-top:6px"><span class="coins"><i class="coin"></i>+${reward} gold</span></p>`:''}${B.mode==='custom'?'<p class="muted" style="margin-top:6px">Practice battle: no gold, spoils or records.</p>':''}</div>
+    ${B.courtMsg?`<p class="court-msg">${esc(B.courtMsg)}</p>`:''}
     ${B.rival&&winner!==-1?`<blockquote class="fluff">“${esc(winner===0?B.rival.lose:B.rival.win)}” <span class="muted">· ${esc(B.rival.full)}</span></blockquote>`:''}
     ${spoils.length?`<div class="spoils" id="spoils"><p><b>Spoils of war.</b> Claim one die from the army you beat. It goes into your portfolio.</p><div class="spoil-row">${spoils.map(id=>`<button class="spoil" data-spoil="${id}" data-tip="${id}">${tileSVG(DIE[id])}<b>${esc(DIE[id].name)}</b><span class="rar ${DIE[id].rarity}">${DIE[id].rarity}</span><span class="muted" style="font-size:.74rem">${owned(id)?`You own ${owned(id)}`:'New!'}</span></button>`).join('')}</div></div>`:''}
     <table class="result-table"><thead><tr><th></th><th>${esc(B.names[0])}</th><th>${esc(B.names[1])}</th></tr></thead><tbody>
@@ -2117,15 +2292,15 @@ function endBattle(w){
     <tr><td>Knockouts</td><td>${B.stats[0].kos}</td><td>${B.stats[1].kos}</td></tr></tbody></table>
     ${mvp?`<div class="info-head">${tileSVG(mvp.d)}<div><p class="eyebrow">Best die</p><b>${esc(mvp.name)}</b> <span class="muted">(${esc(B.names[mvp.side])}) · ${mvp.dmg} damage, ${mvp.kos} knockouts</span></div></div>`:''}
     <div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end">
-      <button class="btn" id="rMenu">Main menu</button>
+      <button class="btn" id="rMenu">${B.mode==='cpu'?'Back to the court':'Main menu'}</button>
       ${B.mode!=='tutorial'?`<button class="btn" id="rEdit">${B.mode==='cpu'?'Change my army':'Change armies'}</button>`:''}
       <button class="btn primary" id="rAgain">${B.mode==='tutorial'?'Play the walkthrough again':'Rematch'}</button>
     </div>`);
     const done=()=>{delete $('#ov').dataset.lock;closeModal()};
     $$('[data-spoil]').forEach(b=>b.onclick=()=>{const id=b.dataset.spoil;addDie(id);saveP();setTimeout(checkMercs,300);Snd.win();hideTip();$('#spoils').innerHTML=`<div class="info-head">${tileSVG(DIE[id])}<div><b>${esc(DIE[id].name)}</b> joins your portfolio.<div class="muted" style="font-size:.8rem">Read its guide page any time from the Portfolio.</div></div></div>`});
-    $('#rMenu').onclick=()=>{done();go('menu')};
+    $('#rMenu').onclick=()=>{done();go(B.mode==='cpu'?'court':'menu')};
     if($('#rEdit'))$('#rEdit').onclick=()=>{done();if(BU){BU.step=0;go('build');renderBuilder()}else go('menu')};
-    $('#rAgain').onclick=()=>{done();if(B.mode==='tutorial')startTutorial();else startBattle({mode:B.mode,ctrl:B.ctrl,diff:B.diff,armies:B.armies,names:B.names,rival:B.rival})};
+    $('#rAgain').onclick=()=>{done();if(B.mode==='tutorial')startTutorial();else if(B.mode==='cpu')startLord(B.rival.lordId);else startBattle({mode:B.mode,ctrl:B.ctrl,diff:B.diff,armies:B.armies,names:B.names,rival:B.rival})};
   },reduced()?200:900);
 }
 $('#wPause').onclick=()=>{if(!B)return;B.paused=!B.paused;$('#wPause').textContent=B.paused?'Resume':'Pause';renderTurnBox()};
@@ -2230,7 +2405,7 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape'&&coach.on&&$('#ov').
 function startTutorial(){
   BU=null;
   startBattle({mode:'tutorial',ctrl:['human','ai'],diff:[null,'easy'],first:0,names:[P.started?lordName():'You','Goblin raiders'],
-    armies:[[{id:'red-h-0',row:'front'},{id:'green-h-0',row:'back'},{id:'white-h-1',row:'back'}],[{id:'green-m-0',row:'front'},{id:'green-m-0',row:'front'},{id:'red-m-2',row:'back'}]]});
+    armies:[[{id:'red-h-0',row:'front'},{id:'green-h-0',row:'back'},{id:'white-h-1',row:'back'}],[{id:'green-m-0',row:'front'},{id:'green-m-0',row:'front'},{id:'red-m-2',row:'back'},{id:'green-m-0',row:'back'}]]});
   coach.start([
     {title:'Welcome',t:'Your army is along the bottom and the enemy is along the top. Knock out every enemy die to win. Hover over any die to read about it.',f:'#board'},
     {title:'Two ranks',t:'Each army stands in two ranks. The <b>front rank</b> fights hand to hand. The <b>back rank</b> holds archers, casters and healers. Melee dice only fight from the front. When a front die falls, a melee die from the back steps up to take its place.',f:'#sideA'},
@@ -2242,7 +2417,7 @@ function startTutorial(){
     {title:'Recharging',t:'Abilities need time to recharge. ★ means ready. ⟳2 means ready in 2 of your turns.',f:'[data-uid="0-1"]'},
     {title:'Healing',t:'Last, <b>High Priest Anselm</b>. He can <b>Mend</b> an ally or attack. When all your dice have acted, the turn ends by itself. You can also press End turn.',f:'[data-uid="0-2"]',wait:'turnEnd'},
     {title:'Their turn',t:'The goblins move now. Their rolls appear in the dice tray and every action goes into the battle log.',f:'#logbox',wait:'turnStart',ok:d=>d.side===0,delay:500},
-    {title:'Over to you',t:'Every colour has a power and has the advantage over one other colour. Finish this fight to earn 100 gold and claim a goblin for your portfolio. Then visit the shop and build your own army.',last:true}
+    {title:'Over to you',t:'Every colour has a power and has the advantage over one other colour. A goblin in their back rank is waiting to step up. Finish this fight to earn 100 gold and claim a goblin for your portfolio. Then enter the Court of Dice Lords and start climbing.',last:true}
   ],'Walkthrough');
 }
 
@@ -2258,8 +2433,9 @@ function renderHowto(){
   <section><h3>Colours</h3><p>Every die has a colour. Each colour has the <b>advantage</b> over one other colour: it rolls <b>1 extra attack die</b> against it, and area attacks deal 2 extra damage to it. An advantage is an edge, not a sure win. Blue has the advantage over Red, but Red can still win with good dice and good rolls.</p>
   ${tbl(['Colour','Power','Advantage over','At a disadvantage to'],COLORS.map(c=>[`<span class="sw" style="background:${c.hex};vertical-align:-2px"></span> <b>${c.name}</b> · ${c.title}`,`<b>${c.pn}</b>: ${c.pt}`,COL[c.beats].name,beatenBy(c.id).name]))}</section>
   <section><h3>Levels and evolution</h3><ul><li>Spend gold on a die's guide page in your portfolio to level it up, from 1 to 10. Every level adds health.</li><li>At level 4 it <b>evolves</b> into a Veteran with a new name and +1 to every attack roll. At level 7 it becomes Elite with +1 to every defence roll. At level 10 it becomes a Legend with an extra attack die.</li><li>Each evolution unlocks a new chapter of the die's story.</li><li>Levels apply to every copy you own.</li></ul></section>
-  <section><h3>Computer armies</h3><ul><li>The computer builds its army after seeing yours: front-line fighters, ranged support, a healer when it can, and on harder settings colours with the advantage over yours.</li><li>It scales to your army's strength. On Easy it aims for about 85% of your strength, on Normal about the same, and on Hard a little more. Its dice are always at your army's average level, so as your dice level up, so do its dice.</li><li>The builder shows both armies' strength before the battle. If you edit the computer's army yourself, it stops rescaling.</li><li>In AI vs AI games both armies are the same level and the second army is built to match the first one's strength, so fights stay close.</li></ul></section>
-  <section><h3>Rival lords and practice</h3><ul><li>In <b>Face a rival Dice Lord</b>, a rival challenges you for a reason of their own. You see their army before you accept, but you cannot change it. Only your own army is yours to arrange.</li><li>In <b>Practice battle</b> you build both armies, choose the level of the practice army, and test formations. Nothing is at stake.</li></ul></section>
+  <section><h3>Computer armies (practice and AI vs AI)</h3><ul><li>The computer builds its army after seeing yours: front-line fighters, ranged support, a healer when it can, and on harder settings colours with the advantage over yours.</li><li>It scales to your army's strength. On Easy it aims for about 85% of your strength, on Normal about the same, and on Hard a little more. Its dice are always at your army's average level, so as your dice level up, so do its dice.</li><li>The builder shows both armies' strength before the battle. If you edit the computer's army yourself, it stops rescaling.</li><li>In AI vs AI games both armies are the same level and the second army is built to match the first one's strength, so fights stay close.</li></ul></section>
+  <section><h3>The Court of Dice Lords</h3><ul><li>Every new portfolio gets its own court: 21 randomly made rival lords in six ranks, from Hedge Lords to the Dice Sovereign. Reset your portfolio and you get a different court.</li><li>Each lord has a home realm, a style (Purist, Beastmaster, Champion, Schemer, Alliance or Collector) and a grudge. Their strength is set by their rank, so you grow into the higher ranks by collecting and levelling dice.</li><li>Beat 2 lords of a rank to open the next one (3 High Lords for the Dice Throne). Higher ranks pay more gold, and dragons can be won as spoils from Great Lords and above.</li><li>Lords you beat come back about 6% stronger each time. One lord at a time challenges you directly, for 50% more gold.</li><li>Take the Dice Throne and you can begin a new season with a fresh, stronger court, keeping everything you own.</li><li>You see a lord's army before you accept, but you cannot change it. Only your own army is yours to arrange.</li></ul></section>
+  <section><h3>Practice</h3><ul><li>In <b>Practice battle</b> you build both armies, choose the level of the practice army, and test formations. Nothing is at stake.</li></ul></section>
   <section><h3>Rumours</h3><p>Tavern talk mentions grey sellswords from the Free Companies who never signed the Treaty of the Table. They cannot be bought in any shop. They are said to seek out commanders who prove themselves.</p></section>
   <section><h3>Heroes: race and class</h3><p>Each colour has 10 named heroes. A hero combines a race perk with a class and its ability.</p>
   ${tbl(['Race','Health','Perk','Extra cost'],RAC.map(r=>[`<b>${r.name}</b>`,(r.hp>=0?'+':'')+r.hp,`<b>${PERK[r.perk][0]}</b>: ${PERK[r.perk][1]}`,'+'+r.cost]))}
@@ -2269,7 +2445,7 @@ function renderHowto(){
   <section><h3>Commons</h3><p>Each colour has 30 commons: 5 jobs for each of the 6 races, like the Red <b>Street Fighter Orc</b>. They are cheap, keep their race perk and colour power, and fill out an army.</p>
   ${tbl(['Job','Health','Attack','Defence','Reach','Special','Cost'],JOBS.map((j,k)=>[`<b>${COLORS.map(c=>JOBN[c.id][k]).slice(0,3).join(', ')}…</b>`,j.hp,j.atk,j.def,j.ranged?'Ranged':'Melee',j.ab?`<b>${ABIL[j.ab].n}</b>`:'—',j.cost]))}</section>
   <section><h3>Effects</h3><ul><li><b>Poison</b>: loses 2 health at the start of each of its turns, for 3 turns.</li><li><b>Stuck / Frozen</b>: loses its next action.</li><li><b>Hex</b>: rolls 1 fewer attack die on its next 2 turns.</li><li><b>Chill</b>: rolls 1 fewer attack die on its next attack.</li><li><b>Guard</b>: rolls 1 extra defence die until the guarding side's next turn.</li></ul></section>
-  <section><h3>Collecting</h3><ul><li>Start by choosing a home realm. You get 10 dice from it, a Traitor Pack of 5 deserters from other realms, and 200 gold. One traitor always comes from the colour that counters your weakness.</li><li>Beat the computer for gold: 40 on Easy, 70 on Normal, 110 on Hard, 15 for a loss. Two-player games pay 20. The walkthrough pays 100 once.</li><li>After a win, claim one die from the army you beat. Dragons can only be claimed on Hard.</li><li>Spend gold in the shop: single dice from the market (30 to 450 gold), mixed packs (100) and colour packs (150). Sell spare copies for gold.</li><li>You can field as many copies of a die as you own.</li><li>Every die has a guide page in your portfolio with what it does, its history and its battle record.</li><li>Rarity: commons have no mark, monsters a blue dot, heroes a violet diamond, dragons a gold star.</li></ul></section>
+  <section><h3>Collecting</h3><ul><li>Start by choosing a home realm. You get 10 dice from it, a Traitor Pack of 5 deserters from other realms, and 200 gold. One traitor always comes from the colour that counters your weakness.</li><li>Beat rival lords for gold: from 35 for a Hedge Lord up to 260 for the Dice Sovereign, plus 50% when you answer a lord's challenge. A loss pays 15. Two-player games pay 20. The walkthrough pays 100 once.</li><li>After a win, claim one die from the army you beat. Dragons can only be claimed from Great Lords and above.</li><li>Spend gold in the shop: single dice from the market (30 to 450 gold), mixed packs (100) and colour packs (150). Sell spare copies for gold.</li><li>You can field as many copies of a die as you own.</li><li>Every die has a guide page in your portfolio with what it does, its history and its battle record.</li><li>Rarity: commons have no mark, monsters a blue dot, heroes a violet diamond, dragons a gold star.</li></ul></section>
   <section><h3>Keys</h3>${tbl(['Key','Action'],[['A','Attack with the selected die'],['S','Use its ability'],['Tab','Next ready die'],['E','End turn'],['Esc','Cancel or close']])}</section>`;
 }
 

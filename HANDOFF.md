@@ -64,7 +64,16 @@ Save data lives in `localStorage` under the `gib-dice.` prefix. Every read and w
 4. Publish `game.html` to the same artifact URL.
 5. Rebuild the repo: put game.html into `index.html` from `<title>` up to the old `</body>`, then zip the folder.
 
-## What changed most recently
+## What changed most recently (October 14)
+
+- **The Court of Dice Lords** replaced Easy/Normal/Hard in player vs computer (`court.js`, inlined). `newCourt(season)` makes 21 random lords in six ranks (`COURT_TIERS`: strength 80, 108, 152, 204, 265, 355). The court is saved in `P.court` and regenerated when the portfolio is reset.
+  - Lord armies: `lordArmy(L, playerArmy)` builds from the lord's style pool and sizes the army to `lordPower(L)`. Hedge Lords may bring 4 or 5 dice.
+  - Results: `lordResult(winner)` handles gold, unlocks, the crown and the next challenger.
+  - Screen: `renderCourt()` draws `#scr-court`.
+- **Balance (AI-played simulations):** a sensibly built starter army beat the Hedge Lords 12/12 and the Banner Lords 9/12. Equally rated armies won about 75% against higher ranks, so ranks from Landed up were raised about 8%.
+- **Fixes:** a healer no longer counts as ready when nobody is hurt, so the turn ends by itself. The walkthrough has a 4th goblin, and its card sits first on the menu until it's done.
+
+## Earlier changes
 
 - **Dice Lords:** the player names their lord when they start, and can rename it in Settings.
 - **Rival lords:** each rival gets a name, a holding, a rank by difficulty and a grudge. Rivals taunt the player on the result screen.
@@ -74,6 +83,8 @@ Save data lives in `localStorage` under the `gib-dice.` prefix. Every read and w
 - **New lore and docs:** a "The Dice Lords" history entry, and updates to How to play and the README.
 
 ## Playtest findings (October 13, an unfinished first play as a new player)
+
+**Update, October 14:** items 2, 4, 5 and 6 are addressed. The walkthrough card comes first until it's done; the walkthrough has a 4th goblin; Hedge Lords are weaker than a starter army; healers no longer block the turn. Item 3 (naming before the walkthrough) and item 7 are still open.
 
 I played through the UI at normal speed with real clicks. These came up:
 
